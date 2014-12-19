@@ -1,0 +1,33 @@
+# Don't commit changes to these files out unless you know what you are doing
+
+# IntelliJ IDEA project files
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# editor temp files
+*~
+*.swp
+
+# Deployment directories and runtime artifacts
+bin/
+target/
+log/
+
+# Deployment setting
+src/main/resources/hibernate.cfg.xml
+src/main/resources/tournament.properties
+src/main/resources/log4j.properties
+
+# OS generated files
+.DS_Store?
+.DS_Store
+ehthumbs.db
+Icon?
+Thumbs.db
+*.log
+
+# Compiled source
+*.class
+

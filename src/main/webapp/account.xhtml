@@ -1,0 +1,167 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets">
+
+<h:body>
+  <ui:composition template="template.xhtml">
+    <ui:define name="content">
+      <script type="text/javascript" charset="utf8"
+              src="resources/js/account.js"></script>
+
+      <h2>Account for user: #{user.userName}</h2>
+
+      <h:form id="accountForm3" rendered="#{user.isLoggedIn()}">
+        <h:panelGrid columns="2" styleClass="left fixed_height">
+          <h:outputText value="Institution"/>
+          <h:outputText value="#{actionAccount.user.institution}"
+                        rendered="#{!actionAccount.user.editingDetails}"/>
+          <h:inputText value="#{actionAccount.user.institution}"
+                       maxlength="256"
+                       rendered="#{actionAccount.user.editingDetails}"/>
+
+          <h:outputText value="Contact name"/>
+          <h:outputText value="#{actionAccount.user.contactName}"
+                        rendered="#{!actionAccount.user.editingDetails}"/>
+          <h:inputText value="#{actionAccount.user.contactName}"
+                       maxlength="256"
+                       rendered="#{actionAccount.user.editingDetails}"/>
+
+          <h:outputText value="Contact email"/>
+          <h:outputText value="#{actionAccount.user.contactEmail}"
+                        rendered="#{!actionAccount.user.editingDetails}"/>
+          <h:inputText value="#{actionAccount.user.contactEmail}"
+                       maxlength="256"
+                       rendered="#{actionAccount.user.editingDetails}"/>
+
+          <h:outputText value="Contact phone"/>
+          <h:outputText value="#{actionAccount.user.contactPhone}"
+                        rendered="#{!actionAccount.user.editingDetails}"/>
+          <h:inputText value="#{actionAccount.user.contactPhone}"
+                       maxlength="256"
+                       rendered="#{actionAccount.user.editingDetails}"/>
+
+          <h:commandButton value="Edit"
+                           rendered="#{!actionAccount.user.editingDetails}"
+                           action="#{actionAccount.editUserDetails()}"/>
+          <h:commandButton value="Save"
+                           rendered="#{actionAccount.user.editingDetails}"
+                           action="#{actionAccount.saveUserDetails()}"/>
+          <h:panelGroup/>
+
+          <br/>
+        </h:panelGrid>
+      </h:form>
+
+      <h:form id="accountForm0"
+              rendered="#{user.isLoggedIn() and actionAccount.brokers.size() > 0}">
+        <h4>Brokers in Tournaments, Rounds and running Games</h4>
+        <h:dataTable border="1" id="brokers"
+                     value="#{actionAccount.brokers}" var="broker">
+          <h:column>
+            <f:facet name="header">Id</f:facet>
+            <h:outputText value="#{broker.brokerId}" id="id"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">Broker Name</f:facet>
+            <h:outputText value="#{broker.brokerName}"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">Tournaments</f:facet>
+            <h:outputText value="#{broker.getTournamentsString(false)}"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">Rounds</f:facet>
+            <h:outputText value="#{broker.getRoundsString(false)}"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">Games</f:facet>
+            <h:outputText value="#{broker.getRunningGamesString()}"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">CheckIns</f:facet>
+            <h:outputText id="checkins"/>
+          </h:column>
+        </h:dataTable>
+      </h:form>
+
+      <h:form id="accountForm1"
+              rendered="#{user.isLoggedIn() and actionAccount.brokers.size() > 0}">
+        <br/>
+        <h4>Manage Brokers</h4>
+        <h:dataTable border="1" value="#{actionAccount.brokers}" var="broker">
+          <h:column>
+            <f:facet name="header">Broker Name</f:facet>
+            <h:outputText value="#{broker.brokerName}"
+                          rendered="#{!broker.edit}"/>
+            <h:inputText value="#{broker.brokerName}"
+                         rendered="#{broker.edit}" maxlength="45"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">Broker Auth Token</f:facet>
+            <h:outputText value="#{broker.brokerAuth}"
+                          rendered="#{!broker.edit}"/>
+            <h:inputText value="#{broker.brokerAuth}" styleClass="input_wide"
+                         rendered="#{broker.edit}" maxlength="32"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">Short Description</f:facet>
+            <h:outputText value="#{broker.shortDescription}"
+                          rendered="#{!broker.edit}"/>
+            <h:inputText value="#{broker.shortDescription}"
+                         rendered="#{broker.edit}" maxlength="256"/>
+          </h:column>
+
+          <h:column>
+            <f:facet name="header">Action</f:facet>
+            <h:commandButton value="edit" styleClass="smallButton"
+                             action="#{actionAccount.editBroker(broker)}"
+                             rendered="#{!broker.edit}"/>
+            <h:commandButton value="delete" styleClass="smallButton"
+                             action="#{actionAccount.deleteBroker(broker)}"
+                             rendered="#{!broker.edit}"/>
+            <h:commandButton value="save" styleClass="smallButton"
+                             action="#{actionAccount.updateBroker(broker)}"
+                             rendered="#{broker.edit}"/>
+            <h:commandButton value="cancel" styleClass="smallButton"
+                             action="#{actionAccount.cancelEdit(broker)}"
+                             rendered="#{broker.edit}"/>
+          </h:column>
+        </h:dataTable>
+
+        <h:commandButton value="Random auth" type="button"
+                         onclick="randomAuth();"/>
+        <span id="randomAuthSpan"/>
+
+      </h:form>
+
+      <h:form id="accountForm2" rendered="#{user.isLoggedIn()}">
+        <br/>
+        <h4>Add Broker Name/Description</h4>
+        <h:panelGrid columns="1">
+          <h:inputText value="#{actionAccount.brokerName}" maxlength="45"/>
+          <h:inputTextarea value="#{actionAccount.brokerShort}"
+                           maxlength="256"/>
+          <h:commandButton value="Add Broker"
+                           action="#{actionAccount.addBroker}"/>
+          <br/>
+        </h:panelGrid>
+      </h:form>
+
+      <h:form rendered="#{user.isGuest()}">
+        <h3>Insufficient Permissions, redirecting in 10 seconds</h3>
+        <meta http-equiv="REFRESH" content="10;url=login.xhtml"/>
+      </h:form>
+    </ui:define>
+  </ui:composition>
+</h:body>
+</html>
