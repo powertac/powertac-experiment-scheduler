@@ -17,7 +17,7 @@ log/
 
 # Deployment setting
 src/main/resources/hibernate.cfg.xml
-src/main/resources/tournament.properties
+src/main/resources/experiment.properties
 src/main/resources/log4j.properties
 
 # OS generated files
@@ -31,3 +31,4 @@ Thumbs.db
 # Compiled source
 *.class
 
+*.sh

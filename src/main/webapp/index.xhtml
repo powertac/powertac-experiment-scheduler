@@ -11,8 +11,6 @@
   <ui:composition template="template.xhtml">
     <ui:define name="content">
       <script type="text/javascript" charset="utf8"
-              src="resources/js/datatable.sort.js"></script>
-      <script type="text/javascript" charset="utf8"
               src="resources/js/index.js"></script>
 
       <h:outputText value="#{actionIndex.content}" escape="false"/>
@@ -29,7 +27,7 @@
       </h:form>
 
       <h:form rendered="#{actionIndex.notCompleteGamesList.size() != 0}">
-        <h3>Running Games and their Visualizers</h3>
+        <h3>Running Games</h3>
         <t:dataTable id="runnning_games" border="1"
                      value="#{actionIndex.notCompleteGamesList}" var="g"
                      styleClass="display dataTable">
@@ -39,82 +37,17 @@
           </t:column>
 
           <t:column>
-            <f:facet name="header">Round</f:facet>
-            <h:outputText value="#{g.round.roundName}"/>
-          </t:column>
-
-          <t:column>
-            <f:facet name="header">Brokers</f:facet>
-            <h:outputText value="#{g.getBrokersInGameString()}"/>
+            <f:facet name="header">Experiment</f:facet>
+            <h:outputText value="#{g.experiment.experimentId}"/>
           </t:column>
 
           <t:column>
             <f:facet name="header">Status</f:facet>
             <h:outputText value="#{g.state}"/>
           </t:column>
-
-          <t:column styleClass="nowrap">
-            <f:facet name="header">Start Time (UTC)</f:facet>
-            <h:outputText value="#{g.startTimeUTC()}"
-                          rendered="#{g.readyTime == null}"/>
-            <h:outputText value="#{g.readyTimeUTC()}"
-                          rendered="#{g.readyTime != null}"/>
-          </t:column>
-
-          <t:column>
-            <f:facet name="header">Viz Link</f:facet>
-            <h:outputText value="Not avail." rendered="#{!g.isRunning()}"/>
-            <h:panelGroup rendered="#{g.isRunning()}">
-              <a href="http://#{g.machine.vizUrl}"
-                 target="_blank">Visualizer</a>
-            </h:panelGroup>
-          </t:column>
         </t:dataTable>
       </h:form>
 
-      <h:form rendered="#{actionIndex.completeGamesList.size() != 0}">
-        <h3>Complete Games and Logs</h3>
-        <t:dataTable id="completed_games" border="1"
-                     value="#{actionIndex.completeGamesList}" var="g"
-                     styleClass="display dataTable">
-          <t:column>
-            <f:facet name="header">ID</f:facet>
-            <h:link value="#{g.gameId}" outcome="Game">
-              <f:param name="gameId" value="#{g.gameId}"/>
-            </h:link>
-          </t:column>
-
-          <t:column>
-            <f:facet name="header">Round</f:facet>
-            <h:link value="#{g.round.roundName}" outcome="Round">
-              <f:param name="roundId"
-                       value="#{g.round.roundId}"/>
-            </h:link>
-          </t:column>
-
-          <t:column>
-            <f:facet name="header">Brokers</f:facet>
-            <h:outputText value="#{g.getBrokersInGameString()}"/>
-          </t:column>
-
-          <t:column styleClass="nowrap">
-            <f:facet name="header">Start Time (UTC)</f:facet>
-            <h:outputText value="#{g.readyTimeUTC()}"/>
-          </t:column>
-
-          <t:column>
-            <f:facet name="header">Logs</f:facet>
-            <a href="#{actionIndex.getLogUrl(g)}">Logs</a>
-          </t:column>
-
-          <t:column>
-            <f:facet name="header">Boots</f:facet>
-            <a href="#{actionIndex.getBootUrl(g)}">Boot</a>
-          </t:column>
-        </t:dataTable>
-      </h:form>
-
-      <br/><br/>
     </ui:define>
   </ui:composition>
 </h:body>

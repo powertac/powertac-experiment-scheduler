@@ -8,14 +8,17 @@
       xmlns:p="http://primefaces.org/ui">
 
 <h:head>
-  <title>PowerTac Tournament Scheduler</title>
+  <title>PowerTac Experiment Scheduler</title>
   <link rel="stylesheet" type="text/css"
         href="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.8.2/css/jquery.dataTables.css"/>
   <script type="text/javascript" charset="utf8"
-          src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.1.min.js"></script>
+          src="//code.jquery.com/jquery-1.12.0.min.js"></script>
   <script type="text/javascript" charset="utf8"
-          src="http://ajax.aspnetcdn.com/ajax/jquery.dataTables/1.8.2/jquery.dataTables.min.js"></script>
+          src="https://cdn.datatables.net/1.10.11/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" charset="utf8"
+          src="https://cdn.datatables.net/plug-ins/1.10.11/sorting/natural.js"></script>
   <link rel="stylesheet" type="text/css" href="resources/css/style.css"/>
+
   <script type="text/javascript">
     function confirmAlert(msg) {
       return confirm(msg);
@@ -25,25 +28,25 @@
 
 <body>
 
-<p:growl id="growl" showSummary="true" showDetail="true" autoUpdate="true"
-         escape="false"/>
+  <p:growl id="growl" showSummary="true" showDetail="true" autoUpdate="true"
+           escape="false"/>
 
-<f:view>
-  <div id="page">
-    <div id="header">
-      <ui:insert name="header">
-        <ui:include src="header.xhtml"/>
-      </ui:insert>
-    </div>
+  <f:view>
+    <div id="page">
+      <div id="header">
+        <ui:insert name="header">
+          <ui:include src="header.xhtml"/>
+        </ui:insert>
+      </div>
 
-    <div id="content">
-      <ui:insert name="content"/>
-    </div>
+      <div id="content">
+        <ui:insert name="content"/>
+      </div>
 
-    <div id="footer">
-      <ui:insert name="footer"/>
+      <div id="footer">
+        <ui:insert name="footer"/>
+      </div>
     </div>
-  </div>
-</f:view>
+  </f:view>
 </body>
 </html>

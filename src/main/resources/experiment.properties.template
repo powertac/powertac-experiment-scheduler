@@ -1,0 +1,47 @@
+# This is the Experiment Scheduler properties file
+
+# URL, user/token of the Jenkins server.
+# If user or token is empty, assume no authentication needed
+# The token can be found under http://localhost:8080/jenkins/me/configure
+jenkins.location = http://localhost:8080/jenkins
+jenkins.username =
+jenkins.token =
+
+# URL of the Experiment Scheduler. Leave empty for automatic detection
+tourney.location =
+
+# We send an email if sims or bootstraps seem wedged
+scheduler.bootstrapWedged = 900000
+scheduler.simWedged = 10800000
+scheduler.simTestWedged = 2700000
+# Leave empty if not used
+scheduler.mailRecipient =
+gmail.username =
+gmail.password =
+
+# This is the directory where the uploaded POMs are stored
+pomLocation = /tmp/
+# This is the directory where the boot files are stored
+bootLocation = /tmp/
+# This is the directory where the boot files are stored
+seedLocation = /tmp/
+# This is the directory where the game- and sim-logs are stored
+logLocation = /tmp/
+# This is the directory where the jars are stored
+jarLocation = /tmp/
+
+# This is the url for serving the log files. The %d will be replaced with the gameId.
+# Without changing the code, this url needs to serve 'logLocation'.
+# If empty, the TM does the serving. For better performance, use a 'real' webserver.
+#actionIndex.logUrl = http://some-url-to-logifles/game-%d-sim-logs.tar.gz
+actionIndex.logUrl = download?game=%d
+actionIndex.bootUrl = download?boot=%d
+
+# Interval (ms) to check the machine states, to-be-run bootstraps and sims
+scheduler.schedulerInterval = 60000
+
+# Overwrite the default gamelengths here
+competition.minimumTimeslotCount = 1320
+competition.expectedTimeslotCount = 1440
+test.minimumTimeslotCount = 200
+test.expectedTimeslotCount = 220

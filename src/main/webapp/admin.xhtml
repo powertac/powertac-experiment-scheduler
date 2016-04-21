@@ -12,8 +12,6 @@
     <ui:define name="content">
       <script type="text/javascript" charset="utf8"
               src="resources/js/admin.js"></script>
-      <script type="text/javascript" charset="utf8"
-              src="resources/js/datatable.sort.js"></script>
 
       <h2>Admin</h2>
 
@@ -48,40 +46,33 @@
           <h:commandButton value="Restart"
                            action="#{actionAdmin.restartScheduler}"/>
 
-          <h4>Round Status</h4>
+          <h4>Loaded Experiments</h4>
           <h:panelGroup>
-            <h:outputText value="No Rounds Loaded"
+            <h:outputText value="No Experiments Loaded"
                           style="color:red;"
-                          rendered="#{scheduler.isRunningRoundsEmpty()}"/>
-            <h:dataTable id="loadedRoundTable" border="0"
-                         value="#{scheduler.runningRounds}" var="round"
-                         rendered="#{!scheduler.isRunningRoundsEmpty() }">
-              <h:column>
-                <f:facet name="header">
-                  <h:outputText value="Running Rounds:" style="color:green;"/>
-                </f:facet>
-                <h:outputText value="#{round.roundName}" style="color:green;"/>
-              </h:column>
-            </h:dataTable>
+                          rendered="#{scheduler.noExperimentsScheduled()}"/>
+            <h:outputText value="#{scheduler.getRunningString()}"
+                          style="color:green;"
+                          rendered="#{!scheduler.noExperimentsScheduled()}"/>
           </h:panelGroup>
           <h:panelGroup>
             <h:commandButton value="Unload"
-                             action="#{actionAdmin.unloadRounds()}"
-                             rendered="#{!scheduler.isRunningRoundsEmpty()}"/>
-            <h:panelGroup rendered="#{actionAdmin.availableRounds.size() > 0}">
-              <h:selectManyListbox value="#{actionAdmin.selectedRounds}"
-                                   rendered="#{scheduler.isRunningRoundsEmpty()}"
+                             action="#{actionAdmin.unloadExperiments()}"
+                             rendered="#{!scheduler.noExperimentsScheduled()}"/>
+            <h:panelGroup rendered="#{actionAdmin.availableExperiments.size() > 0}">
+              <h:selectManyListbox value="#{actionAdmin.selectedExperiments}"
+                                   rendered="#{scheduler.noExperimentsScheduled()}"
                                    style="border:1px solid grey;padding:1px;margin:2px;">
-                <f:selectItems value="#{actionAdmin.availableRounds}" var="r"
-                               itemValue="#{r.roundId}"
-                               itemLabel="#{r.roundName}"/>
+                <f:selectItems value="#{actionAdmin.availableExperiments}" var="e"
+                               itemValue="#{e.experimentId}"
+                               itemLabel="#{e.name}"/>
               </h:selectManyListbox>
               <h:commandButton value="Load"
-                               action="#{actionAdmin.loadRounds()}"
-                               rendered="#{scheduler.isRunningRoundsEmpty()}"/>
+                               action="#{actionAdmin.loadExperiments()}"
+                               rendered="#{scheduler.noExperimentsScheduled()}"/>
             </h:panelGroup>
-            <h:panelGroup rendered="#{actionAdmin.availableRounds.size() == 0}">
-              <h:outputText>No rounds availble for loading</h:outputText>
+            <h:panelGroup rendered="#{actionAdmin.availableExperiments.size() == 0}">
+              <h:outputText>No ExperimentSets availble for loading</h:outputText>
             </h:panelGroup>
           </h:panelGroup>
 
@@ -211,13 +202,6 @@
             </f:facet>
             <h:outputText value="#{p.pomId}"/>
           </t:column>
-
-          <t:column>
-            <f:facet name="header">
-              <h:outputText value="Uploading User"/>
-            </f:facet>
-            <h:outputText value="#{p.user.getUserName()}"/>
-          </t:column>
         </t:dataTable>
       </h:form>
 
@@ -237,7 +221,7 @@
       <br/>
       <h:form rendered="#{user.isAdmin()}" id="machinesForm">
         <h3 class="withButton">Available Machines</h3>
-        <h:button value="Refresh" outcome="Admin"/>
+        <h:button value="Refresh" outcome="admin"/>
         <t:dataTable id="dataMachines" border="1"
                      styleClass="dataTable"
                      value="#{actionAdmin.machineList}" var="m">
@@ -256,33 +240,15 @@
           </t:column>
           <t:column>
             <f:facet name="header">
-              <h:outputText value="Vizualizer URL"/>
-            </f:facet>
-            <a href="http://#{m.vizUrl}" target="_blank">
-              <h:outputText value="#{m.vizUrl} "/>
-            </a>
-          </t:column>
-          <t:column>
-            <f:facet name="header">CheckIns</f:facet>
-            <h:outputText id="checkins"/>
-          </t:column>
-          <t:column>
-            <f:facet name="header">Load</f:facet>
-            <h:outputText id="load"/>
-          </t:column>
-
-          <t:column>
-            <f:facet name="header">
               <h:outputText value="Idle"/>
             </f:facet>
-            <h:outputText value="#{!m.isInProgress()}"/>
+            <h:outputText value="#{m.isIdle()}"/>
           </t:column>
           <t:column>
             <h:commandButton value="Toggle"
                              action="#{actionAdmin.toggleState(m)}"
                              styleClass="smallButton"/>
           </t:column>
-
           <t:column>
             <f:facet name="header">
               <h:outputText value="Avail"/>
@@ -315,9 +281,6 @@
 
           <h:outputText value="Hostname:"/>
           <h:inputText value="#{actionAdmin.machineUrl}"/>
-
-          <h:outputText value="Viz Url:"/>
-          <h:inputText value="#{actionAdmin.machineViz}"/>
         </h:panelGrid>
         <h:commandButton value="Save" action="#{actionAdmin.saveMachine()}"/>
         <h:inputHidden id="machineId" value="#{actionAdmin.machineId}"/>

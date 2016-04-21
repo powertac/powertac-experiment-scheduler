@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+>
+
+<h:body>
+  <ui:composition template="template.xhtml">
+    <ui:define name="content">
+      <script type="text/javascript" charset="utf8"
+              src="resources/js/experimentsets.js"></script>
+
+      <h:form
+          rendered="#{user.isResearcher() and actionExperimentSets.experimentSetList.size() > 0}"
+          id="runningExperimentSets">
+        <br/>
+
+        <h3 class="withButton">Pending/Running ExperimentSets</h3>
+        <h:button value="Refresh" outcome="experimentsets"/>
+        <t:dataTable id="dataExperimentSets" border="1"
+                     value="#{actionExperimentSets.experimentSetList}" var="e">
+
+          <t:column>
+            <f:facet name="header">ID</f:facet>
+            <h:outputText value="#{e.experimentSetId}"/>
+          </t:column>
+          <t:column>
+            <f:facet name="header">Name</f:facet>
+            <h:outputText value="#{e.name}"/>
+          </t:column>
+          <t:column>
+            <f:facet name="header">User</f:facet>
+            <h:outputText value="#{e.user.userName}"/>
+          </t:column>
+
+          <t:column styleClass="left">
+            <f:facet name="header">Actions</f:facet>
+            <h:commandButton value="Edit"
+                             action="#{actionExperimentSets.editExperimentSet(e)}"
+                             rendered="#{e.editingAllowed}"
+                             styleClass="actionButton"/>
+            <h:commandButton value="Delete"
+                             action="#{actionExperimentSets.deleteExperimentSet(e)}"
+                             rendered="#{e.deletingAllowed}"
+                             styleClass="actionButton"/>
+            <h:commandButton value="Schedule"
+                             action="#{actionExperimentSets.scheduleExperimentSet(e)}"
+                             rendered="#{e.schedulingAllowed}"
+                             styleClass="actionButton"/>
+          </t:column>
+        </t:dataTable>
+
+        <br/>
+      </h:form>
+
+      <h:form rendered="#{user.isResearcher()}">
+        <br/>
+
+        <h3 class="withButton">Parameters Global</h3>
+        <t:dataTable id="paramsGlobal" border="1"
+                     value="#{actionExperimentSets.paramsGlobal}" var="a">
+          <t:column>
+            <f:facet name="header">Key</f:facet>
+            <h:outputText value="#{a[0]}"/>
+            <sup>
+              <h:graphicImage value="resources/images/info.png"
+                              style="float: right;"
+                              width="20" height="20"
+                              rendered="#{a[3] != null}"
+                              title="#{a[3]}"/>
+            </sup>
+          </t:column>
+          <t:column>
+            <f:facet name="header">Values</f:facet>
+            <h:outputText value="#{a[1]}" escape="false"/>
+          </t:column>
+          <t:column>
+            <f:facet name="header">Default</f:facet>
+            <h:outputText value="#{a[2]}"/>
+          </t:column>
+        </t:dataTable>
+        <br/>
+
+        <h3 class="withButton">Parameters Server</h3>
+        <t:dataTable id="paramsServer" border="1"
+                     value="#{actionExperimentSets.paramsServer}" var="a">
+          <t:column>
+            <f:facet name="header">Key</f:facet>
+            <h:outputText value="#{a[0]}"/>
+            <sup>
+              <h:graphicImage value="resources/images/info.png"
+                              style="float: right;"
+                              width="20" height="20"
+                              rendered="#{a[3] != null}"
+                              title="#{a[3]}"/>
+            </sup>
+          </t:column>
+          <t:column>
+            <f:facet name="header">Default</f:facet>
+            <h:outputText value="#{a[1]}"/>
+          </t:column>
+        </t:dataTable>
+      </h:form>
+
+      <h:form id="saveExperimentset" rendered="#{user.isResearcher()}">
+        <h:panelGroup>
+          <h3>
+            <h:outputLabel
+                value="#{actionExperimentSets.experimentSetId == -1 ? 'Create' : 'Edit'}"/>
+            Experimentset
+          </h3>
+        </h:panelGroup>
+
+        <h:panelGroup>
+          <h:outputLabel>Name</h:outputLabel>
+          <h:outputText value="&#160;" />
+          <h:inputText id="nameInput"
+                       value="#{actionExperimentSets.experimentSetName}"/>
+          <br/>
+          <br/>
+        </h:panelGroup>
+
+        <h:panelGroup>
+          <h:outputText>An experiment will be created for each variable, with
+            <i>multiplier</i> games</h:outputText> per experiment<br/>
+          <h:outputText>Variable name is the same as parameters, value format is comma separated values</h:outputText>
+          <h:outputText>Integer or double variables can also be min-max,step</h:outputText>
+          <br/>
+        </h:panelGroup>
+
+        <h:panelGrid columns="2">
+          <h:outputLabel>Variable name</h:outputLabel>
+          <h:outputLabel>Value</h:outputLabel>
+
+          <h:inputText id="variableName" styleClass="input_huge"
+                       value="#{actionExperimentSets.variableName}"/>
+          <h:inputText id="variableValue" styleClass="input_huge"
+                       value="#{actionExperimentSets.variableValue}"/>
+
+          <br/><br/>
+        </h:panelGrid>
+
+        <h:panelGroup>
+          <h:outputText>Parameters for all experiments / games</h:outputText><br/>
+          <h:inputTextarea id="contentInput"
+                           value="#{actionExperimentSets.paramString}"
+                           styleClass="contentInput"/>
+          <br/>
+        </h:panelGroup>
+
+        <h:commandButton
+            value="#{actionExperimentSets.experimentSetId == -1 ? 'Create' : 'Update'}"
+            action="#{actionExperimentSets.createOrUpdateSet()}"/>
+
+        <h:inputHidden id="experimentSetId"
+                       value="#{actionExperimentSets.experimentSetId}"/>
+        <br/>
+      </h:form>
+
+      <h:form rendered="#{!user.isResearcher()}">
+        <h3>Insufficient Permissions, redirecting in 3 seconds</h3>
+        <meta http-equiv="REFRESH" content="3;url=login.xhtml"/>
+      </h:form>
+    </ui:define>
+  </ui:composition>
+</h:body>
+</html>

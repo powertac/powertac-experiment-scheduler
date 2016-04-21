@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://java.sun.com/xml/ns/javaee"
-         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
-         id="TournamentScheduler"
-         version="3.0">
-  <display-name>TournamentScheduler</display-name>
+  xmlns="http://java.sun.com/xml/ns/javaee"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+  id="ExperimentScheduler" version="3.0">
+  <display-name>ExperimentScheduler</display-name>
   <context-param>
     <param-name>contextConfigLocation</param-name>
     <param-value>/WEB-INF/applicationContext.xml</param-value>
@@ -106,7 +105,7 @@
     <session-timeout>240</session-timeout>
   </session-config>
   <listener>
-    <listener-class>org.powertac.tournament.listeners.Initializer
+    <listener-class>org.powertac.experiment.listeners.Initializer
     </listener-class>
   </listener>
   <filter>

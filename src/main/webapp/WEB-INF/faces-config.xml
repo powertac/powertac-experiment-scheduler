@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<faces-config
-    xmlns="http://java.sun.com/xml/ns/javaee"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://java.sun.com/xml/ns/javaee 
-    http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd"
-    version="2.0">
+<faces-config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+    http://java.sun.com/xml/ns/javaee/web-facesconfig_2_0.xsd" version="2.0">
 
   <application>
     <el-resolver>
@@ -27,6 +24,7 @@
   <!-- Services -->
 
   <!-- Navigation rules -->
+  <!--
   <navigation-rule>
     <from-view-id>/*</from-view-id>
     <navigation-case>
@@ -50,98 +48,14 @@
       <to-view-id>/about.xhtml</to-view-id>
     </navigation-case>
     <navigation-case>
-      <from-outcome>Tournaments</from-outcome>
-      <to-view-id>/tournaments.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Levels</from-outcome>
-      <to-view-id>/levels.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Rounds</from-outcome>
-      <to-view-id>/rounds.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
       <from-outcome>Overview</from-outcome>
       <to-view-id>/overview.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Timeline</from-outcome>
-      <to-view-id>/timeline.xhtml</to-view-id>
     </navigation-case>
     <navigation-case>
       <from-outcome>Admin</from-outcome>
       <to-view-id>/admin.xhtml</to-view-id>
     </navigation-case>
-    <navigation-case>
-      <from-outcome>Game</from-outcome>
-      <to-view-id>/game.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Round</from-outcome>
-      <to-view-id>/round.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Tournament</from-outcome>
-      <to-view-id>/tournament.xhtml</to-view-id>
-    </navigation-case>
   </navigation-rule>
-
-  <!-- Specific Navigation rules -->
-  <navigation-rule>
-    <from-view-id>/rounds.xhtml</from-view-id>
-    <navigation-case>
-      <from-outcome>Success</from-outcome>
-      <to-view-id>/rounds.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Error</from-outcome>
-      <to-view-id>/rounds.xhtml</to-view-id>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/round.xhtml</from-view-id>
-    <navigation-case>
-      <from-outcome>Success</from-outcome>
-      <to-view-id>/rounds.xhtml</to-view-id>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/account.xhtml</from-view-id>
-    <navigation-case>
-      <from-outcome>Success</from-outcome>
-      <to-view-id>/account.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Failure</from-outcome>
-      <to-view-id>/account.xhtml</to-view-id>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/login.xhtml</from-view-id>
-    <navigation-case>
-      <from-outcome>Success</from-outcome>
-      <to-view-id>/account.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Failure</from-outcome>
-      <to-view-id>/login.xhtml</to-view-id>
-    </navigation-case>
-  </navigation-rule>
-
-  <navigation-rule>
-    <from-view-id>/register.xhtml</from-view-id>
-    <navigation-case>
-      <from-outcome>Success</from-outcome>
-      <to-view-id>/login.xhtml</to-view-id>
-    </navigation-case>
-    <navigation-case>
-      <from-outcome>Failure</from-outcome>
-      <to-view-id>/register.xhtml</to-view-id>
-    </navigation-case>
-  </navigation-rule>
+  -->
 
 </faces-config>
