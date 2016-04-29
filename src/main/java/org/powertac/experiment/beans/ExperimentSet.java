@@ -68,16 +68,12 @@ public class ExperimentSet implements MapOwner
   @Transient
   public boolean isSchedulingAllowed ()
   {
-    // TODO Check other requirements
-
     return isEditingAllowed();
   }
 
   @Transient
   public boolean isDeletingAllowed ()
   {
-    // TODO Check other requirements
-
     return isEditingAllowed();
   }
 
@@ -127,8 +123,34 @@ public class ExperimentSet implements MapOwner
     }
 
     // Always generate new CSVs
-    // TODO
     //CSV.createRoundCsv(this);
+  }
+
+  // TODO Shouldn't be needed, use default values
+  public void ensureParameters (ParamMap setMap,
+                                String variableName, Location location)
+  {
+    // Guarantee required params
+    if (setMap.get(Type.gameLength) == null) {
+      setMap.put(Type.gameLength, new Parameter(this, Type.gameLength,
+          Game.computeGameLength()));
+    }
+    if (setMap.get(Type.location) == null) {
+      setMap.put(Type.location, new Parameter(this, Type.location,
+          location.getLocation()));
+    }
+    if (setMap.get(Type.simStartDate) == null) {
+      setMap.put(Type.simStartDate, new Parameter(this, Type.simStartDate,
+          Utils.dateToStringSmall(location.getDateFrom())));
+    }
+    if (setMap.get(Type.bootstrapId) == null) {
+      setMap.put(Type.bootstrapId, new Parameter(this, Type.bootstrapId, "1"));
+    }
+
+    Type type = Type.valueOf(variableName);
+    if (type.exclusive) {
+      setMap.remove(Type.valueOf(variableName));
+    }
   }
 
   //<editor-fold desc="Collections">

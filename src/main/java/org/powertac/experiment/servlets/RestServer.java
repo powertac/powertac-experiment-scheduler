@@ -128,7 +128,6 @@ public class RestServer extends HttpServlet
       String fileName = request.getParameter(Rest.REQ_PARAM_FILENAME);
       log.info("Received a file " + fileName);
 
-      // TODO Do we facilitate generation of boot files?
       String logLoc = fileName.endsWith("boot.xml")
           ? properties.getProperty("bootLocation")
           : properties.getProperty("logLocation");

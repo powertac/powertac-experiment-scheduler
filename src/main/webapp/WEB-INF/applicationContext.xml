@@ -8,7 +8,6 @@
 
   <context:component-scan base-package="org.powertac.experiment" />
 
-  <!-- TODO Check if needed -->
   <bean id="actionAccount" scope="session"
     class="org.powertac.experiment.actions.ActionAccount"/>
   <bean id="actionAdmin" scope="request"

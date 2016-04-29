@@ -6,7 +6,6 @@ import org.powertac.experiment.beans.ExperimentSet;
 import org.powertac.experiment.beans.Game;
 import org.powertac.experiment.beans.Location;
 import org.powertac.experiment.beans.Pom;
-import org.powertac.experiment.services.Utils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -59,37 +58,6 @@ public class Parameter
     }
     else if (owner instanceof Game) {
       this.game = (Game) owner;
-    }
-  }
-
-  // TODO Move to ExperimentSet??
-  // TODO Shouldn't be needed, use default values
-  public static void ensureParameters (ExperimentSet experimentSet,
-                                       ParamMap setMap,
-                                       String variableName,
-                                       Location location)
-  {
-    // Guarantee required params
-    if (setMap.get(Type.gameLength) == null) {
-      setMap.put(Type.gameLength, new Parameter(experimentSet, Type.gameLength,
-          Game.computeGameLength()));
-    }
-    if (setMap.get(Type.location) == null) {
-      setMap.put(Type.location, new Parameter(experimentSet, Type.location,
-          location.getLocation()));
-    }
-    if (setMap.get(Type.simStartDate) == null) {
-      setMap.put(Type.simStartDate, new Parameter(experimentSet, Type.simStartDate,
-          Utils.dateToStringSmall(location.getDateFrom())));
-    }
-    if (setMap.get(Type.bootstrapId) == null) {
-      setMap.put(Type.bootstrapId, new Parameter(
-          experimentSet, Type.bootstrapId, "1"));
-    }
-
-    Type type = Type.valueOf(variableName);
-    if (type.exclusive) {
-      setMap.remove(Type.valueOf(variableName));
     }
   }
 
@@ -174,13 +142,11 @@ public class Parameter
   //</editor-fold>
 
   //<editor-fold desc="Static stuff">
+  // TODO Move to ParamMap
   public static List<String> validateExperimentSetMap (ParamMap paramMap)
   {
-    // TODO Check location, simStartDate, bootstrapId, gameLength
-
     List<String> messages = new ArrayList<>();
 
-    // TODO Get actual pomIds from MemStore
     try {
       if (Integer.valueOf(paramMap.get(Type.pomId).getValue().trim()) <= 0) {
         messages.add("The pomId needs to be > 0");
@@ -210,7 +176,6 @@ public class Parameter
       try {
         String[] strArray = paramMap.get(Type.brokers).getValue().split(",");
         for (String aStrArray : strArray) {
-          // TODO Get actual brokerIds from MemStore
           if (Integer.valueOf(aStrArray) <= 0) {
             messages.add("BrokerIds need to be > 0");
           }
@@ -223,6 +188,33 @@ public class Parameter
         messages.add("Brokers definition not correct\nneeds to be ints separated by ','");
       }
     }
+
+    // TODO Check simStartDate, bootstrapId, gameLength
+    try {
+      List<String> locations = Location.getLocationNames();
+      if (!locations.contains(paramMap.get(Type.location).getValue().trim())) {
+        messages.add("The location isn't valid");
+      }
+    }
+    catch (Exception ignored) {
+      messages.add("Location needs to be defined");
+    }
+
+    try {
+      List<String> locations = Location.getLocationNames();
+      if (!locations.contains(paramMap.get(Type.location).getValue().trim())) {
+        messages.add("The location isn't valid");
+      }
+    }
+    catch (Exception ignored) {
+      messages.add("Location needs to be defined");
+    }
+
+
+    System.out.println();
+    System.out.println("Hier !!!!!!!!!!!!!!!!");
+    System.out.println(paramMap.get(Type.location));
+    System.out.println();
 
     return messages;
   }
@@ -319,11 +311,4 @@ public class Parameter
     return availableParams;
   }
   //</editor-fold>
-
-  // TODO
-  @Override
-  public String toString ()
-  {
-    return value;
-  }
 }

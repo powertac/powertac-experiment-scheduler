@@ -214,8 +214,7 @@ public class ActionExperimentSets
       setMap.setOrUpdateValue(parameter.getType(), parameter.getValue());
     }
     // Add required params, check conflicts
-    Parameter.ensureParameters(experimentSet, setMap,
-        variableName, availableLocations.get(0));
+    experimentSet.ensureParameters(setMap, variableName, availableLocations.get(0));
   }
 
   private ParamMap createParamMap (String paramString)
@@ -249,7 +248,8 @@ public class ActionExperimentSets
   private boolean inputsValidated (ParamMap paramMap)
   {
     List<String> messages = ParamMap.validateVariable(variableName, variableValue);
-    messages.addAll(Parameter.validateExperimentSetMap(paramMap));
+    List<String> setMapMessages = Parameter.validateExperimentSetMap(paramMap);
+    messages.addAll(setMapMessages);
 
     if (experimentSetName.trim().isEmpty()) {
       messages.add("The ExperimentSet name cannot be empty");
@@ -297,7 +297,7 @@ public class ActionExperimentSets
 
   public void setExperimentSetName (String experimentSetName)
   {
-    this.experimentSetName = experimentSetName;
+    this.experimentSetName = experimentSetName.trim();
   }
 
   public String getVariableValue ()
@@ -307,7 +307,7 @@ public class ActionExperimentSets
 
   public void setVariableValue (String variableValue)
   {
-    this.variableValue = variableValue;
+    this.variableValue = variableValue.trim();
   }
 
   public String getVariableName ()
@@ -317,7 +317,7 @@ public class ActionExperimentSets
 
   public void setVariableName (String variableName)
   {
-    this.variableName = variableName;
+    this.variableName = variableName.trim();
   }
 
   public String getParamString ()
@@ -327,7 +327,7 @@ public class ActionExperimentSets
 
   public void setParamString (String paramString)
   {
-    this.paramString = paramString;
+    this.paramString = paramString.trim();
   }
   //</editor-fold>
 }

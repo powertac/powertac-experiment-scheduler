@@ -126,16 +126,17 @@
         </h:panelGroup>
 
         <h:panelGroup>
-          <h:outputText>An experiment will be created for each variable, with
-            <i>multiplier</i> games</h:outputText> per experiment<br/>
-          <h:outputText>Variable name is the same as parameters, value format is comma separated values</h:outputText>
-          <h:outputText>Integer or double variables can also be min-max,step</h:outputText>
+          <h:outputText>
+            An experiment will be created for each variable, with <i>multiplier</i> games per experiment<br/>
+            Variable name is the same as parameters, value format is comma separated values<br/>
+            NUmeric values can also be min-max,step<br/>
+          </h:outputText>
           <br/>
         </h:panelGroup>
 
         <h:panelGrid columns="2">
           <h:outputLabel>Variable name</h:outputLabel>
-          <h:outputLabel>Value</h:outputLabel>
+          <h:outputLabel>Variable value</h:outputLabel>
 
           <h:inputText id="variableName" styleClass="input_huge"
                        value="#{actionExperimentSets.variableName}"/>

@@ -120,7 +120,6 @@ public class RestBroker extends HttpServlet
       String brokerId = request.getParameter(Rest.REQ_PARAM_BROKERID);
       log.info("Received a file " + fileName);
 
-      // TODO Do we facilitate generation of boot files?
       String logLoc = properties.getProperty("logLocation");
       String pathString = logLoc + fileName;
 
@@ -187,7 +186,6 @@ public class RestBroker extends HttpServlet
       MemStore.addBrokerCheckin(broker.getBrokerId());
       return String.format(retryResponse, 60);
     }
-    // TODO Check if needed
     catch (NumberFormatException ignored) {
       log.debug("Error parsing gameId, sending retry response");
       return String.format(retryResponse, 60);

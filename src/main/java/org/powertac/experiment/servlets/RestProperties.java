@@ -193,7 +193,6 @@ public class RestProperties extends HttpServlet
     result.append(String.format(Prop.tourneyUrl,
         properties.getProperty("tourneyUrl"))).append("\n");
 
-    // TODO Have the script insert this?
     result.append(Prop.tourneyName).append("game_").append(gameId).append("\n");
 
     return result.toString();

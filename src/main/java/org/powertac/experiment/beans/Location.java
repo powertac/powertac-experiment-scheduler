@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -64,6 +65,12 @@ public class Location
     session.close();
 
     return locations;
+  }
+
+  public static List<String> getLocationNames ()
+  {
+    return getLocationList().stream().map(location -> location.location)
+        .collect(Collectors.toList());
   }
 
   public static Location getLocationByName (String name)
