@@ -8,7 +8,7 @@
     <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver
     </property>
     <property name="hibernate.connection.url">
-      jdbc:mysql://localhost:3306/powertac_tournament
+      jdbc:mysql://localhost:3306/powertac_experiment
     </property>
     <property name="hibernate.connection.username">localUsername</property>
     <property name="hibernate.connection.password">localPassword</property>
@@ -29,13 +29,19 @@
     <property name="hibernate.c3p0.acquireRetryAttempts">1</property>
     <property name="hibernate.c3p0.acquireRetryDelay">250</property>
 
-    <mapping class="org.powertac.experiment.beans.User"/>
-    <mapping class="org.powertac.experiment.beans.Machine"/>
-    <mapping class="org.powertac.experiment.beans.Pom"/>
-    <mapping class="org.powertac.experiment.beans.Game"/>
-    <mapping class="org.powertac.experiment.beans.Broker"/>
-    <mapping class="org.powertac.experiment.beans.Agent"/>
-    <mapping class="org.powertac.experiment.beans.Location"/>
-    <mapping class="org.powertac.experiment.beans.Config"/>
+    <mapping class="org.powertac.experiment.beans.User" />
+    <mapping class="org.powertac.experiment.beans.Machine" />
+    <mapping class="org.powertac.experiment.beans.Pom" />
+
+    <mapping class="org.powertac.experiment.beans.ExperimentSet" />
+    <mapping class="org.powertac.experiment.beans.Experiment" />
+
+    <mapping class="org.powertac.experiment.models.Parameter" />
+
+    <mapping class="org.powertac.experiment.beans.Game" />
+    <mapping class="org.powertac.experiment.beans.Broker" />
+    <mapping class="org.powertac.experiment.beans.Agent" />
+    <mapping class="org.powertac.experiment.beans.Location" />
+    <mapping class="org.powertac.experiment.beans.Config" />
   </session-factory>
 </hibernate-configuration>
