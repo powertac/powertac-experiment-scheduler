@@ -7,7 +7,7 @@ log4j.logger.org.apache=WARN
 log4j.category.TSLogger=DEBUG, File
 
 log4j.appender.File=org.apache.log4j.RollingFileAppender
-log4j.appender.File.File=/home/jcollins/development/powertac/ts/log/tournament.trace
+log4j.appender.File.File=/home/jcollins/development/powertac/ts/log/experiment.trace
 log4j.appender.File.Append=true
 log4j.appender.File.MaxFileSize=20000KB
 log4j.appender.File.MaxBackupIndex=10
@@ -18,7 +18,7 @@ log4j.appender.File.layout.ConversionPattern=[%d{yyyy-MM-dd HH:mm:ss}] [%-5p] [%
 log4j.logger.org.hibernate.SQL=DEBUG, Hibernate
 
 log4j.appender.Hibernate=org.apache.log4j.RollingFileAppender
-log4j.appender.Hibernate.File=/home/jcollins/development/powertac/ts/log/hibernate.log
+log4j.appender.Hibernate.File=/home/jcollins/development/powertac/ts/log/hibernate_experiment.log
 log4j.appender.Hibernate.Append=true
 log4j.appender.Hibernate.MaxFileSize=20000KB
 log4j.appender.Hibernate.MaxBackupIndex=10

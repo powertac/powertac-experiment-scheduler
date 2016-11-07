@@ -36,7 +36,7 @@ public enum Type
   balancemkt_balancingMarketService_balancingCost(Double.class, null),
   balancemkt_balancingMarketService_balancingCostMax(Double.class, -0.006),
   balancemkt_balancingMarketService_balancingCostMin(Double.class, -0.002),
-  balancemkt_balancingMarketService_defaultSpotPrice(Double.class, -50),
+  balancemkt_balancingMarketService_defaultSpotPrice(Double.class, 75),
   balancemkt_balancingMarketService_pMinusPrime(Double.class, -0.000001),
   balancemkt_balancingMarketService_pPlusPrime(Double.class, 0.000001),
   balancemkt_balancingMarketService_rmPremium(Double.class, 1.8),
