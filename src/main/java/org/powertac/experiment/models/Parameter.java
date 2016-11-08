@@ -210,12 +210,6 @@ public class Parameter
       messages.add("Location needs to be defined");
     }
 
-
-    System.out.println();
-    System.out.println("Hier !!!!!!!!!!!!!!!!");
-    System.out.println(paramMap.get(Type.location));
-    System.out.println();
-
     return messages;
   }
 

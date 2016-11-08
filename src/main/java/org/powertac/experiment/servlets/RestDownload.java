@@ -74,23 +74,25 @@ public class RestDownload extends HttpServlet
   private void streamFile (HttpServletResponse response,
                            String absolutePath, String downloadFile)
   {
-    byte[] buf = new byte[1024];
-    try {
-      String realPath = absolutePath + downloadFile;
-      File file = new File(realPath);
-      long length = file.length();
-      BufferedInputStream in = new BufferedInputStream(new FileInputStream(file));
+    byte[] buf = new byte[8192];
+    String realPath = absolutePath + downloadFile;
+    File file = new File(realPath);
+
+    try (BufferedInputStream in =
+             new BufferedInputStream(new FileInputStream(file), buf.length)) {
       ServletOutputStream out = response.getOutputStream();
-      response.setContentLength((int) length);
+      response.setContentLength((int) file.length());
+      int length;
       while ((length = in.read(buf)) != -1) {
-        out.write(buf, 0, (int) length);
+        out.write(buf, 0, length);
       }
+
+      response.flushBuffer();
       in.close();
-      out.flush();
-      out.close();
     }
     catch (Exception exc) {
       log.warn("File not found for downloading : " + downloadFile);
+      exc.printStackTrace();
     }
   }
 }
