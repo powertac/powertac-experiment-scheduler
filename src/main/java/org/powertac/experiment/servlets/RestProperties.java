@@ -100,47 +100,29 @@ public class RestProperties extends HttpServlet
     ParamMap gameMap = game.getParamMap();
 
     // Add the Global params
-    result.append(Prop.weatherServerURL)
-        .append(gameMap.getValue(Type.server_weatherService_serverUrl)).append("\n");
-    result.append(Prop.weatherLocation)
-        .append(gameMap.getValue(Type.location)).append("\n");
+    addParam(result, Prop.weatherServerURL,
+        gameMap.getValue(Type.server_weatherService_serverUrl));
+    addParam(result, Prop.weatherLocation, gameMap.getValue(Type.location));
+
     Parameter locParam = gameMap.get(Type.location);
     if (locParam != null) {
       Location location = Location.getLocationByName(locParam.getValue());
-      result.append(Prop.timezoneOffset).append(location.getTimezone()).append("\n");
+      addParam(result, Prop.timezoneOffset, location.getTimezone());
     }
-    result.append(Prop.startTime).append(gameMap.getValue(Type.startTime)).append("\n");
-
-    result.append(Prop.jms);
-    if (game.getMachine() != null) {
-      result.append(game.getMachine().getJmsUrl()).append("\n");
-    }
-    else {
-      result.append("tcp://localhost:61616").append("\n");
-    }
-
-    result.append(Prop.serverFirstTimeout).append(600000).append("\n");
-    result.append(Prop.serverTimeout).append(120000).append("\n");
-
-    // Properties from the experiment
+    addParam(result, Prop.startTime, gameMap.getValue(Type.startTime));
+    addParam(result, Prop.jms, game.getMachine() != null ?
+        game.getMachine().getJmsUrl() : "tcp://localhost:61616");
+    addParam(result, Prop.serverFirstTimeout, 600000);
+    addParam(result, Prop.serverTimeout, 120000);
     Parameter gameLength = gameMap.get(Type.gameLength);
     if (gameLength != null) {
-      result.append(Constants.Prop.minTimeslot).append(gameLength.getValue()).append("\n");
-      result.append(Prop.expectedTimeslot).append(gameLength.getValue()).append("\n");
+      addParam(result, Prop.minTimeslot, gameLength.getValue());
+      addParam(result, Prop.expectedTimeslot, gameLength.getValue());
     }
 
-    // Add the Server params
-    for (Parameter param : gameMap.values()) {
-      Type type = param.getType();
-      if (!type.toString().contains("_") ||
-          type == Type.server_weatherService_serverUrl ||
-          type == Type.common_competition_timezoneOffset) {
-        continue;
-      }
-
-      result.append(type.toString().replace("_", ".")).append(" = ")
-          .append(param.getValue()).append("\n");
-    }
+    // Properties from the experiment- and game paramMap
+    addParamMap(result, game.getExperiment().getParamMap());
+    addParamMap(result, gameMap);
 
     return result.toString();
   }
@@ -186,15 +168,34 @@ public class RestProperties extends HttpServlet
   {
     StringBuilder result = new StringBuilder();
 
-    result.append(Constants.Prop.brokerUsername)
-        .append(broker.getBrokerName()).append("\n");
-    result.append(Prop.authToken).append(broker.getBrokerAuth())
-        .append("\n");
-    result.append(String.format(Prop.tourneyUrl,
-        properties.getProperty("tourneyUrl"))).append("\n");
-
-    result.append(Prop.tourneyName).append("game_").append(gameId).append("\n");
+    addParam(result, Constants.Prop.brokerUsername, broker.getBrokerName());
+    addParam(result, Prop.authToken, broker.getBrokerAuth());
+    addParam(result, Prop.tourneyUrl, String.format(Prop.tourneyPath,
+        properties.getProperty("tourneyUrl")));
+    addParam(result, Prop.tourneyName, String.format("game_%d", gameId));
 
     return result.toString();
+  }
+
+  private void addParam (StringBuilder result, String name, Object value)
+  {
+    result.append(name);
+    if (!name.endsWith(" = ")) {
+      result.append(" = ");
+    }
+    result.append(value).append("\n");
+  }
+
+  private void addParamMap (StringBuilder result, ParamMap paramMap)
+  {
+    for (Parameter param : paramMap.values()) {
+      Type type = param.getType();
+
+      if (type.toString().contains("_") &&
+          type != Type.server_weatherService_serverUrl &&
+          type != Type.common_competition_timezoneOffset) {
+        addParam(result, type.toString().replace("_", "."), param.getValue());
+      }
+    }
   }
 }

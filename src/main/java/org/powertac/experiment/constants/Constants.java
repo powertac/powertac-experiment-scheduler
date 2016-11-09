@@ -31,7 +31,8 @@ public class Constants
     public static final String brokerUsername =
         "samplebroker.core.powerTacBroker.username = ";
     public static final String tourneyUrl =
-        "samplebroker.core.powerTacBroker.tourneyUrl = %sfaces/brokerLogin.jsp";
+        "samplebroker.core.powerTacBroker.tourneyUrl = ";
+    public static final String tourneyPath = "%sfaces/brokerLogin.jsp";
     public static final String authToken =
         "samplebroker.core.powerTacBroker.authToken = ";
   }
