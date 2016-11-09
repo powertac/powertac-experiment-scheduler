@@ -27,7 +27,9 @@
 
           <t:column>
             <f:facet name="header">ID</f:facet>
-            <h:outputText value="#{e.experimentSetId}"/>
+            <h:link value="#{e.experimentSetId}" outcome="experimentset">
+              <f:param name="experimentSetId" value="#{e.experimentSetId}"/>
+            </h:link>
           </t:column>
           <t:column>
             <f:facet name="header">Name</f:facet>
@@ -110,15 +112,14 @@
       <h:form id="saveExperimentset" rendered="#{user.isResearcher()}">
         <h:panelGroup>
           <h3>
-            <h:outputLabel
+            <h:outputText
                 value="#{actionExperimentSets.experimentSetId == -1 ? 'Create' : 'Edit'}"/>
             Experimentset
           </h3>
         </h:panelGroup>
 
         <h:panelGroup>
-          <h:outputLabel>Name</h:outputLabel>
-          <h:outputText value="&#160;" />
+          <h:outputLabel for="nameInput" value="Name&#160;"/>
           <h:inputText id="nameInput"
                        value="#{actionExperimentSets.experimentSetName}"/>
           <br/>
@@ -135,8 +136,8 @@
         </h:panelGroup>
 
         <h:panelGrid columns="2">
-          <h:outputLabel>Variable name</h:outputLabel>
-          <h:outputLabel>Variable value</h:outputLabel>
+          <h:outputLabel for="variableName" value="Variable name"/>
+          <h:outputLabel for="variableValue" value="Variable value"/>
 
           <h:inputText id="variableName" styleClass="input_huge"
                        value="#{actionExperimentSets.variableName}"/>
@@ -147,7 +148,8 @@
         </h:panelGrid>
 
         <h:panelGroup>
-          <h:outputText>Parameters for all experiments / games</h:outputText><br/>
+          <h:outputLabel for="contentInput"
+                         value="Parameters for all experiments / games"/>
           <h:inputTextarea id="contentInput"
                            value="#{actionExperimentSets.paramString}"
                            styleClass="contentInput"/>

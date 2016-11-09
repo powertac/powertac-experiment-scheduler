@@ -90,6 +90,11 @@ public class Constants
         "FROM ExperimentSet AS experimentSet "
             + "LEFT JOIN FETCH experimentSet.parameterMap AS parameterMap ";
 
+    public static final String GET_EXPERIMENT_SET_BY_ID =
+        "FROM ExperimentSet AS experimentSet "
+            + "LEFT JOIN FETCH experimentSet.parameterMap AS parameterMap "
+            + "WHERE experimentSet.experimentSetId  =:experimentSetId";
+
     public static final String GET_EXPERIMENTS =
         "FROM Experiment AS experiment "
             + "LEFT JOIN FETCH experiment.parameterMap AS parameterMap "

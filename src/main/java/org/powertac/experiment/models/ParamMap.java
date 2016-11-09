@@ -6,6 +6,7 @@ import org.springframework.util.StringUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -104,6 +105,13 @@ public class ParamMap
   public void setOrUpdateValue (Type type, String value)
   {
     setOrUpdateValue(type, value, true);
+  }
+
+  public List<Type> getSortedKeys()
+  {
+    List<Type> keys = new ArrayList<>(map.keySet());
+    keys.sort(Comparator.comparing(Enum::toString));
+    return keys;
   }
 
   //<editor-fold desc="Proxy methods for the map">
