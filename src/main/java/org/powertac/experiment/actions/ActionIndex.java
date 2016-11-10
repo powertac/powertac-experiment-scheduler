@@ -14,6 +14,7 @@ public class ActionIndex implements InitializingBean
 {
   private static boolean editing;
   private List<Game> notCompleteGamesList;
+  private List<Game> completeGamesList;
   private String content;
 
   public ActionIndex ()
@@ -23,11 +24,17 @@ public class ActionIndex implements InitializingBean
   public void afterPropertiesSet () throws Exception
   {
     notCompleteGamesList = Game.getNotCompleteGamesList();
+    completeGamesList = Game.getCompleteGamesList();
   }
 
   public List<Game> getNotCompleteGamesList ()
   {
     return notCompleteGamesList;
+  }
+
+  public List<Game> getCompleteGamesList ()
+  {
+    return completeGamesList;
   }
 
   public void edit ()

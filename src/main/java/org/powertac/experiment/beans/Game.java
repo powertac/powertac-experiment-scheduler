@@ -102,6 +102,63 @@ public class Game implements Serializable, MapOwner
     return games;
   }
 
+  @SuppressWarnings("unchecked")
+  public static List<Game> getCompleteGamesList ()
+  {
+    List<Game> games = new ArrayList<>();
+
+    Session session = HibernateUtil.getSession();
+    Transaction transaction = session.beginTransaction();
+    try {
+      Query query = session.createQuery(Constants.HQL.GET_GAMES_COMPLETE);
+      games = (List<Game>) query.
+          setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+      transaction.commit();
+    }
+    catch (Exception e) {
+      transaction.rollback();
+      e.printStackTrace();
+    }
+    session.close();
+
+    return games;
+  }
+
+  @Transient
+  public String getLogUrl ()
+  {
+    Properties properties = Properties.getProperties();
+    String baseUrl = properties.getProperty("actionIndex.logUrl",
+        "download?game=%d");
+
+    return String.format(baseUrl, gameId);
+  }
+
+  @Transient
+  public String getBrokerLogUrl (int brokerId)
+  {
+    Properties properties = Properties.getProperties();
+    String baseUrl = properties.getProperty("actionIndex.brokerUrl",
+        "download?game=%d&brokerId=%d");
+
+    return String.format(baseUrl, gameId, brokerId);
+  }
+
+  @Transient
+  public List<String[]> getLogUrls ()
+  {
+    List<String[]> result = new ArrayList<>();
+
+    result.add(new String[]{"Game", getLogUrl()});
+    for (Agent agent: getAgentMap().values()) {
+      Broker broker = agent.getBroker();
+      result.add(new String[]{broker.getBrokerName(),
+          getBrokerLogUrl(broker.getBrokerId())});
+    }
+
+    return result;
+  }
+
   // Computes a random game length as outlined in the game specification
   public static int computeGameLength ()
   {

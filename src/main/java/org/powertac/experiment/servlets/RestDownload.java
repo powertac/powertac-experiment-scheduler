@@ -37,9 +37,14 @@ public class RestDownload extends HttpServlet
     String pomId = request.getParameter(Rest.REQ_PARAM_POM_ID);
     String brokerId = request.getParameter(Rest.REQ_PARAM_BROKERID);
 
-    if (gameId != null) {
+    if (brokerId != null && gameId != null) {
       absolutePath = properties.getProperty("logLocation");
-      downloadFile = "game-" + gameId + "-sim-logs.tar.gz";
+      downloadFile = "game-" + gameId + "-broker-" + brokerId + ".tar.gz";
+      response.setContentType("application/x-tar; x-gzip");
+    }
+    else if (gameId != null) {
+      absolutePath = properties.getProperty("logLocation");
+      downloadFile = "game-" + gameId + "-sim.tar.gz";
       response.setContentType("application/x-tar; x-gzip");
     }
     else if (bootId != null) {
