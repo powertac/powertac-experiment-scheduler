@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 
 @ManagedBean
@@ -43,7 +45,8 @@ public class CheckWeatherServer implements InitializingBean
 
   public void afterPropertiesSet () throws Exception
   {
-    lazyStart();
+    Executors.newScheduledThreadPool(1)
+        .schedule(this::lazyStart, 10, TimeUnit.SECONDS);
   }
 
   private void lazyStart ()
