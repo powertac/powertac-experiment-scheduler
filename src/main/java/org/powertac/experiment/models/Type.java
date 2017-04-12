@@ -151,7 +151,7 @@ public enum Type
     this.preset = preset;
   }
 
-  public static Set<Type> getExperimentSetTypes ()
+  public static Set<Type> getStudyTypes ()
   {
     lazyLoad();
 

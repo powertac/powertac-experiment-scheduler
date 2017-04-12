@@ -13,22 +13,22 @@
   <ui:composition template="template.xhtml">
     <ui:define name="content">
       <script type="text/javascript" charset="utf8"
-              src="resources/js/experimentsets.js"></script>
+              src="resources/js/studies.js"/>
 
       <h:form
-          rendered="#{user.isResearcher() and actionExperimentSets.experimentSetList.size() > 0}"
-          id="runningExperimentSets">
+          rendered="#{user.isResearcher() and actionStudies.studyList.size() > 0}"
+          id="runningStudies">
         <br/>
 
-        <h3 class="withButton">Pending/Running ExperimentSets</h3>
-        <h:button value="Refresh" outcome="experimentsets"/>
-        <t:dataTable id="dataExperimentSets" border="1"
-                     value="#{actionExperimentSets.experimentSetList}" var="e">
+        <h3 class="withButton">Pending/Running Studies</h3>
+        <h:button value="Refresh" outcome="studies"/>
+        <t:dataTable id="dataStudies" border="1"
+                     value="#{actionStudies.studyList}" var="e">
 
           <t:column>
             <f:facet name="header">ID</f:facet>
-            <h:link value="#{e.experimentSetId}" outcome="experimentset">
-              <f:param name="experimentSetId" value="#{e.experimentSetId}"/>
+            <h:link value="#{e.studyId}" outcome="study">
+              <f:param name="studyId" value="#{e.studyId}"/>
             </h:link>
           </t:column>
           <t:column>
@@ -43,15 +43,15 @@
           <t:column styleClass="left">
             <f:facet name="header">Actions</f:facet>
             <h:commandButton value="Edit"
-                             action="#{actionExperimentSets.editExperimentSet(e)}"
+                             action="#{actionStudies.editStudy(e)}"
                              rendered="#{e.editingAllowed}"
                              styleClass="actionButton"/>
             <h:commandButton value="Delete"
-                             action="#{actionExperimentSets.deleteExperimentSet(e)}"
+                             action="#{actionStudies.deleteStudy(e)}"
                              rendered="#{e.deletingAllowed}"
                              styleClass="actionButton"/>
             <h:commandButton value="Schedule"
-                             action="#{actionExperimentSets.scheduleExperimentSet(e)}"
+                             action="#{actionStudies.scheduleStudy(e)}"
                              rendered="#{e.schedulingAllowed}"
                              styleClass="actionButton"/>
           </t:column>
@@ -65,7 +65,7 @@
 
         <h3 class="withButton">Parameters Global</h3>
         <t:dataTable id="paramsGlobal" border="1"
-                     value="#{actionExperimentSets.paramsGlobal}" var="a">
+                     value="#{actionStudies.paramsGlobal}" var="a">
           <t:column>
             <f:facet name="header">Key</f:facet>
             <h:outputText value="#{a[0]}"/>
@@ -90,7 +90,7 @@
 
         <h3 class="withButton">Parameters Server</h3>
         <t:dataTable id="paramsServer" border="1"
-                     value="#{actionExperimentSets.paramsServer}" var="a">
+                     value="#{actionStudies.paramsServer}" var="a">
           <t:column>
             <f:facet name="header">Key</f:facet>
             <h:outputText value="#{a[0]}"/>
@@ -109,19 +109,19 @@
         </t:dataTable>
       </h:form>
 
-      <h:form id="saveExperimentset" rendered="#{user.isResearcher()}">
+      <h:form id="saveStudy" rendered="#{user.isResearcher()}">
         <h:panelGroup>
           <h3>
             <h:outputText
-                value="#{actionExperimentSets.experimentSetId == -1 ? 'Create' : 'Edit'}"/>
-            Experimentset
+                value="#{actionStudies.studyId == -1 ? 'Create' : 'Edit'}"/>
+            Studies
           </h3>
         </h:panelGroup>
 
         <h:panelGroup>
           <h:outputLabel for="nameInput" value="Name&#160;"/>
           <h:inputText id="nameInput"
-                       value="#{actionExperimentSets.experimentSetName}"/>
+                       value="#{actionStudies.studyName}"/>
           <br/>
           <br/>
         </h:panelGroup>
@@ -130,7 +130,7 @@
           <h:outputText>
             An experiment will be created for each variable, with <i>multiplier</i> games per experiment<br/>
             Variable name is the same as parameters, value format is comma separated values<br/>
-            NUmeric values can also be min-max,step<br/>
+            Numeric values can also be min-max,step<br/>
           </h:outputText>
           <br/>
         </h:panelGroup>
@@ -140,9 +140,9 @@
           <h:outputLabel for="variableValue" value="Variable value"/>
 
           <h:inputText id="variableName" styleClass="input_huge"
-                       value="#{actionExperimentSets.variableName}"/>
+                       value="#{actionStudies.variableName}"/>
           <h:inputText id="variableValue" styleClass="input_huge"
-                       value="#{actionExperimentSets.variableValue}"/>
+                       value="#{actionStudies.variableValue}"/>
 
           <br/><br/>
         </h:panelGrid>
@@ -151,17 +151,17 @@
           <h:outputLabel for="contentInput"
                          value="Parameters for all experiments / games"/>
           <h:inputTextarea id="contentInput"
-                           value="#{actionExperimentSets.paramString}"
+                           value="#{actionStudies.paramString}"
                            styleClass="contentInput"/>
           <br/>
         </h:panelGroup>
 
         <h:commandButton
-            value="#{actionExperimentSets.experimentSetId == -1 ? 'Create' : 'Update'}"
-            action="#{actionExperimentSets.createOrUpdateSet()}"/>
+            value="#{actionStudies.studyId == -1 ? 'Create' : 'Update'}"
+            action="#{actionStudies.createOrUpdateSet()}"/>
 
-        <h:inputHidden id="experimentSetId"
-                       value="#{actionExperimentSets.experimentSetId}"/>
+        <h:inputHidden id="studyId"
+                       value="#{actionStudies.studyId}"/>
         <br/>
       </h:form>
 

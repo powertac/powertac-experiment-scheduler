@@ -110,8 +110,7 @@ public class RestProperties extends HttpServlet
       addParam(result, Prop.timezoneOffset, location.getTimezone());
     }
     addParam(result, Prop.startTime, gameMap.getValue(Type.startTime));
-    addParam(result, Prop.jms, game.getMachine() != null ?
-        game.getMachine().getJmsUrl() : "tcp://localhost:61616");
+    addParam(result, Prop.jms, "tcp://0.0.0.0:61616");
     addParam(result, Prop.serverFirstTimeout, 600000);
     addParam(result, Prop.serverTimeout, 120000);
     Parameter gameLength = gameMap.get(Type.gameLength);

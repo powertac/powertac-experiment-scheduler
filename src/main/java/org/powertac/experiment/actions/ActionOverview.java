@@ -134,8 +134,10 @@ public class ActionOverview implements InitializingBean
 
     // Kill the job(s) on Jenkins and the slave(s), update in 2 mins
     for (Machine machine : machines) {
-      new RunKill(machine.getMachineName()).run();
-      Machine.delayedMachineUpdate(machine, 120);
+      if (machine != null) {
+        new RunKill(machine.getMachineName()).run();
+        Machine.delayedMachineUpdate(machine, 120);
+      }
     }
 
     // Removed MemStored info about game

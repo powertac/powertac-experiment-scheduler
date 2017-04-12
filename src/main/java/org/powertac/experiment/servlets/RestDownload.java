@@ -31,9 +31,9 @@ public class RestDownload extends HttpServlet
   {
     String downloadFile;
     String absolutePath;
-    String gameId = request.getParameter("game");
-    String bootId = request.getParameter("boot");
-    String csvName = request.getParameter("csv");
+    String gameId = request.getParameter(Rest.REQ_PARAM_GAME_ID);
+    String bootId = request.getParameter(Rest.REQ_PARAM_BOOT_ID);
+    String csvName = request.getParameter(Rest.REQ_PARAM_CSV_NAME);
     String pomId = request.getParameter(Rest.REQ_PARAM_POM_ID);
     String brokerId = request.getParameter(Rest.REQ_PARAM_BROKERID);
 

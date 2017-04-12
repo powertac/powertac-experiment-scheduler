@@ -157,7 +157,9 @@ public class ParamMap
   {
     List<String> messages = new ArrayList<>();
     if (name.isEmpty() || value.isEmpty()) {
-      Utils.growlMessage("No variable given, there will only be 1 experiment!");
+      Utils.growlMessage("Warn",
+          "No variable given, there will only be 1 experiment!");
+      return messages;
     }
 
     // Check if variableName is allowed

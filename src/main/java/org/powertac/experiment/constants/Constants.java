@@ -61,7 +61,10 @@ public class Constants
     public static final String REQ_PARAM_ELAPSED_TIME = "elapsedTime";
     public static final String REQ_PARAM_AGENT_STATUS = "agentStatus";
 
-    // Possible Rest Parameters for pom service
+    // Possible Rest Parameters for download service
+    public static final String REQ_PARAM_GAME_ID = "game";
+    public static final String REQ_PARAM_BOOT_ID = "boot";
+    public static final String REQ_PARAM_CSV_NAME = "csv";
     public static final String REQ_PARAM_POM_ID = "pomId";
   }
 
@@ -88,13 +91,13 @@ public class Constants
         "FROM Machine AS machine ";
 
     public static final String GET_EXPERIMENT_SETS =
-        "FROM ExperimentSet AS experimentSet "
-            + "LEFT JOIN FETCH experimentSet.parameterMap AS parameterMap ";
+        "FROM Study AS study "
+            + "LEFT JOIN FETCH study.parameterMap AS parameterMap ";
 
     public static final String GET_EXPERIMENT_SET_BY_ID =
-        "FROM ExperimentSet AS experimentSet "
-            + "LEFT JOIN FETCH experimentSet.parameterMap AS parameterMap "
-            + "WHERE experimentSet.experimentSetId  =:experimentSetId";
+        "FROM Study AS study "
+            + "LEFT JOIN FETCH study.parameterMap AS parameterMap "
+            + "WHERE study.studyId  =:studyId";
 
     public static final String GET_EXPERIMENTS =
         "FROM Experiment AS experiment "

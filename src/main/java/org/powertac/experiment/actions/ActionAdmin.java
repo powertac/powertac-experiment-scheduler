@@ -93,7 +93,7 @@ public class ActionAdmin implements InitializingBean
     }
   }
 
-  /* selectedExperimentSets is a list of Integers that are the IDs of the rounds selected
+  /* selectedStudies is a list of Integers that are the IDs of the rounds selected
    * by the user in the 'Admin'-form of the experiment scheduler.
    * This function gives this list to the scheduler to make sure that this will
    * be the list of running rounds.

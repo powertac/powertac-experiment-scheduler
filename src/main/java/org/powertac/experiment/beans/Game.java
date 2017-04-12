@@ -125,35 +125,39 @@ public class Game implements Serializable, MapOwner
   }
 
   @Transient
-  public String getLogUrl ()
+  public String getLogURL ()
   {
-    Properties properties = Properties.getProperties();
-    String baseUrl = properties.getProperty("actionIndex.logUrl",
-        "download?game=%d");
+    String baseUrl = properties.getProperty("logUrl");
 
-    return String.format(baseUrl, gameId);
+    if (baseUrl.isEmpty()) {
+      return String.format("download?game=%d", gameId);
+    }
+
+    return String.format(baseUrl, gameName);
   }
 
   @Transient
-  public String getBrokerLogUrl (int brokerId)
+  public String getBrokerLogURL (int brokerId)
   {
-    Properties properties = Properties.getProperties();
-    String baseUrl = properties.getProperty("actionIndex.brokerUrl",
-        "download?game=%d&brokerId=%d");
+    String baseUrl = properties.getProperty("brokerUrl");
+
+    if (baseUrl.isEmpty()) {
+      baseUrl = "download?game=%d&brokerId=%d";
+    }
 
     return String.format(baseUrl, gameId, brokerId);
   }
 
   @Transient
-  public List<String[]> getLogUrls ()
+  public List<String[]> getLogURLs ()
   {
     List<String[]> result = new ArrayList<>();
 
-    result.add(new String[]{"Game", getLogUrl()});
+    result.add(new String[]{"Game", getLogURL()});
     for (Agent agent: getAgentMap().values()) {
       Broker broker = agent.getBroker();
       result.add(new String[]{broker.getBrokerName(),
-          getBrokerLogUrl(broker.getBrokerId())});
+          getBrokerLogURL(broker.getBrokerId())});
     }
 
     return result;
@@ -210,7 +214,7 @@ public class Game implements Serializable, MapOwner
   public static Game createGame (Experiment experiment, AtomicInteger counter)
   {
     String gameName = String.format("%s_%d",
-        experiment.getExperimentSet().getName(), counter.getAndIncrement());
+        experiment.getStudy().getName(), counter.getAndIncrement());
 
     ParamMap paramMap = experiment.getParamMap();
 

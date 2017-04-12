@@ -2,7 +2,7 @@ package org.powertac.experiment.models;
 
 import org.powertac.experiment.beans.Broker;
 import org.powertac.experiment.beans.Experiment;
-import org.powertac.experiment.beans.ExperimentSet;
+import org.powertac.experiment.beans.Study;
 import org.powertac.experiment.beans.Game;
 import org.powertac.experiment.beans.Location;
 import org.powertac.experiment.beans.Pom;
@@ -30,7 +30,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 public class Parameter
 {
   private int parameterId;
-  private ExperimentSet experimentSet;
+  private Study study;
   private Experiment experiment;
   private Game game;
   private Type type;
@@ -50,8 +50,8 @@ public class Parameter
 
   public void setOwner (Object owner)
   {
-    if (owner instanceof ExperimentSet) {
-      this.experimentSet = (ExperimentSet) owner;
+    if (owner instanceof Study) {
+      this.study = (Study) owner;
     }
     else if (owner instanceof Experiment) {
       this.experiment = (Experiment) owner;
@@ -82,15 +82,15 @@ public class Parameter
   }
 
   @ManyToOne
-  @JoinColumn(name = "experimentSetId")
-  public ExperimentSet getExperimentSet ()
+  @JoinColumn(name = "studyId")
+  public Study getStudy ()
   {
-    return experimentSet;
+    return study;
   }
 
-  public void setExperimentSet (ExperimentSet experimentSet)
+  public void setStudy (Study study)
   {
-    this.experimentSet = experimentSet;
+    this.study = study;
   }
 
   @ManyToOne
@@ -143,7 +143,7 @@ public class Parameter
 
   //<editor-fold desc="Static stuff">
   // TODO Move to ParamMap
-  public static List<String> validateExperimentSetMap (ParamMap paramMap)
+  public static List<String> validateStudyMap (ParamMap paramMap)
   {
     List<String> messages = new ArrayList<>();
 
@@ -241,7 +241,7 @@ public class Parameter
   {
     List<String[]> availableParams = new ArrayList<>();
 
-    for (Type type : Type.getExperimentSetTypes()) {
+    for (Type type : Type.getStudyTypes()) {
       if (type != Type.createTime) {
         availableParams.add(new String[]{type.toString(),
             type.preset, type.getDefault(), type.description});
@@ -259,7 +259,7 @@ public class Parameter
     List<String> bootstraps = Bootstrap.getBootstraps();
     List<Location> locations = Location.getLocationList();
 
-    for (Type type : Type.getExperimentSetTypes()) {
+    for (Type type : Type.getStudyTypes()) {
       if (type == Type.brokers && brokers.size() > 0) {
         availableParams.add(new String[]{type.toString(),
             brokers.toString().replace("[", "").replace("]", ""),

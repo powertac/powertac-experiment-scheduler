@@ -87,7 +87,6 @@ function toggleGamesViz() {
 }
 
 function updateBrokers(data) {
-  /* TODO
   $('#brokersForm\\:databrokers').find('>tbody>tr').each(function () {
     var sp = $(this).find('td:first-child span')[0];
     var orgRowNr = $(sp).attr("id").split(":")[2];
@@ -100,7 +99,6 @@ function updateBrokers(data) {
           '\\:checkins').html("");
     }
   });
-  */
 }
 
 function updateGames(data) {

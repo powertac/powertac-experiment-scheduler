@@ -1,6 +1,6 @@
 package org.powertac.experiment.states;
 
-public enum ExperimentSetState
+public enum StudyState
 {
   pending, in_progress, complete
 }

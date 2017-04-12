@@ -11,7 +11,7 @@ import org.powertac.experiment.models.Parameter;
 import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
 import org.powertac.experiment.services.Utils;
-import org.powertac.experiment.states.ExperimentSetState;
+import org.powertac.experiment.states.StudyState;
 import org.powertac.experiment.states.ExperimentState;
 
 import javax.faces.bean.ManagedBean;
@@ -40,29 +40,29 @@ import static javax.persistence.GenerationType.IDENTITY;
 
 @ManagedBean
 @Entity
-@Table(name = "experimentsets")
-public class ExperimentSet implements MapOwner
+@Table(name = "studies")
+public class Study implements MapOwner
 {
   private static Logger log = Utils.getLogger();
 
-  private int experimentSetId;
+  private int studyId;
   private User user;
   private String name;
-  private ExperimentSetState state = ExperimentSetState.pending;
+  private StudyState state = StudyState.pending;
 
   private Map<Type, Parameter> parameterMap = new HashMap<>();
   private ParamMap paramMap = new ParamMap(this, parameterMap);
   private String variableName;
   private String variableValue;
 
-  public ExperimentSet ()
+  public Study ()
   {
   }
 
   @Transient
   public boolean isEditingAllowed ()
   {
-    return state == ExperimentSetState.pending;
+    return state == StudyState.pending;
   }
 
   @Transient
@@ -77,9 +77,9 @@ public class ExperimentSet implements MapOwner
     return isEditingAllowed();
   }
 
-  public void scheduleExperimentSet (Session session)
+  public void scheduleStudy (Session session)
   {
-    state = ExperimentSetState.in_progress;
+    state = StudyState.in_progress;
 
     String startDate =
         Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
@@ -94,7 +94,7 @@ public class ExperimentSet implements MapOwner
                                  String variableName, String variableValue)
   {
     Experiment experiment = new Experiment();
-    experiment.setExperimentSet(this);
+    experiment.setStudy(this);
     experiment.copyParameters(paramMap, variableName, variableValue);
     session.saveOrUpdate(experiment);
     experiment.createGames(session, counter);
@@ -110,7 +110,7 @@ public class ExperimentSet implements MapOwner
 
     for (Experiment experiment : experiments) {
       // The state of the finished game isn't in the db yet.
-      if (experiment.getExperimentSet().getExperimentSetId() != experimentSetId ||
+      if (experiment.getStudy().getStudyId() != studyId ||
           experiment.getExperimentId() == finishedExperimentId) {
         continue;
       }
@@ -118,7 +118,7 @@ public class ExperimentSet implements MapOwner
     }
 
     if (allDone) {
-      state = ExperimentSetState.complete;
+      state = StudyState.complete;
       session.update(this);
     }
 
@@ -127,8 +127,7 @@ public class ExperimentSet implements MapOwner
   }
 
   // TODO Shouldn't be needed, use default values
-  public void ensureParameters (ParamMap setMap,
-                                String variableName, Location location)
+  public void ensureParameters (ParamMap setMap, Location location)
   {
     // Guarantee required params
     if (setMap.get(Type.gameLength) == null) {
@@ -147,28 +146,31 @@ public class ExperimentSet implements MapOwner
       setMap.put(Type.bootstrapId, new Parameter(this, Type.bootstrapId, "1"));
     }
 
-    Type type = Type.valueOf(variableName);
-    if (type.exclusive) {
+    if (variableName.isEmpty()) {
+      return;
+    }
+
+    if (Type.valueOf(variableName).exclusive) {
       setMap.remove(Type.valueOf(variableName));
     }
   }
 
   //<editor-fold desc="Collections">
-  public static List<ExperimentSet> getNotCompleteSets ()
+  public static List<Study> getNotCompleteSets ()
   {
     return getAllSets().stream().filter(
-        p -> p.state != ExperimentSetState.complete).collect(Collectors.toList());
+        p -> p.state != StudyState.complete).collect(Collectors.toList());
   }
 
   @SuppressWarnings("unchecked")
-  public static List<ExperimentSet> getAllSets ()
+  public static List<Study> getAllSets ()
   {
-    List<ExperimentSet> experimentSets = new ArrayList<>();
+    List<Study> studies = new ArrayList<>();
 
     Session session = HibernateUtil.getSession();
     Transaction transaction = session.beginTransaction();
     try {
-      experimentSets = (List<ExperimentSet>) session
+      studies = (List<Study>) session
           .createQuery(Constants.HQL.GET_EXPERIMENT_SETS)
           .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
       transaction.commit();
@@ -179,11 +181,11 @@ public class ExperimentSet implements MapOwner
     }
     session.close();
 
-    return experimentSets;
+    return studies;
   }
 
   @OneToMany(cascade = CascadeType.ALL)
-  @JoinColumn(name = "experimentSetId")
+  @JoinColumn(name = "studyId")
   @MapKey(name = "type")
   private Map<Type, Parameter> getParameterMap ()
   {
@@ -206,15 +208,15 @@ public class ExperimentSet implements MapOwner
   //<editor-fold desc="Setters and Getters">
   @Id
   @GeneratedValue(strategy = IDENTITY)
-  @Column(name = "experimentSetId", unique = true, nullable = false)
-  public int getExperimentSetId ()
+  @Column(name = "studyId", unique = true, nullable = false)
+  public int getStudyId ()
   {
-    return experimentSetId;
+    return studyId;
   }
 
-  public void setExperimentSetId (int experimentSetId)
+  public void setStudyId (int studyId)
   {
-    this.experimentSetId = experimentSetId;
+    this.studyId = studyId;
   }
 
   @ManyToOne
@@ -242,12 +244,12 @@ public class ExperimentSet implements MapOwner
 
   @Column(name = "state", nullable = false)
   @Enumerated(EnumType.STRING)
-  public ExperimentSetState getState ()
+  public StudyState getState ()
   {
     return state;
   }
 
-  public void setState (ExperimentSetState state)
+  public void setState (StudyState state)
   {
     this.state = state;
   }

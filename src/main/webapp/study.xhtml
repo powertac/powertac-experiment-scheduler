@@ -4,26 +4,24 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
-      xmlns:f="http://java.sun.com/jsf/core"
-      xmlns:t="http://myfaces.apache.org/tomahawk"
-      xmlns:c="http://java.sun.com/jsp/jstl/core">
+      xmlns:f="http://java.sun.com/jsf/core">
 
 <h:body>
   <ui:composition template="template.xhtml">
     <ui:define name="content">
       <script type="text/javascript" charset="utf8"
-              src="resources/js/experimentsets.js"></script>
+              src="resources/js/studies.js"/>
 
-      <h2>Overview for ExperimentSet : #{actionExperimentSet.experimentSet.name}</h2>
+      <h2>Overview for Study : #{actionStudy.study.name}</h2>
       <br/>
-      <b>Variable name : </b><h:outputText value="#{actionExperimentSet.experimentSet.variableName}" /><br/>
+      <b>Variable name : </b><h:outputText value="#{actionStudy.study.variableName}" /><br/>
       <br/>
-      <b>Variable value : </b><h:outputText value="#{actionExperimentSet.experimentSet.variableValue}" /><br/>
+      <b>Variable value : </b><h:outputText value="#{actionStudy.study.variableValue}" /><br/>
       <br/>
       <br/>
 
       <h:dataTable border="1" styleClass="dataTable"
-                   value="#{actionExperimentSet.paramList}" var="entry">
+                   value="#{actionStudy.paramList}" var="entry">
         <h:column>
           <f:facet name="header">Name</f:facet>
           <h:outputText value="#{entry[0]}"/>

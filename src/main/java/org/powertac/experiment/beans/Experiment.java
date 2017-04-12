@@ -47,7 +47,7 @@ public class Experiment implements MapOwner
   private static Logger log = Utils.getLogger();
 
   private int experimentId;
-  private ExperimentSet experimentSet;
+  private Study study;
   private ExperimentState state = ExperimentState.pending;
 
   private Map<Type, Parameter> parameterMap = new HashMap<>();
@@ -68,8 +68,10 @@ public class Experiment implements MapOwner
     }
 
     // Copy the variable
-    Type type = Type.valueOf(name);
-    paramMap.setOrUpdateValue(type, value, type.exclusive);
+    if (!name.isEmpty()) {
+      Type type = Type.valueOf(name);
+      paramMap.setOrUpdateValue(type, value, type.exclusive);
+    }
   }
 
   public void createGames (Session session, AtomicInteger counter)
@@ -109,7 +111,7 @@ public class Experiment implements MapOwner
       Scheduler scheduler = Scheduler.getScheduler();
       scheduler.unloadExperiment(experimentId);
 
-      experimentSet.experimentCompleted(session, experimentId);
+      study.experimentCompleted(session, experimentId);
     }
 
     // Always generate new CSVs
@@ -119,7 +121,7 @@ public class Experiment implements MapOwner
   @Transient
   public String getName ()
   {
-    return experimentSet.getName() + "_" + experimentId;
+    return study.getName() + "_" + experimentId;
   }
 
   @Transient
@@ -216,15 +218,15 @@ public class Experiment implements MapOwner
   }
 
   @ManyToOne
-  @JoinColumn(name = "experimentSetId")
-  public ExperimentSet getExperimentSet ()
+  @JoinColumn(name = "studyId")
+  public Study getStudy ()
   {
-    return experimentSet;
+    return study;
   }
 
-  public void setExperimentSet (ExperimentSet experimentSet)
+  public void setStudy (Study study)
   {
-    this.experimentSet = experimentSet;
+    this.study = study;
   }
 
   @Column(name = "state", nullable = false)

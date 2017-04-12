@@ -4,8 +4,8 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
-import org.powertac.experiment.beans.ExperimentSet;
 import org.powertac.experiment.beans.Location;
+import org.powertac.experiment.beans.Study;
 import org.powertac.experiment.beans.User;
 import org.powertac.experiment.models.ParamMap;
 import org.powertac.experiment.models.Parameter;
@@ -23,30 +23,30 @@ import java.util.List;
 
 
 @ManagedBean
-public class ActionExperimentSets
+public class ActionStudies
 {
   private static Logger log = Utils.getLogger();
 
-  private int experimentSetId;
-  private String experimentSetName;
+  private int studyId;
+  private String studyName;
   private String variableName;
   private String variableValue;
   private String paramString;
 
   private List<Location> availableLocations;
-  private List<ExperimentSet> experimentSetList;
+  private List<Study> studyList;
   private List<String[]> paramsGlobal;
   private List<String[]> paramsServer;
 
-  public ActionExperimentSets ()
+  public ActionStudies ()
   {
   }
 
   @PostConstruct
   public void afterPropertiesSet ()
   {
-    if (experimentSetList == null) {
-      experimentSetList = ExperimentSet.getNotCompleteSets();
+    if (studyList == null) {
+      studyList = Study.getNotCompleteSets();
     }
 
     if (availableLocations == null) {
@@ -72,8 +72,8 @@ public class ActionExperimentSets
 
   private void resetValues ()
   {
-    experimentSetId = -1;
-    experimentSetName = "";
+    studyId = -1;
+    studyName = "";
     variableName = "";
     variableValue = "";
     paramString = Parameter.getDefaultString();
@@ -84,105 +84,105 @@ public class ActionExperimentSets
     ParamMap paramMap = createParamMap(paramString);
 
     if (!inputsValidated(paramMap)) {
-      if (experimentSetId != -1) {
+      if (studyId != -1) {
         resetValues();
       }
       return;
     }
 
-    String type = experimentSetId != -1 ? "Update" : "Create";
-    saveExperimentSet(paramMap, type, experimentSetId);
+    String type = studyId != -1 ? "Update" : "Create";
+    saveStudy(paramMap, type, studyId);
   }
 
-  private void saveExperimentSet (ParamMap paramMap, String type, int setId)
+  private void saveStudy (ParamMap paramMap, String type, int setId)
   {
     String name = type.substring(0, type.length() - 1);
-    log.info(String.format("%sing ExperimentSet", name));
+    log.info(String.format("%sing Study", name));
 
-    experimentSetName = experimentSetName.trim();
+    studyName = studyName.trim();
 
     Session session = HibernateUtil.getSession();
     Transaction transaction = session.beginTransaction();
-    ExperimentSet experimentSet = null;
+    Study study = null;
 
     try {
       switch (type) {
         case "Create":
-          experimentSet = new ExperimentSet();
-          updateSet(experimentSet, paramMap);
+          study = new Study();
+          updateSet(study, paramMap);
           break;
         case "Update":
-          experimentSet = (ExperimentSet) session.get(ExperimentSet.class, setId);
-          updateSet(experimentSet, paramMap);
+          study = (Study) session.get(Study.class, setId);
+          updateSet(study, paramMap);
           break;
         case "Schedule":
-          experimentSet = (ExperimentSet) session.get(ExperimentSet.class, setId);
-          experimentSet.scheduleExperimentSet(session);
+          study = (Study) session.get(Study.class, setId);
+          study.scheduleStudy(session);
           MemStore.getNameMapping(true);
           break;
       }
 
-      session.saveOrUpdate(experimentSet);
+      session.saveOrUpdate(study);
       transaction.commit();
     }
     catch (ConstraintViolationException ignored) {
       ignored.printStackTrace();
       transaction.rollback();
-      Utils.growlMessage("The ExperimentSet name already exists");
+      Utils.growlMessage("The Study name already exists");
     }
     catch (Exception e) {
       transaction.rollback();
       e.printStackTrace();
-      String msg = String.format("Error %sing ExperimentSet", name);
+      String msg = String.format("Error %sing Study", name);
       log.error(msg);
       Utils.growlMessage(msg);
     }
     finally {
       if (transaction.wasCommitted()) {
-        if (experimentSet != null) {
-          log.info(String.format("%sd ExperimentSet %s", type,
-              experimentSet.getExperimentSetId()));
+        if (study != null) {
+          log.info(String.format("%sd Study %s", type,
+              study.getStudyId()));
         }
         resetValues();
       }
       session.close();
     }
 
-    experimentSetList = ExperimentSet.getNotCompleteSets();
+    studyList = Study.getNotCompleteSets();
   }
 
-  public void editExperimentSet (ExperimentSet experimentSet)
+  public void editStudy (Study study)
   {
-    experimentSetId = experimentSet.getExperimentSetId();
-    experimentSetName = experimentSet.getName();
-    variableName = experimentSet.getVariableName();
-    variableValue = experimentSet.getVariableValue();
-    paramString = Parameter.getParamsString(experimentSet.getParamMap());
+    studyId = study.getStudyId();
+    studyName = study.getName();
+    variableName = study.getVariableName();
+    variableValue = study.getVariableValue();
+    paramString = Parameter.getParamsString(study.getParamMap());
 
-    log.info("Editing experiment_set : " + experimentSetId
-        + " " + experimentSet.getName());
+    log.info("Editing experiment_set : " + studyId
+        + " " + study.getName());
   }
 
-  public void scheduleExperimentSet (ExperimentSet experimentSet)
+  public void scheduleStudy (Study study)
   {
-    saveExperimentSet(null, "Schedule", experimentSet.getExperimentSetId());
+    saveStudy(null, "Schedule", study.getStudyId());
   }
 
-  public void deleteExperimentSet (ExperimentSet experimentSet)
+  public void deleteStudy (Study study)
   {
     Session session = HibernateUtil.getSession();
     Transaction transaction = session.beginTransaction();
     try {
-      for (Parameter parameter : experimentSet.getParamMap().values()) {
+      for (Parameter parameter : study.getParamMap().values()) {
         session.delete(parameter);
       }
-      session.delete(experimentSet);
+      session.delete(study);
       transaction.commit();
     }
     catch (Exception e) {
       transaction.rollback();
       e.printStackTrace();
-      String msg = String.format("Error deleting ExperimentSet %s", experimentSet.getName());
+      String msg = String.format("Error deleting Study %s", study.getName());
       log.error(msg);
       Utils.growlMessage(msg);
     }
@@ -194,14 +194,14 @@ public class ActionExperimentSets
     }
   }
 
-  private void updateSet (ExperimentSet experimentSet, ParamMap paramMap)
+  private void updateSet (Study study, ParamMap paramMap)
   {
-    experimentSet.setUser(User.getCurrentUser());
-    experimentSet.setName(experimentSetName);
-    experimentSet.setVariableName(variableName);
-    experimentSet.setVariableValue(variableValue);
+    study.setUser(User.getCurrentUser());
+    study.setName(studyName);
+    study.setVariableName(variableName);
+    study.setVariableValue(variableValue);
 
-    ParamMap setMap = experimentSet.getParamMap();
+    ParamMap setMap = study.getParamMap();
 
     // First remove params that aren't there anymore
     for (Iterator<Type> it = setMap.keySet().iterator(); it.hasNext(); ) {
@@ -214,7 +214,7 @@ public class ActionExperimentSets
       setMap.setOrUpdateValue(parameter.getType(), parameter.getValue());
     }
     // Add required params, check conflicts
-    experimentSet.ensureParameters(setMap, variableName, availableLocations.get(0));
+    study.ensureParameters(setMap, availableLocations.get(0));
   }
 
   private ParamMap createParamMap (String paramString)
@@ -248,11 +248,11 @@ public class ActionExperimentSets
   private boolean inputsValidated (ParamMap paramMap)
   {
     List<String> messages = ParamMap.validateVariable(variableName, variableValue);
-    List<String> setMapMessages = Parameter.validateExperimentSetMap(paramMap);
+    List<String> setMapMessages = Parameter.validateStudyMap(paramMap);
     messages.addAll(setMapMessages);
 
-    if (experimentSetName.trim().isEmpty()) {
-      messages.add("The ExperimentSet name cannot be empty");
+    if (studyName.trim().isEmpty()) {
+      messages.add("The Study name cannot be empty");
     }
 
     for (String msg : messages) {
@@ -263,9 +263,9 @@ public class ActionExperimentSets
   }
 
   //<editor-fold desc="Collections">
-  public List<ExperimentSet> getExperimentSetList ()
+  public List<Study> getStudyList ()
   {
-    return experimentSetList;
+    return studyList;
   }
 
   public List<String[]> getParamsGlobal ()
@@ -280,24 +280,24 @@ public class ActionExperimentSets
   //</editor-fold>
 
   //<editor-fold desc="Setters and Getters">
-  public int getExperimentSetId ()
+  public int getStudyId ()
   {
-    return experimentSetId;
+    return studyId;
   }
 
-  public void setExperimentSetId (int experimentSetId)
+  public void setStudyId (int studyId)
   {
-    this.experimentSetId = experimentSetId;
+    this.studyId = studyId;
   }
 
-  public String getExperimentSetName ()
+  public String getStudyName ()
   {
-    return experimentSetName;
+    return studyName;
   }
 
-  public void setExperimentSetName (String experimentSetName)
+  public void setStudyName (String studyName)
   {
-    this.experimentSetName = experimentSetName.trim();
+    this.studyName = studyName.trim();
   }
 
   public String getVariableValue ()

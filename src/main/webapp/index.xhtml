@@ -65,7 +65,7 @@
 
           <t:column>
             <f:facet name="header">Logs</f:facet>
-              <ui:repeat value="#{g.getLogUrls()}" var="entry">
+              <ui:repeat value="#{g.logURLs()}" var="entry">
                 <a href="#{entry[1]}" style="margin-right: 10px;">
                   <h:outputText value="#{entry[0]}"/>
                 </a>&nbsp;

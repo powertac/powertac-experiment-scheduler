@@ -3,7 +3,7 @@ package org.powertac.experiment.actions;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.powertac.experiment.beans.ExperimentSet;
+import org.powertac.experiment.beans.Study;
 import org.powertac.experiment.constants.Constants;
 import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
@@ -17,31 +17,31 @@ import java.util.List;
 
 
 @ManagedBean
-public class ActionExperimentSet
+public class ActionStudy
 {
-  private ExperimentSet experimentSet;
+  private Study study;
 
-  public ActionExperimentSet ()
+  public ActionStudy ()
   {
   }
 
   @PostConstruct
   public void afterPropertiesSet ()
   {
-    int experimentSetId = getExperimentSetId();
-    if (experimentSetId < 1) {
+    int studyId = getStudyId();
+    if (studyId < 1) {
       return;
     }
 
-    loadExperimentSet(experimentSetId);
+    loadStudy(studyId);
   }
 
-  private int getExperimentSetId ()
+  private int getStudyId ()
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
     try {
       return Integer.parseInt(facesContext.getExternalContext().
-          getRequestParameterMap().get("experimentSetId"));
+          getRequestParameterMap().get("studyId"));
     }
     catch (NumberFormatException ignored) {
       if (!FacesContext.getCurrentInstance().isPostback()) {
@@ -51,16 +51,16 @@ public class ActionExperimentSet
     }
   }
 
-  private void loadExperimentSet (int experimentSetId)
+  private void loadStudy (int studyId)
   {
     Session session = HibernateUtil.getSession();
     Transaction transaction = session.beginTransaction();
     try {
       Query query = session.createQuery(Constants.HQL.GET_EXPERIMENT_SET_BY_ID);
-      query.setInteger("experimentSetId", experimentSetId);
-      experimentSet = (ExperimentSet) query.uniqueResult();
+      query.setInteger("studyId", studyId);
+      study = (Study) query.uniqueResult();
 
-      if (experimentSet == null) {
+      if (study == null) {
         transaction.rollback();
         Utils.redirect();
         return;
@@ -77,18 +77,18 @@ public class ActionExperimentSet
     }
   }
 
-  public ExperimentSet getExperimentSet ()
+  public Study getStudy ()
   {
-    return experimentSet;
+    return study;
   }
 
   public List<String[]> getParamList ()
   {
     List<String[]> paramList = new ArrayList<>();
 
-    for (Type type : experimentSet.getParamMap().getSortedKeys()) {
+    for (Type type : study.getParamMap().getSortedKeys()) {
       paramList.add(new String[]{
-          type.toString(), experimentSet.getParamMap().get(type).getValue()});
+          type.toString(), study.getParamMap().get(type).getValue()});
     }
 
     return paramList;

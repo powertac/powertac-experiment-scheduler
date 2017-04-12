@@ -33,7 +33,7 @@
     <mapping class="org.powertac.experiment.beans.Machine" />
     <mapping class="org.powertac.experiment.beans.Pom" />
 
-    <mapping class="org.powertac.experiment.beans.ExperimentSet" />
+    <mapping class="org.powertac.experiment.beans.Study" />
     <mapping class="org.powertac.experiment.beans.Experiment" />
 
     <mapping class="org.powertac.experiment.models.Parameter" />
