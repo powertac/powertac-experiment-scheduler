@@ -18,17 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.powertac.experiment.constants.Constants.Rest;
+import static org.powertac.experiment.services.Utils.writeToFile;
 
 
 @WebServlet(description = "REST API for game servers",
@@ -97,13 +92,11 @@ public class RestServer extends HttpServlet
         return handleStatus(request);
       }
       else if (actionString.equalsIgnoreCase(Rest.REQ_PARAM_BOOT)) {
-        Game game = Game.getGameById(getGameId(request));
-        String bootId = game.getParamMap().getValue(Type.bootstrapId);
-        return serveBoot(Integer.parseInt(bootId));
+		return serveBoot(getGameId(request));
       }
       else if (actionString.equalsIgnoreCase(Rest.REQ_PARAM_SEED)) {
         Game game = Game.getGameById(getGameId(request));
-        String seedId = game.getParamMap().getValue(Type.seedId);
+		    String seedId = game.getParamMap().getValue(Type.seedId);
         return serveSeed(Integer.parseInt(seedId));
       }
       else if (actionString.equalsIgnoreCase(Rest.REQ_PARAM_HEARTBEAT)) {
@@ -126,27 +119,13 @@ public class RestServer extends HttpServlet
 
     try {
       String fileName = request.getParameter(Rest.REQ_PARAM_FILENAME);
-      log.info("Received a file " + fileName);
-
-      String logLoc = fileName.endsWith("boot.xml")
+      String logLoc = fileName.endsWith(".xml")
           ? properties.getProperty("bootLocation")
           : properties.getProperty("logLocation");
       String pathString = logLoc + fileName;
 
-      // Write to file
-      InputStream is = request.getInputStream();
-      FileOutputStream fos = new FileOutputStream(pathString);
-      byte buf[] = new byte[1024];
-      int letti;
-      while ((letti = is.read(buf)) > 0) {
-        fos.write(buf, 0, letti);
-      }
-      is.close();
-      fos.close();
-
-      // Create softlinks to named versions
-      String gameName = request.getParameter(Rest.REQ_PARAM_GAMENAME);
-      createSoftLinks (fileName, logLoc, gameName);
+      log.info("Received a file " + fileName);
+      writeToFile(request, pathString);
     }
     catch (Exception e) {
       return "error";
@@ -199,14 +178,14 @@ public class RestServer extends HttpServlet
     }
   }
 
-  private String serveBoot (int bootId)
+  private String serveBoot (int gameId)
   {
     StringBuilder result = new StringBuilder();
 
     try {
       // Determine boot-file location
-      String bootLocation = properties.getProperty("bootLocation") +
-          "boot." + bootId + ".xml";
+      Game game = Game.getGameById(gameId);
+      String bootLocation = game.getBootLocation();
 
       // Read the file
       FileInputStream fstream = new FileInputStream(bootLocation);
@@ -221,13 +200,13 @@ public class RestServer extends HttpServlet
       fstream.close();
       in.close();
       br.close();
-
-      return result.toString();
     }
     catch (Exception e) {
       log.error(e.getMessage());
       return "error";
     }
+
+    return result.toString();
   }
 
   private String serveSeed (int seedId)
@@ -344,31 +323,5 @@ public class RestServer extends HttpServlet
     }
 
     return gameId;
-  }
-
-  private void createSoftLinks (String fileName, String logLoc, String gameName)
-  {
-    String linkName;
-    if (fileName.endsWith("boot.xml")) {
-      linkName = String.format("%s%s.boot.xml", logLoc, gameName);
-    }
-    else if (fileName.contains("boot")) {
-      linkName = String.format("%s%s.boot.tar.gz", logLoc, gameName);
-    }
-    else {
-      linkName = String.format("%s%s.sim.tar.gz", logLoc, gameName);
-    }
-
-    try {
-      Path link = Paths.get(linkName);
-      Path target = Paths.get(fileName);
-      Files.createSymbolicLink(link, target);
-    }
-    catch (FileAlreadyExistsException faee) {
-      // Ignored
-    }
-    catch (IOException | UnsupportedOperationException e) {
-      e.printStackTrace();
-    }
   }
 }

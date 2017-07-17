@@ -28,7 +28,7 @@ public enum GameState
   boot_pending, boot_in_progress, boot_complete, boot_failed,
   game_pending, game_ready, game_in_progress, game_complete, game_failed;
 
-  // Some conveneint collections
+  // Some convenient collections
   public static final EnumSet<GameState> hasBootstrap = EnumSet.of(
       boot_complete,
       game_pending,

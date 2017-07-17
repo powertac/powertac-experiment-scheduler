@@ -24,12 +24,10 @@ public class ActionRegister
 
   public void register ()
   {
-    if (nameExists(username)) {
-      Utils.growlMessage("Username taken, please select a new name.");
+    if (!nameAvailable(username)) {
       return;
     }
-    if (!password1.equals(password2)) {
-      Utils.growlMessage("Passwords do not match.");
+    if (!passwordMatch(password1, password2)) {
       return;
     }
 
@@ -52,10 +50,23 @@ public class ActionRegister
     }
   }
 
-  private boolean nameExists (String username)
+  private boolean nameAvailable (String username)
   {
     User user = User.getUserByName(username);
-    return (user != null);
+    if (user == null) {
+		return true;
+	}
+    Utils.growlMessage("User Name taken, please select a new name.");
+    return false;
+  }
+
+  private boolean passwordMatch (String password1, String password2)
+  {
+    if (password1.equals(password2)) {
+      return true;
+    }
+    Utils.growlMessage("Passwords do not match.");
+    return false;
   }
 
   //<editor-fold desc="Setters and Getters">

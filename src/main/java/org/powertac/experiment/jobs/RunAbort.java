@@ -33,7 +33,6 @@ public class RunAbort
 
     try {
       JenkinsConnector.sendJob(abortUrl);
-
       log.info("Aborted job on slave " + machineName);
     }
     catch (Exception ignored) {

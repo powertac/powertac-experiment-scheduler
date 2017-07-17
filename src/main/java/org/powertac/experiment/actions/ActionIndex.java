@@ -12,9 +12,10 @@ import java.util.List;
 @ManagedBean
 public class ActionIndex implements InitializingBean
 {
-  private static boolean editing;
   private List<Game> notCompleteGamesList;
   private List<Game> completeGamesList;
+
+  private static boolean editing;
   private String content;
 
   public ActionIndex ()

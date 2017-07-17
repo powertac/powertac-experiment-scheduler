@@ -12,6 +12,10 @@ import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import javax.servlet.http.HttpServletRequest;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -210,6 +214,21 @@ public class Utils
     {
       return agent1.getAgentId() - agent2.getAgentId();
     }
+  }
+
+  public static void writeToFile (HttpServletRequest request, String pathString)
+      throws IOException
+  {
+    // Write to file
+    InputStream is = request.getInputStream();
+    FileOutputStream fos = new FileOutputStream(pathString);
+    byte buf[] = new byte[1024];
+    int letti;
+    while ((letti = is.read(buf)) > 0) {
+      fos.write(buf, 0, letti);
+    }
+    is.close();
+    fos.close();
   }
 
   /*

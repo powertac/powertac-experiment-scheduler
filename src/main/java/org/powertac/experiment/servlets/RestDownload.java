@@ -31,20 +31,20 @@ public class RestDownload extends HttpServlet
   {
     String downloadFile;
     String absolutePath;
-    String gameId = request.getParameter(Rest.REQ_PARAM_GAME_ID);
+    String gameName = request.getParameter(Rest.REQ_PARAM_GAME_ID);
     String bootId = request.getParameter(Rest.REQ_PARAM_BOOT_ID);
     String csvName = request.getParameter(Rest.REQ_PARAM_CSV_NAME);
     String pomId = request.getParameter(Rest.REQ_PARAM_POM_ID);
     String brokerId = request.getParameter(Rest.REQ_PARAM_BROKERID);
 
-    if (brokerId != null && gameId != null) {
+    if (brokerId != null && gameName != null) {
       absolutePath = properties.getProperty("logLocation");
-      downloadFile = "game-" + gameId + "-broker-" + brokerId + ".tar.gz";
+      downloadFile = gameName + ".broker-" + brokerId + ".tar.gz";
       response.setContentType("application/x-tar; x-gzip");
     }
-    else if (gameId != null) {
+    else if (gameName != null) {
       absolutePath = properties.getProperty("logLocation");
-      downloadFile = "game-" + gameId + "-sim.tar.gz";
+      downloadFile = gameName + ".tar.gz";
       response.setContentType("application/x-tar; x-gzip");
     }
     else if (bootId != null) {

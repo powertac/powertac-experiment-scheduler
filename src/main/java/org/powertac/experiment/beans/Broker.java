@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,7 +32,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 @ManagedBean
 @Entity
 @Table(name = "brokers")
-public class Broker
+public class Broker implements Serializable
 {
   private static Logger log = Utils.getLogger();
 

@@ -130,7 +130,7 @@ public class Game implements Serializable, MapOwner
     String baseUrl = properties.getProperty("logUrl");
 
     if (baseUrl.isEmpty()) {
-      return String.format("download?game=%d", gameId);
+      return String.format("download?game=%s", gameName);
     }
 
     return String.format(baseUrl, gameName);
@@ -142,10 +142,10 @@ public class Game implements Serializable, MapOwner
     String baseUrl = properties.getProperty("brokerUrl");
 
     if (baseUrl.isEmpty()) {
-      baseUrl = "download?game=%d&brokerId=%d";
+      baseUrl = "download?game=%s&brokerId=%d";
     }
 
-    return String.format(baseUrl, gameId, brokerId);
+    return String.format(baseUrl, gameName, brokerId);
   }
 
   @Transient
@@ -161,6 +161,14 @@ public class Game implements Serializable, MapOwner
     }
 
     return result;
+  }
+
+  @Transient
+  public String getBootLocation ()
+  {
+    String bootId = getParamMap().getValue(Type.bootstrapId);
+    return String.format("%sboot.%s.xml",
+        properties.getProperty("bootLocation"), bootId);
   }
 
   // Computes a random game length as outlined in the game specification
@@ -223,6 +231,7 @@ public class Game implements Serializable, MapOwner
     String location = paramMap.get(Type.location).getValue();
     String simStartDate = paramMap.get(Type.simStartDate).getValue();
     String gameLength = paramMap.get(Type.gameLength).getValue();
+    String seedId = paramMap.get(Type.seedId).getValue();
 
     Game game = new Game();
     game.setGameName(gameName);
@@ -236,6 +245,7 @@ public class Game implements Serializable, MapOwner
     gameMap.createParameter(Type.location, location);
     gameMap.createParameter(Type.simStartDate, simStartDate);
     gameMap.createParameter(Type.gameLength, gameLength);
+    gameMap.createParameter(Type.seedId, seedId);
 
     return game;
   }

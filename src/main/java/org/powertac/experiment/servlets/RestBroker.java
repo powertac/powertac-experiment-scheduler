@@ -21,14 +21,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
+import static org.powertac.experiment.services.Utils.writeToFile;
 
 
 @WebServlet(description = "REST API for brokers and agents",
@@ -117,26 +113,11 @@ public class RestBroker extends HttpServlet
 
     try {
       String fileName = request.getParameter(Rest.REQ_PARAM_FILENAME);
-      String brokerId = request.getParameter(Rest.REQ_PARAM_BROKERID);
-      log.info("Received a file " + fileName);
-
       String logLoc = properties.getProperty("logLocation");
       String pathString = logLoc + fileName;
 
-      // Write to file
-      InputStream is = request.getInputStream();
-      FileOutputStream fos = new FileOutputStream(pathString);
-      byte buf[] = new byte[1024];
-      int letti;
-      while ((letti = is.read(buf)) > 0) {
-        fos.write(buf, 0, letti);
-      }
-      is.close();
-      fos.close();
-
-      // Create softlinks to named versions
-      String gameName = request.getParameter(Rest.REQ_PARAM_GAMENAME);
-      createSoftLinks(fileName, logLoc, gameName, brokerId);
+      log.info("Received a file " + fileName);
+      writeToFile(request, pathString);
     }
     catch (Exception e) {
       return "error";
@@ -261,25 +242,6 @@ public class RestBroker extends HttpServlet
     }
     finally {
       session.close();
-    }
-  }
-
-  private void createSoftLinks (String fileName, String logLoc,
-                                String gameName, String brokerId)
-  {
-    String linkName = String.format("%s%s.broker.%s.tar.gz",
-        logLoc, gameName, brokerId);
-
-    try {
-      Path link = Paths.get(linkName);
-      Path target = Paths.get(fileName);
-      Files.createSymbolicLink(link, target);
-    }
-    catch (FileAlreadyExistsException faee) {
-      // Ignored
-    }
-    catch (IOException | UnsupportedOperationException e) {
-      e.printStackTrace();
     }
   }
 }

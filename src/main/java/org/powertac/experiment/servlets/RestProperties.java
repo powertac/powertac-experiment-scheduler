@@ -129,7 +129,6 @@ public class RestProperties extends HttpServlet
   /**
    * Returns a broker properties file string
    *
-   * @param params :
    * @return String representing a broker properties file
    */
   private String parseBrokerProperties (HttpServletRequest request)

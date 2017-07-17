@@ -25,6 +25,8 @@ public class RunKill
       return;
     }
 
+    Properties properties = Properties.getProperties();
+
     // Stop the job on Jenkins, only work on when host = localhost
     for (int count = 0; count < 2; count++) {
       try {
@@ -33,7 +35,7 @@ public class RunKill
         boolean idle = Boolean.parseBoolean(nNode.getTextContent());
 
         if (!idle) {
-          String stopUrl = "http://localhost:8080/jenkins/"
+          String stopUrl = properties.getProperty("jenkins.location")
               + "computer/" + machineName + "/executors/" + count + "/stop";
           log.info("Stop url: " + stopUrl);
 
@@ -51,7 +53,6 @@ public class RunKill
     }
 
     // Actually kill the job on the slave, it doesn't always get done above
-    Properties properties = Properties.getProperties();
     String killUrl = properties.getProperty("jenkins.location")
         + "job/kill-server-agent/buildWithParameters?"
         + "machine=" + machineName;

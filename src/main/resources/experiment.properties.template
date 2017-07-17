@@ -34,7 +34,8 @@ jarLocation = /tmp/
 # Without changing the code, this url needs to serve 'logLocation'.
 # If empty, the TM does the serving. For better performance, use a 'real' webserver.
 #logUrl = http://some-url-to-logifles/game-%d-sim-logs.tar.gz
-logUrl = download?game=%d
+logUrl = download?game=%s
+brokerUrl =
 bootUrl = download?boot=%d
 
 # Interval (ms) to check the machine states, to-be-run bootstraps and sims

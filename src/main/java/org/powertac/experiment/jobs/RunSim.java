@@ -23,10 +23,11 @@ public class RunSim
 {
   private static Logger log = Utils.getLogger();
 
+  private Properties properties = Properties.getProperties();
+
   private Game game;
   private List<Machine> freeMachines;
   private String brokers = "";
-  private Properties properties = Properties.getProperties();
   private Session session;
 
   public RunSim (Game game, List<Machine> freeMachines)

@@ -144,8 +144,7 @@ function get_properties () {
 interfaceUrl=&quot;$experimentUrl$interfacePath&quot;
 propertiesUrl=&quot;$experimentUrl$propertiesPath?brokerId=$brokerId&amp;gameId=$gameId&quot;
 jarUrl=&quot;$experimentUrl$jarPath?brokerId=$brokerId&quot;
-logName=&quot;game-$gameId-broker-$brokerId&quot;
-
+logName=&quot;$gameName.broker-$brokerId.tar.gz&quot;
 
 # Make sure logdir exists
 DIRECTORY=&quot;log&quot;
@@ -183,13 +182,10 @@ log nl &quot;Run broker : $CMD \n&quot;
 eval $CMD
 
 log nl &quot;Compressing log files&quot;
-NAME=&quot;$logName.tar.gz&quot;
-tar -czvf $NAME log/*.state log/*.trace
+tar -czvf $logName log/*.state log/*.trace
 
 log nl &quot;Sending log file&quot;
-# TODO
-#curl --upload-file &quot;$logName&quot; &quot;$interfaceUrl?fileName=$logName&quot;
-curl --upload-file $NAME &quot;$interfaceUrl?fileName=$NAME&amp;gameName=$gameName&amp;brokerId=$brokerId&quot;
+curl --upload-file $logName &quot;$interfaceUrl?fileName=$logName&quot;
 
 # TODO Do we need to find out if failed or succeeded?
 # If game aborted or killed, game sets agents to pending

@@ -85,7 +85,6 @@
 # You might want or need to change these
 ###############################################################################
 LOGFILE=&quot;./log/$(date -u +%y%m%d_%H%M).log&quot;
-MVN_CMD=&quot;mvn&quot;
 
 interfacePath=&quot;faces/serverInterface.jsp&quot;
 pomPath=&quot;faces/download&quot;
@@ -168,7 +167,6 @@ function get_seed_data () {
 # Some intermediate variables
 interfaceUrl=&quot;$tourneyUrl$interfacePath&quot;
 pomUrl=&quot;$tourneyUrl$pomPath?pomId=$pomId&quot;
-simName=&quot;game-$gameId-sim&quot;
 seedUrl=&quot;$interfaceUrl?action=seed&amp;gameId=$gameId&quot;
 
 # Make sure logdir exists
@@ -180,8 +178,9 @@ fi
 get_pom
 get_seed_data
 
-log &quot;&quot;
 StartTime=$(date +%s)
+
+log &quot;&quot;
 log &quot;StartTime     : $(date -u +%F\ %H:%M:%S)&quot;
 log &quot;Nodename      : $NODE_NAME&quot;
 log &quot;BuildNumber   : $BUILD_NUMBER&quot;
@@ -197,10 +196,8 @@ log &quot;interfacePath : $interfacePath&quot;
 log &quot;interfaceUrl  : $interfaceUrl&quot;
 log &quot;pomPath       : $pomPath&quot;
 log &quot;pomUrl        : $pomUrl&quot;
-log &quot;simName       : $simName&quot;
-log &quot;MVN_CMD       : $MVN_CMD&quot;
 
-CMD=&quot;$MVN_CMD    -Pcli -Dexec.args=\&quot;-sim --game-id $gameName --control $tourneyUrl --brokers $brokers --input-queue $serverQueue $seedData\&quot;&quot;
+CMD=&quot;mvn -Pcli -Dexec.args=\&quot;-sim --game-id $gameName --control $tourneyUrl --brokers $brokers --input-queue $serverQueue $seedData\&quot;&quot;
 
 log nl &quot;Run maven : $CMD \n&quot;
 eval $CMD
@@ -215,8 +212,10 @@ S=$(($RunningTime % 60))
 log nl &quot;Game took (H:M:S) $H:$M:$S&quot;
 
 log nl &quot;Compressing log files&quot;
-NAME=&quot;$simName.tar.gz&quot;
-tar -czvf $NAME log/powertac-sim-$gameName.* log/init.* game-.*-boot.xml
+NAME=&quot;$gameName.tar.gz&quot;
+mv log/powertac-sim-$gameName.trace log/$gameName.trace
+mv log/powertac-sim-$gameName.state log/$gameName.state
+tar -czvf $NAME log/$gameName.* log/init.*
 
 size=$(stat -c %s &quot;$NAME&quot;)
 if [ &quot;$size&quot; -gt &quot;45&quot; ]; then

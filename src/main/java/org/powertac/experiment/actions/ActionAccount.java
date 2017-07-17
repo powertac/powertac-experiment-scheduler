@@ -3,10 +3,11 @@ package org.powertac.experiment.actions;
 import org.powertac.experiment.beans.User;
 
 import javax.faces.bean.ManagedBean;
+import java.io.Serializable;
 
 
 @ManagedBean
-public class ActionAccount
+public class ActionAccount implements Serializable
 {
   private User user = User.getCurrentUser();
 
