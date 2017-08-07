@@ -5,8 +5,6 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.powertac.experiment.constants.Constants;
-import org.powertac.experiment.states.ExperimentState;
-import org.powertac.experiment.states.GameState;
 import org.powertac.experiment.models.ParamMap;
 import org.powertac.experiment.models.ParamMap.MapOwner;
 import org.powertac.experiment.models.Parameter;
@@ -14,6 +12,8 @@ import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
 import org.powertac.experiment.services.Scheduler;
 import org.powertac.experiment.services.Utils;
+import org.powertac.experiment.states.ExperimentState;
+import org.powertac.experiment.states.GameState;
 
 import javax.faces.bean.ManagedBean;
 import javax.persistence.CascadeType;
@@ -33,7 +33,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -74,14 +73,14 @@ public class Experiment implements MapOwner
     }
   }
 
-  public void createGames (Session session, AtomicInteger counter)
+  public void createGames (Session session, int experimentCounter)
   {
     List<Broker> brokers = Broker.getBrokersByIds(session,
         paramMap.get(Type.brokers).getValue());
 
     int multiplier = Integer.valueOf(paramMap.get(Type.multiplier).getValue());
     for (int i = 0; i < multiplier; i++) {
-      Game game = Game.createGame(this, counter);
+      Game game = Game.createGame(this, experimentCounter, i + 1);
       session.saveOrUpdate(game);
       log.info(String.format("Created game : %s", game.getGameId()));
 

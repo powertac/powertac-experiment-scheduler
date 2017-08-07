@@ -28,10 +28,10 @@ function updateBrokerViz () {
   else {
     button.val("Show inactive");
     databrokers.find('>tbody>tr').each(function () {
-      var sp = $(this).find('td:nth-child(4)')[0];
-      var tournaments = $(sp).text();
+      var sp = $(this).find('td:nth-child(3)')[0];
+      var games = $(sp).text();
 
-      if (tournaments.length == 0) {
+      if (games.length == 0) {
         $(this).css("display", "none");
       }
     });
@@ -66,7 +66,7 @@ function updateGamesViz () {
     button.val("Show inactive");
 
     dataGames.find('>tbody>tr').each(function () {
-      var sp = $(this).find('td:nth-child(3) span')[0];
+      var sp = $(this).find('td:nth-child(2)')[0];
       var status = $(sp).text();
 
       if (!($.inArray(status, active_statuses) > -1)) {

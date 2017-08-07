@@ -35,7 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -219,10 +218,11 @@ public class Game implements Serializable, MapOwner
     return (Game) query.uniqueResult();
   }
 
-  public static Game createGame (Experiment experiment, AtomicInteger counter)
+  public static Game createGame (Experiment experiment, int experimentCounter,
+                                 int gameCounter)
   {
-    String gameName = String.format("%s_%d",
-        experiment.getStudy().getName(), counter.getAndIncrement());
+    String gameName = String.format("%s_%d_%d",
+        experiment.getStudy().getName(), experimentCounter, gameCounter);
 
     ParamMap paramMap = experiment.getParamMap();
 

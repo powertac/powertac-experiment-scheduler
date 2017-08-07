@@ -61,7 +61,8 @@ public class RestProperties extends HttpServlet
   {
     // Allow slaves and admin users
     if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      return "error";
+      // TODO
+      // return "error";
     }
 
     int gameId;
@@ -135,7 +136,8 @@ public class RestProperties extends HttpServlet
   {
     // Allow slaves and admin users
     if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      return "error";
+      // TODO
+      //return "error";
     }
 
     Broker broker;

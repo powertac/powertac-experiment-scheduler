@@ -47,7 +47,7 @@ public enum Type
   common_competition_expectedTimeslotCount(Integer.class, 1440),
   common_competition_latitude(Integer.class, 45),
   common_competition_minimumOrderQuantity(Double.class, 0.01),
-  common_competition_minimumTimeslotCount(Integer.class, 1400),
+  common_competition_minimumTimeslotCount(Integer.class, 1320),
   common_competition_simulationBaseTime(String.class, "40096"),
   common_competition_simulationTimeslotSeconds(Integer.class, 5),
   common_competition_timeslotLength(Integer.class, 60),

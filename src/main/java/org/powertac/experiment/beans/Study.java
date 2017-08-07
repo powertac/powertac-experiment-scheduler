@@ -11,8 +11,8 @@ import org.powertac.experiment.models.Parameter;
 import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
 import org.powertac.experiment.services.Utils;
-import org.powertac.experiment.states.StudyState;
 import org.powertac.experiment.states.ExperimentState;
+import org.powertac.experiment.states.StudyState;
 
 import javax.faces.bean.ManagedBean;
 import javax.persistence.CascadeType;
@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static javax.persistence.GenerationType.IDENTITY;
@@ -84,20 +83,20 @@ public class Study implements MapOwner
     String startDate =
         Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
     paramMap.setOrUpdateValue(Type.createTime, startDate);
-    AtomicInteger counter = new AtomicInteger(1);
+    int experimentCounter = 1;
     for (String value : ParamMap.getValueList(variableName, variableValue)) {
-      createExperiment(session, counter, variableName, value);
+      createExperiment(session, experimentCounter++, variableName, value);
     }
   }
 
-  private void createExperiment (Session session, AtomicInteger counter,
+  private void createExperiment (Session session, int experimentCounter,
                                  String variableName, String variableValue)
   {
     Experiment experiment = new Experiment();
     experiment.setStudy(this);
     experiment.copyParameters(paramMap, variableName, variableValue);
     session.saveOrUpdate(experiment);
-    experiment.createGames(session, counter);
+    experiment.createGames(session, experimentCounter);
 
     log.info(String.format("Created experiment: %s", experiment.getExperimentId()));
   }
