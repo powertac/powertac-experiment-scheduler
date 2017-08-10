@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -95,7 +94,7 @@ public class Study implements MapOwner
     }
 
     // Allow deleting when not pending and not running
-    return (state == StudyState.paused || state == StudyState.pending);
+    return true;
   }
 
   @Transient
@@ -256,14 +255,8 @@ public class Study implements MapOwner
   }
 
   //<editor-fold desc="Collections">
-  public static List<Study> getNotCompleteStudies ()
-  {
-    return getAllSets().stream().filter(
-        p -> p.state != StudyState.complete).collect(Collectors.toList());
-  }
-
   @SuppressWarnings("unchecked")
-  public static List<Study> getAllSets ()
+  public static List<Study> getAllStudies ()
   {
     List<Study> studies = new ArrayList<>();
 

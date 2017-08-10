@@ -47,7 +47,7 @@ public class ActionStudies
   public void afterPropertiesSet ()
   {
     if (studyList == null) {
-      studyList = Study.getNotCompleteStudies();
+      studyList = Study.getAllStudies();
     }
 
     if (availableLocations == null) {
@@ -153,7 +153,7 @@ public class ActionStudies
       session.close();
     }
 
-    studyList = Study.getNotCompleteStudies();
+    studyList = Study.getAllStudies();
   }
 
   public void editStudy (Study study)
@@ -212,7 +212,7 @@ public class ActionStudies
     }
 
     resetValues();
-    studyList = Study.getNotCompleteStudies();
+    studyList = Study.getAllStudies();
   }
 
   private void updateSet (Study study, ParamMap paramMap)
