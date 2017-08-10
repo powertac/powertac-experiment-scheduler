@@ -1,22 +1,13 @@
 package org.powertac.experiment.services;
 
-import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.powertac.experiment.beans.Config;
 import org.powertac.experiment.beans.Game;
 import org.powertac.experiment.beans.Location;
-import org.powertac.experiment.beans.Machine;
-import org.powertac.experiment.beans.User;
 import org.springframework.stereotype.Component;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,11 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component("memStore")
 public class MemStore
 {
-  private static Logger log = Utils.getLogger();
-
-  private static ConcurrentHashMap<String, List<String>> machineIPs;
-  private static ConcurrentHashMap<String, String> localIPs;
-
   private static ConcurrentHashMap<Integer, List<Long>> brokerCheckins;
   private static ConcurrentHashMap<Integer, String[]> gameHeartbeats;
   private static ConcurrentHashMap<Integer, Integer> gameLengths;
@@ -43,9 +29,6 @@ public class MemStore
 
   public MemStore ()
   {
-    machineIPs = null;
-    localIPs = null;
-
     brokerCheckins = new ConcurrentHashMap<>(50, 0.9f, 1);
     gameHeartbeats = new ConcurrentHashMap<>(20, 0.9f, 1);
     gameLengths = new ConcurrentHashMap<>(20, 0.9f, 1);
@@ -90,90 +73,6 @@ public class MemStore
       session.close();
     }
   }
-
-  //<editor-fold desc="IP stuff">
-  public static void getIpAddresses ()
-  {
-    machineIPs = new ConcurrentHashMap<>(20, 0.9f, 1);
-    localIPs = new ConcurrentHashMap<>(20, 0.9f, 1);
-
-    for (Machine m : Machine.getMachineList()) {
-      try {
-        String machineIP = InetAddress.getByName(m.getMachineUrl()).toString();
-        if (machineIP.contains("/")) {
-          machineIP = machineIP.split("/")[1];
-        }
-
-        List<String> machine =
-            Arrays.asList(m.getMachineName(), m.getMachineId().toString());
-        machineIPs.put(machineIP, machine);
-      }
-      catch (UnknownHostException ignored) {
-      }
-    }
-
-    localIPs.put("127.0.0.1", "loopback");
-    localIPs.put("0:0:0:0:0:0:0:1", "loopback_IPv6");
-    try {
-      for (Enumeration<NetworkInterface> en =
-           NetworkInterface.getNetworkInterfaces(); en.hasMoreElements(); ) {
-        NetworkInterface intf = en.nextElement();
-
-        if (!intf.getName().startsWith("eth") &&
-            !intf.getName().startsWith("vboxnet")) {
-          continue;
-        }
-
-        for (Enumeration<InetAddress> enumIpAddr =
-             intf.getInetAddresses(); enumIpAddr.hasMoreElements(); ) {
-          String ip = enumIpAddr.nextElement().toString();
-          if (ip.contains(":")) {
-            continue;
-          }
-          if (ip.contains("/")) {
-            ip = ip.split("/")[1];
-          }
-          localIPs.put(ip, intf.getName());
-        }
-      }
-    }
-    catch (SocketException e) {
-      log.error(" (error retrieving network interface list)");
-    }
-  }
-
-  public static void resetMachineIPs ()
-  {
-    machineIPs = null;
-  }
-
-  public static boolean checkMachineAllowed (String slaveAddress)
-  {
-    User user = User.getCurrentUser();
-    if (user != null && user.isAdmin()) {
-      return true;
-    }
-
-    if (machineIPs == null) {
-      getIpAddresses();
-    }
-
-    assert localIPs != null;
-    if (localIPs.containsKey(slaveAddress)) {
-      //log.debug("Localhost is always allowed");
-      return true;
-    }
-
-    assert machineIPs != null;
-    if (machineIPs.containsKey(slaveAddress)) {
-      //log.debug(slaveAddress + " is allowed");
-      return true;
-    }
-
-    log.debug(slaveAddress + " is not allowed");
-    return false;
-  }
-  //</editor-fold>
 
   //<editor-fold desc="Checkin stuff">
   public static ConcurrentHashMap<Integer, List<Long>> getBrokerCheckins ()

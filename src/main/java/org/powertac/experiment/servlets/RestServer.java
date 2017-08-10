@@ -82,17 +82,13 @@ public class RestServer extends HttpServlet
    */
   private String handleGET (HttpServletRequest request)
   {
-    if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      return "error";
-    }
-
     try {
       String actionString = request.getParameter(Rest.REQ_PARAM_ACTION);
       if (actionString.equalsIgnoreCase(Rest.REQ_PARAM_STATUS)) {
         return handleStatus(request);
       }
       else if (actionString.equalsIgnoreCase(Rest.REQ_PARAM_BOOT)) {
-		return serveBoot(getGameId(request));
+        return serveBoot(getGameId(request));
       }
       else if (actionString.equalsIgnoreCase(Rest.REQ_PARAM_SEED)) {
         Game game = Game.getGameById(getGameId(request));
@@ -113,10 +109,6 @@ public class RestServer extends HttpServlet
    */
   private String handlePUT (HttpServletRequest request)
   {
-    if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      return "error";
-    }
-
     try {
       String fileName = request.getParameter(Rest.REQ_PARAM_FILENAME);
       String logLoc = fileName.endsWith(".xml")
@@ -138,10 +130,6 @@ public class RestServer extends HttpServlet
    */
   private String handlePOST (HttpServletRequest request)
   {
-    if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      return "error";
-    }
-
     try {
       String actionString = request.getParameter(Rest.REQ_PARAM_ACTION);
       if (!actionString.equalsIgnoreCase(Rest.REQ_PARAM_GAMERESULTS)) {

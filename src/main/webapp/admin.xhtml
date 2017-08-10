@@ -63,9 +63,9 @@
               <h:selectManyListbox value="#{actionAdmin.selectedExperiments}"
                                    rendered="#{scheduler.noExperimentsScheduled()}"
                                    style="border:1px solid grey;padding:1px;margin:2px;">
-                <f:selectItems value="#{actionAdmin.availableExperiments}" var="e"
-                               itemValue="#{e.experimentId}"
-                               itemLabel="#{e.name}"/>
+                <f:selectItems value="#{actionAdmin.availableExperiments}" var="s"
+                               itemValue="#{s.experimentId}"
+                               itemLabel="#{s.name}"/>
               </h:selectManyListbox>
               <h:commandButton value="Load"
                                action="#{actionAdmin.loadExperiments()}"

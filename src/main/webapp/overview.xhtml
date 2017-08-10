@@ -63,26 +63,26 @@
         <h:button value="Refresh" outcome="overview"/>
 
         <t:dataTable id="dataExperiments" border="1"
-                     value="#{actionOverview.notCompleteExperimentList}" var="e">
+                     value="#{actionOverview.notCompleteExperimentList}" var="s">
 
           <t:column>
             <f:facet name="header">ID</f:facet>
-            <h:outputText value="#{e.experimentId}"/>
+            <h:outputText value="#{s.experimentId}"/>
           </t:column>
 
           <t:column>
             <f:facet name="header">Set name</f:facet>
-            <h:outputText value="#{e.study.name}"/>
+            <h:outputText value="#{s.study.name}"/>
           </t:column>
 
           <t:column>
             <f:facet name="header">Status</f:facet>
-            <h:outputText value="#{e.state}"/>
+            <h:outputText value="#{s.state}"/>
           </t:column>
 
           <t:column>
             <f:facet name="header">Progress</f:facet>
-            <h:outputText value="#{e.progress}"/>
+            <h:outputText value="#{s.progress}"/>
           </t:column>
         </t:dataTable>
 

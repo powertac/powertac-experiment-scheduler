@@ -368,9 +368,6 @@ public class ActionAdmin implements InitializingBean
       return;
     }
 
-    // Make sure we get a new list of IPs
-    MemStore.resetMachineIPs();
-
     // It's a new machine
     if (machineId == -1) {
       addMachine();

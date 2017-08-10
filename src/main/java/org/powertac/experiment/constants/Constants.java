@@ -90,11 +90,11 @@ public class Constants
     public static final String GET_MACHINES =
         "FROM Machine AS machine ";
 
-    public static final String GET_EXPERIMENT_SETS =
+    public static final String GET_STUDIES =
         "FROM Study AS study "
             + "LEFT JOIN FETCH study.parameterMap AS parameterMap ";
 
-    public static final String GET_EXPERIMENT_SET_BY_ID =
+    public static final String GET_STUDIES_BY_ID =
         "FROM Study AS study "
             + "LEFT JOIN FETCH study.parameterMap AS parameterMap "
             + "WHERE study.studyId  =:studyId";

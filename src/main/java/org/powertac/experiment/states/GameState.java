@@ -1,6 +1,8 @@
 package org.powertac.experiment.states;
 
+import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 
 
 public enum GameState
@@ -56,5 +58,14 @@ public enum GameState
   public boolean isFailed ()
   {
     return equals(boot_failed) || equals(game_failed);
+  }
+
+  public static List<GameState> getRunningStates ()
+  {
+    return Arrays.asList(
+        boot_in_progress,
+        game_in_progress,
+        game_ready,
+        game_pending);
   }
 }

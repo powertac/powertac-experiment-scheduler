@@ -84,10 +84,6 @@ public class RestBroker extends HttpServlet
    */
   private String handleGET (HttpServletRequest request)
   {
-    if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      return "error";
-    }
-
     try {
       String actionString = request.getParameter(Rest.REQ_PARAM_ACTION);
       if (actionString == null) {
@@ -99,7 +95,7 @@ public class RestBroker extends HttpServlet
     }
     catch (Exception ignored) {
     }
-    return "error 2";
+    return "error";
   }
 
   /**
@@ -107,10 +103,6 @@ public class RestBroker extends HttpServlet
    */
   private String handlePUT (HttpServletRequest request)
   {
-    if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      return "error";
-    }
-
     try {
       String fileName = request.getParameter(Rest.REQ_PARAM_FILENAME);
       String logLoc = properties.getProperty("logLocation");

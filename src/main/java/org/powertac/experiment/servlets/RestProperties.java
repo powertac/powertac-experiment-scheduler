@@ -59,12 +59,6 @@ public class RestProperties extends HttpServlet
 
   private String parseGameProperties (HttpServletRequest request)
   {
-    // Allow slaves and admin users
-    if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      // TODO
-      // return "error";
-    }
-
     int gameId;
     try {
       String niceName = request.getParameter(Rest.REQ_PARAM_GAMEID);
@@ -134,12 +128,6 @@ public class RestProperties extends HttpServlet
    */
   private String parseBrokerProperties (HttpServletRequest request)
   {
-    // Allow slaves and admin users
-    if (!MemStore.checkMachineAllowed(request.getRemoteAddr())) {
-      // TODO
-      //return "error";
-    }
-
     Broker broker;
     int gameId = -1;
 

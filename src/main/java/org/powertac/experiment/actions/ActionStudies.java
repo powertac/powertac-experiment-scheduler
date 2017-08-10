@@ -4,6 +4,7 @@ import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
+import org.powertac.experiment.beans.Experiment;
 import org.powertac.experiment.beans.Location;
 import org.powertac.experiment.beans.Study;
 import org.powertac.experiment.beans.User;
@@ -46,7 +47,7 @@ public class ActionStudies
   public void afterPropertiesSet ()
   {
     if (studyList == null) {
-      studyList = Study.getNotCompleteSets();
+      studyList = Study.getNotCompleteStudies();
     }
 
     if (availableLocations == null) {
@@ -94,7 +95,7 @@ public class ActionStudies
     saveStudy(paramMap, type, studyId);
   }
 
-  private void saveStudy (ParamMap paramMap, String type, int setId)
+  private void saveStudy (ParamMap paramMap, String type, int studyId)
   {
     String name = type.substring(0, type.length() - 1);
     log.info(String.format("%sing Study", name));
@@ -112,12 +113,17 @@ public class ActionStudies
           updateSet(study, paramMap);
           break;
         case "Update":
-          study = (Study) session.get(Study.class, setId);
+          study = (Study) session.get(Study.class, studyId);
           updateSet(study, paramMap);
           break;
         case "Schedule":
-          study = (Study) session.get(Study.class, setId);
+          study = (Study) session.get(Study.class, studyId);
           study.scheduleStudy(session);
+          MemStore.getNameMapping(true);
+          break;
+        case "Pause":
+          study = (Study) session.get(Study.class, studyId);
+          study.pauseStudy();
           MemStore.getNameMapping(true);
           break;
       }
@@ -140,15 +146,14 @@ public class ActionStudies
     finally {
       if (transaction.wasCommitted()) {
         if (study != null) {
-          log.info(String.format("%sd Study %s", type,
-              study.getStudyId()));
+          log.info(String.format("%sd Study %s", type, study.getStudyId()));
         }
         resetValues();
       }
       session.close();
     }
 
-    studyList = Study.getNotCompleteSets();
+    studyList = Study.getNotCompleteStudies();
   }
 
   public void editStudy (Study study)
@@ -159,22 +164,35 @@ public class ActionStudies
     variableValue = study.getVariableValue();
     paramString = Parameter.getParamsString(study.getParamMap());
 
-    log.info("Editing experiment_set : " + studyId
-        + " " + study.getName());
+    log.info("Editing study : " + studyId + " " + study.getName());
   }
 
   public void scheduleStudy (Study study)
   {
     saveStudy(null, "Schedule", study.getStudyId());
+    Utils.growlMessage("Study ready",
+        "Email <a href=\"mailto:buijs@rsm.nl\">admin</a> for scheduling");
+  }
+
+  public void pauseStudy (Study study)
+  {
+    saveStudy(null, "Pause", study.getStudyId());
   }
 
   public void deleteStudy (Study study)
   {
+    // Remove sim and broker logfiles
+    study.removeLogFiles();
+
+    // Remove study (experiments, games) from the DB
     Session session = HibernateUtil.getSession();
     Transaction transaction = session.beginTransaction();
     try {
-      for (Parameter parameter : study.getParamMap().values()) {
-        session.delete(parameter);
+      study = (Study) session.get(Study.class, study.getStudyId());
+      for (Experiment experiment : Experiment.getAllExperiments(session)) {
+        if (experiment.getStudy().getStudyId() == study.getStudyId()) {
+          session.delete(experiment);
+        }
       }
       session.delete(study);
       transaction.commit();
@@ -192,6 +210,9 @@ public class ActionStudies
       }
       session.close();
     }
+
+    resetValues();
+    studyList = Study.getNotCompleteStudies();
   }
 
   private void updateSet (Study study, ParamMap paramMap)

@@ -224,30 +224,24 @@ public class Game implements Serializable, MapOwner
     String gameName = String.format("%s_%d_%d",
         experiment.getStudy().getName(), experimentCounter, gameCounter);
 
-    ParamMap paramMap = experiment.getParamMap();
-
-    String pomId = paramMap.get(Type.pomId).getValue();
-    String bootstrapId = paramMap.get(Type.bootstrapId).getValue();
-    String location = paramMap.get(Type.location).getValue();
-    String simStartDate = paramMap.get(Type.simStartDate).getValue();
-    String gameLength = paramMap.get(Type.gameLength).getValue();
-    String seedId = paramMap.get(Type.seedId).getValue();
-
     Game game = new Game();
     game.setGameName(gameName);
     game.setExperiment(experiment);
     game.setServerQueue(Utils.createQueueName());
     game.setState(GameState.boot_complete);
 
-    ParamMap gameMap = game.getParamMap();
-    gameMap.createParameter(Type.pomId, pomId);
-    gameMap.createParameter(Type.bootstrapId, bootstrapId);
-    gameMap.createParameter(Type.location, location);
-    gameMap.createParameter(Type.simStartDate, simStartDate);
-    gameMap.createParameter(Type.gameLength, gameLength);
-    gameMap.createParameter(Type.seedId, seedId);
+    Game.cloneParams(experiment, game);
 
     return game;
+  }
+
+  private static void cloneParams (Experiment experiment, Game game)
+  {
+    ParamMap experimentMap = experiment.getParamMap();
+    ParamMap gameMap = game.getParamMap();
+    for (Type type : Type.getGameTypes()) {
+      gameMap.createParameter(type, experimentMap.get(type).getValue());
+    }
   }
 
   //<editor-fold desc="Collections">
@@ -271,7 +265,7 @@ public class Game implements Serializable, MapOwner
     return paramMap;
   }
 
-  @OneToMany
+  @OneToMany(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "gameId")
   @MapKey(name = "brokerId")
   public Map<Integer, Agent> getAgentMap ()

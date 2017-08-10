@@ -23,37 +23,42 @@
         <h3 class="withButton">Pending/Running Studies</h3>
         <h:button value="Refresh" outcome="studies"/>
         <t:dataTable id="dataStudies" border="1"
-                     value="#{actionStudies.studyList}" var="e">
+                     value="#{actionStudies.studyList}" var="s">
 
           <t:column>
             <f:facet name="header">ID</f:facet>
-            <h:link value="#{e.studyId}" outcome="study">
-              <f:param name="studyId" value="#{e.studyId}"/>
+            <h:link value="#{s.studyId}" outcome="study">
+              <f:param name="studyId" value="#{s.studyId}"/>
             </h:link>
           </t:column>
           <t:column>
             <f:facet name="header">Name</f:facet>
-            <h:outputText value="#{e.name}"/>
+            <h:outputText value="#{s.name}"/>
           </t:column>
           <t:column>
             <f:facet name="header">User</f:facet>
-            <h:outputText value="#{e.user.userName}"/>
+            <h:outputText value="#{s.user.userName}"/>
           </t:column>
 
           <t:column styleClass="left">
             <f:facet name="header">Actions</f:facet>
             <h:commandButton value="Edit"
-                             action="#{actionStudies.editStudy(e)}"
-                             rendered="#{e.editingAllowed}"
-                             styleClass="actionButton"/>
-            <h:commandButton value="Delete"
-                             action="#{actionStudies.deleteStudy(e)}"
-                             rendered="#{e.deletingAllowed}"
+                             action="#{actionStudies.editStudy(s)}"
+                             rendered="#{s.editingAllowed}"
                              styleClass="actionButton"/>
             <h:commandButton value="Schedule"
-                             action="#{actionStudies.scheduleStudy(e)}"
-                             rendered="#{e.schedulingAllowed}"
+                             action="#{actionStudies.scheduleStudy(s)}"
+                             rendered="#{s.schedulingAllowed}"
                              styleClass="actionButton"/>
+            <h:commandButton value="Pause study"
+                             action="#{actionStudies.pauseStudy(s)}"
+                             rendered="#{s.pausingAllowed}"
+                             styleClass="actionButton"/>
+            <h:commandButton value="Delete"
+                             action="#{actionStudies.deleteStudy(s)}"
+                             rendered="#{s.deletingAllowed}"
+                             styleClass="actionButton"
+                             onclick="return confirmAlert('Are you sure?\nAll log files will be removed!');" />
           </t:column>
         </t:dataTable>
 
@@ -128,7 +133,8 @@
 
         <h:panelGroup>
           <h:outputText>
-            An experiment will be created for each variable, with <i>multiplier</i> games per experiment<br/>
+            An experiment will be created for each variable, with
+            <i>multiplier</i> games per experiment<br/>
             Variable name is the same as parameters, value format is comma separated values<br/>
             Numeric values can also be min-max,step<br/>
           </h:outputText>

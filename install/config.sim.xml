@@ -85,7 +85,6 @@
 # You might want or need to change these
 ###############################################################################
 LOGFILE=&quot;./log/$(date -u +%y%m%d_%H%M).log&quot;
-
 interfacePath=&quot;faces/serverInterface.jsp&quot;
 pomPath=&quot;faces/download&quot;
 LOGFILE=&quot;./log/sim.$(date -u +%y%m%d_%H%M).log&quot;
@@ -106,10 +105,11 @@ function log () {
 function cleanup () {
     # TODO Enable below
     log nl &quot;Cleaning up&quot;
-    rm -fr ./log/init*
-    rm -fr ./log/powertac*
-    rm -fr ./game*
+    rm -fr ./log/*.trace
+    rm -fr ./log/*.state
+    rm -fr ./*.tar.gz
     rm -f ./pom.xml
+    rm -f ./seed.state
 
     #log nl &quot;Not cleaning up, need to enable this&quot;
 }
@@ -126,6 +126,18 @@ function get_pom () {
         exit 1
     else
         log &quot;Pom retrieved&quot;
+    fi
+}
+
+function get_seed_data () {
+    log nl &quot;Get the seed data from $seedUrl&quot;
+    seedFile=&quot;seed.state&quot;
+    wget -q -O $seedFile $seedUrl
+    num=`wc -l $seedFile | awk &apos;{print $1}&apos;`
+    if [ &quot;$num&quot; -gt 1 ] ; then
+        seedData=&quot;--random-seeds $seedFile&quot;
+    else
+    	rm seed.state
     fi
 }
 
@@ -149,16 +161,6 @@ function detect_aborts () {
     fi
 }
 
-function get_seed_data () {
-    log nl &quot;Get the seed data from $seedUrl&quot;
-    seedFile=&quot;seed.state&quot;
-    wget -O $seedFile $seedUrl
-    num=`wc -l $seedFile | awk &apos;{print $1}&apos;`
-    if [ &quot;$num&quot; -gt 1 ] ; then
-        seedData=&quot;--random-seeds $seedFile&quot;
-    fi
-}
-
 
 ###############################################################################
 # Here we go!
@@ -170,10 +172,7 @@ pomUrl=&quot;$tourneyUrl$pomPath?pomId=$pomId&quot;
 seedUrl=&quot;$interfaceUrl?action=seed&amp;gameId=$gameId&quot;
 
 # Make sure logdir exists
-DIRECTORY=&quot;log&quot;
-if [ ! -d &quot;$DIRECTORY&quot; ]; then
-    mkdir $DIRECTORY
-fi
+mkdir -p &quot;log&quot;
 
 get_pom
 get_seed_data
@@ -215,7 +214,12 @@ log nl &quot;Compressing log files&quot;
 NAME=&quot;$gameName.tar.gz&quot;
 mv log/powertac-sim-$gameName.trace log/$gameName.trace
 mv log/powertac-sim-$gameName.state log/$gameName.state
-tar -czvf $NAME log/$gameName.* log/init.*
+tar -czvf $NAME log/$gameName.* log/init.* 
+if [ -f &quot;$seedData&quot; ]; then
+	log &quot;Adding $seedData&quot;
+    echo &quot;File not found!&quot;
+    tar --append --file=&quot;$NAME&quot; &quot;$seedData&quot;
+fi
 
 size=$(stat -c %s &quot;$NAME&quot;)
 if [ &quot;$size&quot; -gt &quot;45&quot; ]; then

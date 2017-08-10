@@ -80,8 +80,6 @@ This job is meant to be started via a rest call with certain commandline argumen
 # You might want or need to change these
 ###############################################################################
 LOGFILE=&quot;./log/$(date -u +%y%m%d_%H%M).log&quot;
-MVN_CMD=&quot;mvn&quot;
-
 interfacePath=&quot;faces/brokerLogin.jsp&quot;
 jarPath=&quot;faces/download&quot;
 propertiesPath=&quot;faces/properties.jsp&quot;
@@ -102,11 +100,7 @@ function log () {
 
 function cleanup () {
     # TODO Enable below
-    #log nl &quot;Cleaning up&quot;
-    #rm -fr ./log/*.state
-    #rm -fr ./log/*.trace
-    #rm -fr ./broker*
-    #rm -fr ./game*
+    #rm -fr ./*
 
     log nl &quot;Not cleaning up, need to enable this&quot;
 }
@@ -135,6 +129,18 @@ function get_properties () {
     fi
 }
 
+function repackage_jar () {
+	rm -fr src
+	mkdir src
+	cd src
+	jar xf ../broker.jar
+	rm -fr ../broker.jar
+	jar cmf META-INF/MANIFEST.MF ../broker.jar *
+	cd ../
+	rm -fr src
+    log &quot;Jar repackaged&quot;
+}
+
 
 ###############################################################################
 # Here we go!
@@ -147,10 +153,7 @@ jarUrl=&quot;$experimentUrl$jarPath?brokerId=$brokerId&quot;
 logName=&quot;$gameName.broker-$brokerId.tar.gz&quot;
 
 # Make sure logdir exists
-DIRECTORY=&quot;log&quot;
-if [ ! -d &quot;$DIRECTORY&quot; ]; then
-  mkdir $DIRECTORY
-fi
+mkdir -p &quot;log&quot;
 
 log &quot;&quot;
 StartTime=$(date +%s)
@@ -169,13 +172,13 @@ log &quot;jarUrl         : $jarUrl&quot;
 log &quot;propertiesPath : $propertiesPath&quot;
 log &quot;propertiesUrl  : $propertiesUrl&quot;
 log &quot;logName        : $logName&quot;
-log &quot;MVN_CMD        : $MVN_CMD&quot;
 
 log nl &quot;Get the properties file from $propertiesUrl&quot;
 get_properties
 
 log nl &quot;Get the jar file from $jarUrl&quot;
 get_jar
+repackage_jar
 
 CMD=&quot;java -jar broker.jar&quot;
 log nl &quot;Run broker : $CMD \n&quot;

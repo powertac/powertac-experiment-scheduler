@@ -56,7 +56,7 @@ public class ActionStudy
     Session session = HibernateUtil.getSession();
     Transaction transaction = session.beginTransaction();
     try {
-      Query query = session.createQuery(Constants.HQL.GET_EXPERIMENT_SET_BY_ID);
+      Query query = session.createQuery(Constants.HQL.GET_STUDIES_BY_ID);
       query.setInteger("studyId", studyId);
       study = (Study) query.uniqueResult();
 

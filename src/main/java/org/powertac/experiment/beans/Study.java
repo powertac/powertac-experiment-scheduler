@@ -10,8 +10,11 @@ import org.powertac.experiment.models.ParamMap.MapOwner;
 import org.powertac.experiment.models.Parameter;
 import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
+import org.powertac.experiment.services.Properties;
+import org.powertac.experiment.services.Scheduler;
 import org.powertac.experiment.services.Utils;
 import org.powertac.experiment.states.ExperimentState;
+import org.powertac.experiment.states.GameState;
 import org.powertac.experiment.states.StudyState;
 
 import javax.faces.bean.ManagedBean;
@@ -28,6 +31,7 @@ import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -61,32 +65,106 @@ public class Study implements MapOwner
   @Transient
   public boolean isEditingAllowed ()
   {
-    return state == StudyState.pending;
+    if (!isOwnerAdmin()) {
+      return false;
+    }
+
+    return state == StudyState.pending && isOwnerAdmin();
   }
 
   @Transient
   public boolean isSchedulingAllowed ()
   {
-    return isEditingAllowed();
+    if (!isOwnerAdmin()) {
+      return false;
+    }
+
+    return (state == StudyState.paused || state == StudyState.pending);
   }
 
   @Transient
   public boolean isDeletingAllowed ()
   {
-    return isEditingAllowed();
+    if (!isOwnerAdmin()) {
+      return false;
+    }
+
+    // Can't delete if games are still running
+    if (hasRunningGames()) {
+      return false;
+    }
+
+    // Allow deleting when not pending and not running
+    return (state == StudyState.paused || state == StudyState.pending);
+  }
+
+  @Transient
+  public boolean isPausingAllowed ()
+  {
+    if (!isOwnerAdmin()) {
+      return false;
+    }
+
+    return state == StudyState.in_progress;
+  }
+
+  @Transient
+  private boolean isOwnerAdmin ()
+  {
+    User currentUser = User.getCurrentUser();
+    return (currentUser.isAdmin() ||
+        currentUser.getUserId() == user.getUserId());
+  }
+
+  @Transient
+  public List<Experiment> getExperiments ()
+  {
+    List<Experiment> experiments = new ArrayList<>();
+    for (Experiment experiment : Experiment.getNotCompleteExperiments()) {
+      if (experiment.getStudy().getStudyId() == studyId) {
+        experiments.add(experiment);
+      }
+    }
+    return experiments;
+  }
+
+  private boolean hasRunningGames ()
+  {
+    for (Game game : Game.getNotCompleteGamesList()) {
+      // Check for running games that belong to this study
+      if (GameState.getRunningStates().contains(game.getState()) &&
+          game.getExperiment().getStudy().getStudyId() == studyId) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public void pauseStudy ()
+  {
+    state = StudyState.paused;
+
+    Scheduler scheduler = Scheduler.getScheduler();
+    for (Experiment experiment : Experiment.getNotCompleteExperiments()) {
+      if (experiment.getStudy().getStudyId() == studyId) {
+        scheduler.unloadExperiment(experiment.getExperimentId());
+      }
+    }
   }
 
   public void scheduleStudy (Session session)
   {
-    state = StudyState.in_progress;
-
-    String startDate =
-        Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
-    paramMap.setOrUpdateValue(Type.createTime, startDate);
-    int experimentCounter = 1;
-    for (String value : ParamMap.getValueList(variableName, variableValue)) {
-      createExperiment(session, experimentCounter++, variableName, value);
+    if (state == StudyState.pending) {
+      String startDate =
+          Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
+      paramMap.setOrUpdateValue(Type.createTime, startDate);
+      int experimentCounter = 1;
+      for (String value : ParamMap.getValueList(variableName, variableValue)) {
+        createExperiment(session, experimentCounter++, variableName, value);
+      }
     }
+
+    state = StudyState.in_progress;
   }
 
   private void createExperiment (Session session, int experimentCounter,
@@ -154,8 +232,31 @@ public class Study implements MapOwner
     }
   }
 
+  public void removeLogFiles ()
+  {
+    Properties properties = Properties.getProperties();
+    String logLoc = properties.getProperty("logLocation");
+
+    for (Experiment experiment : getExperiments()) {
+      for (Game game : experiment.getGameMap().values()) {
+        String logFilePath = String.format("%s%s.tar.gz",
+            logLoc, game.getGameName());
+        File file = new File(logFilePath);
+        file.delete();
+
+        for (int brokerId : game.getAgentMap().keySet()) {
+          String logBrokerPath = String.format("%s%s.broker-%d.tar.gz",
+              logLoc, game.getGameName(), brokerId);
+
+          file = new File(logBrokerPath);
+          file.delete();
+        }
+      }
+    }
+  }
+
   //<editor-fold desc="Collections">
-  public static List<Study> getNotCompleteSets ()
+  public static List<Study> getNotCompleteStudies ()
   {
     return getAllSets().stream().filter(
         p -> p.state != StudyState.complete).collect(Collectors.toList());
@@ -170,7 +271,7 @@ public class Study implements MapOwner
     Transaction transaction = session.beginTransaction();
     try {
       studies = (List<Study>) session
-          .createQuery(Constants.HQL.GET_EXPERIMENT_SETS)
+          .createQuery(Constants.HQL.GET_STUDIES)
           .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
       transaction.commit();
     }
@@ -194,7 +295,7 @@ public class Study implements MapOwner
   private void setParameterMap (Map<Type, Parameter> parameterMap)
   {
     this.parameterMap = parameterMap;
-    paramMap= new ParamMap(this, parameterMap);
+    paramMap = new ParamMap(this, parameterMap);
   }
 
   @Transient

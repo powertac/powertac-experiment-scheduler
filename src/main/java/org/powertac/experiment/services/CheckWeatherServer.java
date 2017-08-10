@@ -33,14 +33,15 @@ public class CheckWeatherServer implements InitializingBean
 {
   private static Logger log = Utils.getLogger();
   private static String status = "";
-  @Autowired
-  private Properties properties;
+  private final Properties properties;
   private Timer weatherServerCheckerTimer;
   private boolean mailed;
 
-  public CheckWeatherServer ()
+  @Autowired
+  public CheckWeatherServer (Properties properties)
   {
     super();
+    this.properties = properties;
   }
 
   public void afterPropertiesSet () throws Exception
@@ -67,7 +68,7 @@ public class CheckWeatherServer implements InitializingBean
     weatherServerCheckerTimer.schedule(weatherServerChecker, new Date(), 900000);
   }
 
-  public void ping ()
+  private void ping ()
   {
     log.info("Checking WeatherService");
     InputStream is = null;
@@ -157,13 +158,14 @@ public class CheckWeatherServer implements InitializingBean
   @PreDestroy
   private void cleanUp () throws Exception
   {
-    log.info("Spring Container is destroyed! CheckWeatherServer clean up");
-
     if (weatherServerCheckerTimer != null) {
       weatherServerCheckerTimer.cancel();
       weatherServerCheckerTimer.purge();
       weatherServerCheckerTimer = null;
       log.info("Stopping weatherServerCheckerTimer ...");
+    }
+    else {
+      log.warn("weatherServerCheckerTimer Already Stopped");
     }
   }
 

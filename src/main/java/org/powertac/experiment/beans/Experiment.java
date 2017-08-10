@@ -168,7 +168,7 @@ public class Experiment implements MapOwner
         .setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
   }
 
-  @OneToMany
+  @OneToMany(cascade = CascadeType.REMOVE)
   @JoinColumn(name = "experimentId")
   @MapKey(name = "gameId")
   public Map<Integer, Game> getGameMap ()

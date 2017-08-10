@@ -168,13 +168,10 @@ public enum Type
     return experimentTypes;
   }
 
-  public static Set<Type> getGameTypes ()
+  public static List<Type> getGameTypes ()
   {
-    Set<Type> gameTypes = new LinkedHashSet<>(Arrays.asList(Type.values()));
-    gameTypes.remove(brokers);
-    gameTypes.remove(createTime);
-    gameTypes.remove(startTime);
-    return gameTypes;
+    return Arrays.asList(Type.pomId, Type.bootstrapId,
+        Type.location, Type.simStartDate, Type.gameLength, Type.seedId);
   }
 
   private static boolean lazyLoaded;
