@@ -28,10 +28,19 @@ public class ActionStudies
 {
   private static Logger log = Utils.getLogger();
 
+  private enum RadioOptions
+  {
+    values, csv
+  }
+
   private int studyId;
   private String studyName;
   private String variableName;
   private String variableValue;
+  private String variableMin;
+  private String variableMax;
+  private String variableStep;
+  private String valuesType;
   private String paramString;
 
   private List<Location> availableLocations;
@@ -77,12 +86,17 @@ public class ActionStudies
     studyName = "";
     variableName = "";
     variableValue = "";
+    variableMin = "";
+    variableMax = "";
+    variableStep = "";
+    valuesType = RadioOptions.values.toString();
     paramString = Parameter.getDefaultString();
   }
 
-  public void createOrUpdateSet ()
+  public void createOrUpdateStudy ()
   {
     ParamMap paramMap = createParamMap(paramString);
+    ensureVariableValue();
 
     if (!inputsValidated(paramMap)) {
       if (studyId != -1) {
@@ -93,6 +107,17 @@ public class ActionStudies
 
     String type = studyId != -1 ? "Update" : "Create";
     saveStudy(paramMap, type, studyId);
+  }
+
+  private void ensureVariableValue ()
+  {
+    if (valuesType.equals(RadioOptions.csv.toString())) {
+      variableValue = String.join(",", ParamMap.parseMinMaxStep(
+          variableName, variableMin, variableMax, variableStep));
+    }
+    else {
+      variableValue = variableValue.replace(" ", "");
+    }
   }
 
   private void saveStudy (ParamMap paramMap, String type, int studyId)
@@ -110,11 +135,11 @@ public class ActionStudies
       switch (type) {
         case "Create":
           study = new Study();
-          updateSet(study, paramMap);
+          updateStudy(study, paramMap);
           break;
         case "Update":
           study = (Study) session.get(Study.class, studyId);
-          updateSet(study, paramMap);
+          updateStudy(study, paramMap);
           break;
         case "Schedule":
           study = (Study) session.get(Study.class, studyId);
@@ -162,6 +187,7 @@ public class ActionStudies
     studyName = study.getName();
     variableName = study.getVariableName();
     variableValue = study.getVariableValue();
+    valuesType = RadioOptions.values.toString();
     paramString = Parameter.getParamsString(study.getParamMap());
 
     log.info("Editing study : " + studyId + " " + study.getName());
@@ -215,27 +241,27 @@ public class ActionStudies
     studyList = Study.getAllStudies();
   }
 
-  private void updateSet (Study study, ParamMap paramMap)
+  private void updateStudy (Study study, ParamMap paramMap)
   {
     study.setUser(User.getCurrentUser());
     study.setName(studyName);
     study.setVariableName(variableName);
     study.setVariableValue(variableValue);
 
-    ParamMap setMap = study.getParamMap();
+    ParamMap studyParamMap = study.getParamMap();
 
     // First remove params that aren't there anymore
-    for (Iterator<Type> it = setMap.keySet().iterator(); it.hasNext(); ) {
+    for (Iterator<Type> it = studyParamMap.keySet().iterator(); it.hasNext(); ) {
       if (paramMap.get(it.next()) == null) {
         it.remove();
       }
     }
     // Add or update params
     for (Parameter parameter : paramMap.values()) {
-      setMap.setOrUpdateValue(parameter.getType(), parameter.getValue());
+      studyParamMap.setOrUpdateValue(parameter.getType(), parameter.getValue());
     }
     // Add required params, check conflicts
-    study.ensureParameters(setMap, availableLocations.get(0));
+    study.ensureParameters(studyParamMap, availableLocations.get(0));
   }
 
   private ParamMap createParamMap (String paramString)
@@ -269,8 +295,8 @@ public class ActionStudies
   private boolean inputsValidated (ParamMap paramMap)
   {
     List<String> messages = ParamMap.validateVariable(variableName, variableValue);
-    List<String> setMapMessages = Parameter.validateStudyMap(paramMap);
-    messages.addAll(setMapMessages);
+    List<String> studyMapMessages = Parameter.validateStudyMap(paramMap);
+    messages.addAll(studyMapMessages);
 
     if (studyName.trim().isEmpty()) {
       messages.add("The Study name cannot be empty");
@@ -339,6 +365,51 @@ public class ActionStudies
   public void setVariableName (String variableName)
   {
     this.variableName = variableName.trim();
+  }
+
+  public String getVariableMin ()
+  {
+    return variableMin;
+  }
+
+  public void setVariableMin (String variableMin)
+  {
+    this.variableMin = variableMin.trim();
+  }
+
+  public String getVariableMax ()
+  {
+    return variableMax;
+  }
+
+  public void setVariableMax (String variableMax)
+  {
+    this.variableMax = variableMax.trim();
+  }
+
+  public String getVariableStep ()
+  {
+    return variableStep;
+  }
+
+  public void setVariableStep (String variableStep)
+  {
+    this.variableStep = variableStep.trim();
+  }
+
+  public String getValuesType ()
+  {
+    return valuesType;
+  }
+
+  public void setValuesType (String valuesType)
+  {
+    this.valuesType = valuesType;
+  }
+
+  public RadioOptions[] getRadioOptions ()
+  {
+    return RadioOptions.values();
   }
 
   public String getParamString ()

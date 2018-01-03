@@ -7,7 +7,7 @@
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
->
+      xmlns:p="http://primefaces.org/ui">
 
 <h:body>
   <ui:composition template="template.xhtml">
@@ -58,7 +58,7 @@
                              action="#{actionStudies.deleteStudy(s)}"
                              rendered="#{s.deletingAllowed}"
                              styleClass="actionButton"
-                             onclick="return confirmAlert('Are you sure?\nAll log files will be removed!');" />
+                             onclick="return confirmAlert('Are you sure?\nAll log files will be removed!');"/>
           </t:column>
         </t:dataTable>
 
@@ -124,14 +124,6 @@
         </h:panelGroup>
 
         <h:panelGroup>
-          <h:outputLabel for="nameInput" value="Name&#160;"/>
-          <h:inputText id="nameInput"
-                       value="#{actionStudies.studyName}"/>
-          <br/>
-          <br/>
-        </h:panelGroup>
-
-        <h:panelGroup>
           <h:outputText>
             An experiment will be created for each variable, with
             <i>multiplier</i> games per experiment<br/>
@@ -141,17 +133,50 @@
           <br/>
         </h:panelGroup>
 
-        <h:panelGrid columns="2">
-          <h:outputLabel for="variableName" value="Variable name"/>
-          <h:outputLabel for="variableValue" value="Variable value"/>
+        <h:panelGroup>
+          <h:outputLabel for="nameInput" value="Study name"
+                         styleClass="study_label1"/>
+          <h:inputText id="nameInput" styleClass="input_huge"
+                       value="#{actionStudies.studyName}"/>
+          <br/>
+        </h:panelGroup>
 
+        <h:panelGroup>
+          <h:outputLabel for="variableName" value="Variable name"
+                         styleClass="study_label1"/>
           <h:inputText id="variableName" styleClass="input_huge"
                        value="#{actionStudies.variableName}"/>
-          <h:inputText id="variableValue" styleClass="input_huge"
-                       value="#{actionStudies.variableValue}"/>
+          <br/>
+        </h:panelGroup>
 
-          <br/><br/>
-        </h:panelGrid>
+        <p:outputPanel id="customPanel">
+          <p:selectOneRadio id="customRadio" layout="custom"
+                            value="#{actionStudies.valuesType}">
+            <f:selectItem itemValue="#{actionStudies.radioOptions[0]}"/>
+            <f:selectItem itemValue="#{actionStudies.radioOptions[1]}"/>
+          </p:selectOneRadio>
+
+          <h:panelGrid columns="3" cellpadding="5">
+            <p:radioButton id="opt1" for="customRadio" itemIndex="0"/>
+            <h:outputLabel for="opt1" value="comma sep. values"
+                           styleClass="study_label2"/>
+            <h:inputText styleClass="input_huge"
+                         value="#{actionStudies.variableValue}"/>
+
+            <p:radioButton id="opt2" for="customRadio" itemIndex="1"/>
+            <h:outputLabel for="opt2" value="min-max,step"
+                           styleClass="study_label2"/>
+            <h:panelGrid columns="3">
+              <h:inputText value="#{actionStudies.variableMin}"
+                           styleClass="input_small" style="margin-left: -5px;"/>
+              <h:inputText value="#{actionStudies.variableMax}"
+                           styleClass="input_small"/>
+              <h:inputText value="#{actionStudies.variableStep}"
+                           styleClass="input_small"/>
+            </h:panelGrid>
+          </h:panelGrid>
+          <br/>
+        </p:outputPanel>
 
         <h:panelGroup>
           <h:outputLabel for="contentInput"
@@ -164,7 +189,7 @@
 
         <h:commandButton
             value="#{actionStudies.studyId == -1 ? 'Create' : 'Update'}"
-            action="#{actionStudies.createOrUpdateSet()}"/>
+            action="#{actionStudies.createOrUpdateStudy()}"/>
 
         <h:inputHidden id="studyId"
                        value="#{actionStudies.studyId}"/>

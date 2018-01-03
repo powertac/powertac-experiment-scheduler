@@ -118,6 +118,10 @@ select.select_wide {
 
 input[type="text"].input_huge {
   width: 400px;
+  height: 21px;
+  margin-bottom: 10px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 14px;
 }
 
 input[type="text"].input_wide {
@@ -126,6 +130,23 @@ input[type="text"].input_wide {
 
 input[type="text"].input_small {
   width: 50px;
+  height: 21px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 14px;
+}
+
+.study_label1 {
+  width: 191px;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.study_label2 {
+  width: 140px;
+  display: inline-block;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 16px;
+  text-align: left;
 }
 
 #page {

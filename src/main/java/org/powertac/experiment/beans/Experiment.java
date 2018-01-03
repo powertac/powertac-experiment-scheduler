@@ -192,7 +192,7 @@ public class Experiment implements MapOwner
   private void setParameterMap (Map<Type, Parameter> parameterMap)
   {
     this.parameterMap = parameterMap;
-    paramMap= new ParamMap(this, parameterMap);
+    paramMap = new ParamMap(this, parameterMap);
   }
 
   @Transient

@@ -158,7 +158,7 @@ public class Study implements MapOwner
           Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
       paramMap.setOrUpdateValue(Type.createTime, startDate);
       int experimentCounter = 1;
-      for (String value : ParamMap.getValueList(variableName, variableValue)) {
+      for (String value : variableValue.split(",")) {
         createExperiment(session, experimentCounter++, variableName, value);
       }
     }

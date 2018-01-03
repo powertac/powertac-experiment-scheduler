@@ -1,10 +1,9 @@
 package org.powertac.experiment.models;
 
 import org.powertac.experiment.services.Utils;
-import org.springframework.util.StringUtils;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Date;
@@ -12,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
 public class ParamMap
@@ -107,7 +108,7 @@ public class ParamMap
     setOrUpdateValue(type, value, true);
   }
 
-  public List<Type> getSortedKeys()
+  public List<Type> getSortedKeys ()
   {
     List<Type> keys = new ArrayList<>(map.keySet());
     keys.sort(Comparator.comparing(Enum::toString));
@@ -173,7 +174,7 @@ public class ParamMap
     }
 
     // Check if variableValues are allowed
-    for (String v : getValueList(name, value)) {
+    for (String v : value.split(",")) {
       try {
         if (variable.clazz == Integer.class) {
           Integer.parseInt(v);
@@ -191,37 +192,33 @@ public class ParamMap
     return messages;
   }
 
-  public static List<String> getValueList (String name, String value)
+  public static List<String> parseMinMaxStep (String name, String minString,
+                                              String maxString, String stepString)
   {
-    value = value.replace(" ", "");
-
-    // A comma separated list of values
-    if (StringUtils.countOccurrencesOf(value, "-") != 1) {
-      return Arrays.asList(value.split(","));
+    Type type = Type.valueOf(name.trim());
+    if (type.clazz == Integer.class) {
+      int min = Integer.parseInt(minString);
+      int max = Integer.parseInt(maxString);
+      int step = Integer.parseInt(stepString);
+      return getIntValues(min, max, step);
     }
+    else if (type.clazz == Double.class) {
+      double min = Double.parseDouble(minString);
+      double max = Double.parseDouble(maxString);
+      double step = Double.parseDouble(stepString);
 
-    // A min-max,step format
-    if (StringUtils.countOccurrencesOf(value, ",") == 1 &&
-        StringUtils.countOccurrencesOf(value, "-") == 1) {
-      Type type = Type.valueOf(name);
-      if (type.clazz == Integer.class) {
-        return getIntValues(value);
-      }
-      else if (type.clazz == Double.class) {
-        return getDoubleValues(value);
-      }
+      String[] parts = step < Math.min(min, max) ?
+          stepString.split("\\.") : minString.split("\\.");
+      int digits = parts.length > 1 ? parts[1].length() : 0;
+
+      return getDoubleValues(min, max, step, digits);
     }
 
     return new ArrayList<>();
   }
 
-  private static List<String> getIntValues (String variableValue)
+  private static List<String> getIntValues (int min, int max, int step)
   {
-    int min = Integer.parseInt(variableValue.split("-")[0]);
-    String tail = variableValue.split("-")[1];
-    int max = Integer.parseInt(tail.split(",")[0]);
-    int step = Integer.parseInt(tail.split(",")[1]);
-
     List<String> values = new ArrayList<>();
     while (min <= max) {
       values.add(String.valueOf(min));
@@ -230,17 +227,22 @@ public class ParamMap
     return values;
   }
 
-  private static List<String> getDoubleValues (String variableValue)
+  private static List<String> getDoubleValues (double min, double max,
+                                               double step, int digits)
   {
-    double min = Double.parseDouble(variableValue.split("-")[0]);
-    String tail = variableValue.split("-")[1];
-    double max = Double.parseDouble(tail.split(",")[0]);
-    double step = Double.parseDouble(tail.split(",")[1]);
+    String format = IntStream.range(0, digits).mapToObj(i -> "#")
+        .collect(Collectors.joining("", digits > 0 ? "#." : "#", ""));
+    DecimalFormat df = new DecimalFormat(format);
+
+    double factor = Math.pow(10, digits);
+    long minScaled = Math.round(min * factor);
+    long maxScaled = Math.round(max * factor);
+    long stepScaled = Math.round(step * factor);
 
     List<String> values = new ArrayList<>();
-    while (min <= max) {
-      values.add(String.valueOf(min));
-      min += step;
+    while (minScaled <= maxScaled) {
+      values.add(df.format(minScaled / factor));
+      minScaled += stepScaled;
     }
     return values;
   }
