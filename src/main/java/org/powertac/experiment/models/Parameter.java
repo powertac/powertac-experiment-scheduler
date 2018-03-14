@@ -1,26 +1,21 @@
 package org.powertac.experiment.models;
 
-import org.powertac.experiment.beans.Broker;
 import org.powertac.experiment.beans.Experiment;
-import org.powertac.experiment.beans.Study;
 import org.powertac.experiment.beans.Game;
 import org.powertac.experiment.beans.Location;
-import org.powertac.experiment.beans.Pom;
+import org.powertac.experiment.beans.Study;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
-import java.beans.Transient;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -33,7 +28,7 @@ public class Parameter
   private Study study;
   private Experiment experiment;
   private Game game;
-  private Type type;
+  private String type;
   private String value;
 
   public Parameter ()
@@ -41,14 +36,14 @@ public class Parameter
 
   }
 
-  public Parameter (Object owner, Type type, Object value)
+  public Parameter (Object owner, String type, Object value)
   {
     setOwner(owner);
     this.type = type;
     this.value = String.valueOf(value);
   }
 
-  public void setOwner (Object owner)
+  private void setOwner (Object owner)
   {
     if (owner instanceof Study) {
       this.study = (Study) owner;
@@ -59,12 +54,6 @@ public class Parameter
     else if (owner instanceof Game) {
       this.game = (Game) owner;
     }
-  }
-
-  @Transient
-  public String typeName ()
-  {
-    return type.toString();
   }
 
   //<editor-fold desc="Getters and Setters">
@@ -118,13 +107,13 @@ public class Parameter
   }
 
   @Column(name = "type", nullable = false)
-  @Enumerated(EnumType.STRING)
-  public Type getType ()
+  //@Enumerated(EnumType.STRING)
+  public String getType ()
   {
     return type;
   }
 
-  public void setType (Type type)
+  public void setType (String type)
   {
     this.type = type;
   }
@@ -159,7 +148,8 @@ public class Parameter
     try {
       if (Integer.valueOf(paramMap.get(Type.multiplier).getValue().trim()) <= 0) {
         messages.add("The multiplier needs to be > 0");
-      } else {
+      }
+      else {
         if (Integer.valueOf(paramMap.get(Type.multiplier).getValue().trim()) > 10) {
           messages.add("The multiplier needs to be <= 10");
         }
@@ -213,94 +203,72 @@ public class Parameter
     return messages;
   }
 
-  public static String getParamsString (ParamMap map)
+  public static List<ParamEntry> getDefaultList (int minLength)
   {
-    StringBuilder sb = new StringBuilder();
-    for (Map.Entry<Type, Parameter> entry : map.entrySet()) {
-      sb.append(entry.getKey().toString()).append("=");
-      sb.append(entry.getValue().getValue()).append("\n");
-    }
-    return sb.toString();
-  }
+    List<ParamEntry> defaultList = new ArrayList<>();
 
-  public static String getDefaultString ()
-  {
-    StringBuilder sb = new StringBuilder();
-    Type[] types = {Type.brokers, Type.pomId, Type.bootstrapId, Type.seedId,
-        Type.location, Type.simStartDate, Type.multiplier};
+    Type[] types = {Type.brokers(), Type.bootstrapId(),
+        Type.seedId(), Type.location(), Type.simStartDate(), Type.multiplier()};
 
     for (Type type : types) {
-      sb.append(type.toString()).append("=")
-          .append(type.getDefault()).append("\n");
+      defaultList.add(new ParamEntry(type.name, type.getDefault()));
+    }
+    while (defaultList.size() < minLength) {
+      defaultList.add(new ParamEntry("", ""));
     }
 
-    return sb.toString();
+    return defaultList;
   }
 
-  public static List<String[]> getAvailableParams ()
+  public static List<ParamEntry> getParamList (ParamMap map, int minLength)
+  {
+    List<ParamEntry> paramList = new ArrayList<>();
+
+    for (Map.Entry<String, Parameter> entry : map.entrySet()) {
+      if (entry.getKey().equals(Type.pomId)) {
+        continue;
+      }
+      paramList.add(new ParamEntry(entry.getKey(), entry.getValue().value));
+    }
+    while (paramList.size() < minLength) {
+      paramList.add(new ParamEntry("", ""));
+    }
+
+    return paramList;
+  }
+
+  public static List<String[]> getAvailableServerParams (int pomId)
   {
     List<String[]> availableParams = new ArrayList<>();
 
-    for (Type type : Type.getStudyTypes()) {
-      if (type != Type.createTime) {
-        availableParams.add(new String[]{type.toString(),
-            type.preset, type.getDefault(), type.description});
+    for (Type type : Type.getTypes(pomId)) {
+      if (type.name.equals(Type.createTime) ||
+          type.name.equals(Type.startTime)) {
+        continue;
       }
+
+      availableParams.add(type.getStringArray());
     }
+
+    availableParams.sort(Comparator.comparing(p -> p[0]));
 
     return availableParams;
   }
 
-  public static List<String[]> getAvailableParamsOrg ()
+  public static List<String[]> getAvailableBaseParams ()
   {
     List<String[]> availableParams = new ArrayList<>();
-    List<Broker> brokers = Broker.getBrokerList();
-    List<Pom> poms = Pom.getPomList();
-    List<String> bootstraps = Bootstrap.getBootstraps();
-    List<Location> locations = Location.getLocationList();
 
-    for (Type type : Type.getStudyTypes()) {
-      if (type == Type.brokers && brokers.size() > 0) {
-        availableParams.add(new String[]{type.toString(),
-            brokers.toString().replace("[", "").replace("]", ""),
-            brokers.get(0).toString().split(" ")[0],
-            type.description});
+    for (Type type : Type.getBaseTypes()) {
+      if (type.name.equals(Type.createTime) ||
+          type.name.equals(Type.startTime)) {
+        continue;
       }
-      else if (type == Type.pomId && poms.size() > 0) {
-        availableParams.add(new String[]{type.toString(),
-            poms.toString().replace("[", "").replace("]", ""),
-            poms.get(0).toString().split(" ")[0],
-            type.description});
-      }
-      else if (type == Type.bootstrapId) {
-        availableParams.add(new String[]{type.toString(),
-            bootstraps.stream().map(
-                p -> p.replace("bootstrap-", "").replace(".xml", ""))
-                .collect(Collectors.joining(", ")),
-            bootstraps.get(0).replace("bootstrap-", "").replace(".xml", ""),
-            type.description});
-      }
-      else if (type == Type.location) {
-        availableParams.add(new String[]{type.toString(),
-            locations.stream().map(Location::getLocation)
-                .collect(Collectors.joining("<br/>")),
-            locations.get(0).getLocation(),
-            type.description});
-      }
-      else if (type == Type.simStartDate) {
-        availableParams.add(new String[]{type.toString(),
-            locations.stream().map(Location::getRange)
-                .collect(Collectors.joining("<br/>")),
-            locations.get(0).getRange(),
-            type.description});
-      }
-      else if (type == Type.createTime) {
-      }
-      else {
-        availableParams.add(
-            new String[]{type.toString(), "", type.preset, type.description});
-      }
+
+      availableParams.add(type.getStringArray());
     }
+
+    availableParams.sort(Comparator.comparing(p -> p[0]));
 
     return availableParams;
   }

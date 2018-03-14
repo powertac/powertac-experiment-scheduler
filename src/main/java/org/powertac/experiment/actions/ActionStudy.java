@@ -5,7 +5,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.powertac.experiment.beans.Study;
 import org.powertac.experiment.constants.Constants;
-import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
 import org.powertac.experiment.services.Utils;
 
@@ -86,9 +85,9 @@ public class ActionStudy
   {
     List<String[]> paramList = new ArrayList<>();
 
-    for (Type type : study.getParamMap().getSortedKeys()) {
+    for (String name : study.getParamMap().getSortedKeys()) {
       paramList.add(new String[]{
-          type.toString(), study.getParamMap().get(type).getValue()});
+          name, study.getParamMap().get(name).getValue()});
     }
 
     return paramList;

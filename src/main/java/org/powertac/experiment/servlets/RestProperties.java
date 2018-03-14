@@ -95,8 +95,9 @@ public class RestProperties extends HttpServlet
     ParamMap gameMap = game.getParamMap();
 
     // Add the Global params
+    // TODO Get from some list
     addParam(result, Prop.weatherServerURL,
-        gameMap.getValue(Type.server_weatherService_serverUrl));
+        gameMap.getValue("server.weatherService.serverUrl"));
     addParam(result, Prop.weatherLocation, gameMap.getValue(Type.location));
 
     Parameter locParam = gameMap.get(Type.location);
@@ -177,12 +178,14 @@ public class RestProperties extends HttpServlet
   private void addParamMap (StringBuilder result, ParamMap paramMap)
   {
     for (Parameter param : paramMap.values()) {
-      Type type = param.getType();
+      String name = param.getType();
 
-      if (type.toString().contains("_") &&
-          type != Type.server_weatherService_serverUrl &&
-          type != Type.common_competition_timezoneOffset) {
-        addParam(result, type.toString().replace("_", "."), param.getValue());
+      // TODO Get from some list
+      // TODO Check for dot?
+      if (name.contains(".") &&
+          !name.equals("server.weatherService.serverUrl") &&
+          !name.equals("common.competition.timezoneOffset")) {
+        addParam(result, name, param.getValue());
       }
     }
   }

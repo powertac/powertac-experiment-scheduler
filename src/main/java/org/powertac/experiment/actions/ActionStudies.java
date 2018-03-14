@@ -6,8 +6,10 @@ import org.hibernate.Transaction;
 import org.hibernate.exception.ConstraintViolationException;
 import org.powertac.experiment.beans.Experiment;
 import org.powertac.experiment.beans.Location;
+import org.powertac.experiment.beans.Pom;
 import org.powertac.experiment.beans.Study;
 import org.powertac.experiment.beans.User;
+import org.powertac.experiment.models.ParamEntry;
 import org.powertac.experiment.models.ParamMap;
 import org.powertac.experiment.models.Parameter;
 import org.powertac.experiment.models.Type;
@@ -17,14 +19,16 @@ import org.powertac.experiment.services.Utils;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
+import javax.faces.bean.SessionScoped;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
 
 @ManagedBean
-public class ActionStudies
+@SessionScoped
+public class ActionStudies implements Serializable
 {
   private static Logger log = Utils.getLogger();
 
@@ -32,6 +36,9 @@ public class ActionStudies
   {
     values, csv
   }
+
+  // Amount of parameters to edit
+  private static int minimumLength = 15;
 
   private int studyId;
   private String studyName;
@@ -41,12 +48,14 @@ public class ActionStudies
   private String variableMax;
   private String variableStep;
   private String valuesType;
-  private String paramString;
+  private int selectedPomId;
 
   private List<Location> availableLocations;
   private List<Study> studyList;
   private List<String[]> paramsGlobal;
-  private List<String[]> paramsServer;
+  private List<Pom> pomList;
+
+  private List<ParamEntry> paramList;
 
   public ActionStudies ()
   {
@@ -55,6 +64,8 @@ public class ActionStudies
   @PostConstruct
   public void afterPropertiesSet ()
   {
+    resetValues();
+
     if (studyList == null) {
       studyList = Study.getAllStudies();
     }
@@ -63,21 +74,9 @@ public class ActionStudies
       availableLocations = Location.getLocationList();
     }
 
-    if (paramsGlobal == null || paramsServer == null) {
-      paramsGlobal = new ArrayList<>();
-      paramsServer = new ArrayList<>();
-      List<String[]> availableParams = Parameter.getAvailableParams();
-      for (String[] param : availableParams) {
-        if (param[0].contains("_")) {
-          paramsServer.add(param);
-        }
-        else {
-          paramsGlobal.add(param);
-        }
-      }
+    if (paramsGlobal == null) {
+      paramsGlobal = Parameter.getAvailableBaseParams();
     }
-
-    resetValues();
   }
 
   private void resetValues ()
@@ -90,13 +89,14 @@ public class ActionStudies
     variableMax = "";
     variableStep = "";
     valuesType = RadioOptions.values.toString();
-    paramString = Parameter.getDefaultString();
+    pomList = Pom.getPomList();
+    selectedPomId = pomList.get(pomList.size() - 1).getPomId();
+    paramList = Parameter.getDefaultList(minimumLength);
   }
 
   public void createOrUpdateStudy ()
   {
-    ParamMap paramMap = createParamMap(paramString);
-    ensureVariableValue();
+    ParamMap paramMap = createParamMap(paramList);
 
     if (!inputsValidated(paramMap)) {
       if (studyId != -1) {
@@ -109,11 +109,11 @@ public class ActionStudies
     saveStudy(paramMap, type, studyId);
   }
 
-  private void ensureVariableValue ()
+  private void ensureVariableValue (int pomId)
   {
     if (valuesType.equals(RadioOptions.csv.toString())) {
-      variableValue = String.join(",", ParamMap.parseMinMaxStep(
-          variableName, variableMin, variableMax, variableStep));
+      variableValue = ParamMap.parseMinMaxStep(
+          variableName, variableMin, variableMax, variableStep, pomId);
     }
     else {
       variableValue = variableValue.replace(" ", "");
@@ -188,7 +188,8 @@ public class ActionStudies
     variableName = study.getVariableName();
     variableValue = study.getVariableValue();
     valuesType = RadioOptions.values.toString();
-    paramString = Parameter.getParamsString(study.getParamMap());
+    selectedPomId = study.getParamMap().getPomId();
+    paramList = Parameter.getParamList(study.getParamMap(), minimumLength);
 
     log.info("Editing study : " + studyId + " " + study.getName());
   }
@@ -249,9 +250,8 @@ public class ActionStudies
     study.setVariableValue(variableValue);
 
     ParamMap studyParamMap = study.getParamMap();
-
     // First remove params that aren't there anymore
-    for (Iterator<Type> it = studyParamMap.keySet().iterator(); it.hasNext(); ) {
+    for (Iterator<String> it = studyParamMap.keySet().iterator(); it.hasNext(); ) {
       if (paramMap.get(it.next()) == null) {
         it.remove();
       }
@@ -264,37 +264,51 @@ public class ActionStudies
     study.ensureParameters(studyParamMap, availableLocations.get(0));
   }
 
-  private ParamMap createParamMap (String paramString)
+  private ParamMap createParamMap (List<ParamEntry> paramList)
   {
     ParamMap paramMap = new ParamMap();
 
-    String[] lines = paramString.replace(" ", "").split("\n");
-    for (String line : lines) {
-      try {
-        String[] parts = line.split("=");
-        if (parts.length != 2) {
-          log.warn("Ignoring parameter, length of '=' != 2 : " +
-              Arrays.toString(parts));
-          Utils.growlMessage("Parameter removed because '=' isn't allowed in " +
-              "line :<br/>" + line);
-          continue;
-        }
+    for (ParamEntry entry : paramList) {
+      if (entry.isEmpty()) {
+        continue;
+      }
 
-        String value = parts[1].trim();
-        Type type = Type.valueOf(parts[0].trim());
-        paramMap.put(type, new Parameter(null, type, value));
+      String name = entry.getName().trim();
+      String value = entry.getValue().trim();
+
+      if (value.isEmpty()) {
+        log.warn("Ignoring parameter " + name + ", value is empty");
+        Utils.growlMessage("Ignoring parameter " + name + ", value is empty");
       }
-      catch (Exception e) {
-        System.out.println("\ncreateParamMap\n" + e.getMessage());
+      else if (name.isEmpty()) {
+        log.warn("Ignoring parameter, name is empty : value is " + value);
+        Utils.growlMessage("Ignoring parameter, name is empty : value is " + value);
       }
+
+      paramMap.put(name, new Parameter(null, name, value));
     }
+
+    Pom pom = pomList.get(selectedPomId - 1);
+    paramMap.put(Type.pomId,
+        new Parameter(null, Type.pomId, String.valueOf(pom.getPomId())));
 
     return paramMap;
   }
 
   private boolean inputsValidated (ParamMap paramMap)
   {
-    List<String> messages = ParamMap.validateVariable(variableName, variableValue);
+    List<String> messages = new ArrayList<>();
+    int pomId = paramMap.getPomId();
+
+    // Ensure the variableValue
+    ensureVariableValue(pomId);
+
+    // Validate the variableName and non-emptyness of variableValue
+    ParamMap.validateVariableName(messages, variableName, variableValue, pomId);
+
+    // Validate the variableValue
+    ParamMap.validateVariable(messages, variableName, variableValue, pomId);
+
     List<String> studyMapMessages = Parameter.validateStudyMap(paramMap);
     messages.addAll(studyMapMessages);
 
@@ -322,7 +336,12 @@ public class ActionStudies
 
   public List<String[]> getParamsServer ()
   {
-    return paramsServer;
+    return Parameter.getAvailableServerParams(selectedPomId);
+  }
+
+  public List<Pom> getPomList ()
+  {
+    return pomList;
   }
   //</editor-fold>
 
@@ -345,6 +364,16 @@ public class ActionStudies
   public void setStudyName (String studyName)
   {
     this.studyName = studyName.trim();
+  }
+
+  public int getSelectedPomId ()
+  {
+    return selectedPomId;
+  }
+
+  public void setSelectedPomId (int selectedPomId)
+  {
+    this.selectedPomId = selectedPomId;
   }
 
   public String getVariableValue ()
@@ -412,14 +441,14 @@ public class ActionStudies
     return RadioOptions.values();
   }
 
-  public String getParamString ()
+  public List<ParamEntry> getParamList ()
   {
-    return paramString;
+    return paramList;
   }
 
-  public void setParamString (String paramString)
+  public void setParamList (List<ParamEntry> paramList)
   {
-    this.paramString = paramString.trim();
+    this.paramList = paramList;
   }
   //</editor-fold>
 }

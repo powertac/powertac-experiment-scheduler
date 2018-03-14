@@ -3,123 +3,58 @@ package org.powertac.experiment.models;
 import org.powertac.experiment.beans.Broker;
 import org.powertac.experiment.beans.Location;
 import org.powertac.experiment.beans.Pom;
+import org.powertac.experiment.services.Properties;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedHashSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 
-// TODO This isn't perfect for configuring
-public enum Type
+public class Type
 {
-  brokers(Integer.class, null, "Comma separated list of broker ids", false),
-  pomId(Integer.class),
-  bootstrapId(Integer.class),
-  seedId(Integer.class, null, "If not set, no seed file will be used"), // TODO Fix this
-  location(String.class),
-  simStartDate(String.class, null,
-      "If not set, a random value will be used for all games in the set"), // TODO Fix this
-  createTime(String.class),
-  multiplier(Integer.class, null, "Games per experiment"),
-  gameLength(Integer.class, null, "If not set, this will be randomized"),
-  startTime(String.class),
-
-  // TODO Get presets from server.properties
-  accounting_accountingService_bankInterest(Double.class, null),
-  accounting_accountingService_maxInterest(Double.class, 0.12),
-  accounting_accountingService_minInterest(Double.class, 0.04),
-  auctioneer_auctionService_defaultClearingPrice(Double.class, 40),
-  auctioneer_auctionService_defaultMargin(Double.class, 0.2),
-  auctioneer_auctionService_sellerSurplusRatio(Double.class, 0.5),
-  balancemkt_balancingMarketService_balancingCost(Double.class, null),
-  balancemkt_balancingMarketService_balancingCostMax(Double.class, -0.006),
-  balancemkt_balancingMarketService_balancingCostMin(Double.class, -0.002),
-  balancemkt_balancingMarketService_defaultSpotPrice(Double.class, 75),
-  balancemkt_balancingMarketService_pMinusPrime(Double.class, -0.000001),
-  balancemkt_balancingMarketService_pPlusPrime(Double.class, 0.000001),
-  balancemkt_balancingMarketService_rmPremium(Double.class, 1.8),
-  balancemkt_balancingMarketService_settlementProcess(String.class, "static"),
-  common_competition_bootstrapDiscardedTimeslots(Integer.class, 24),
-  common_competition_bootstrapTimeslotCount(Integer.class, 336),
-  common_competition_deactivateTimeslotsAhead(Integer.class, 1),
-  common_competition_expectedTimeslotCount(Integer.class, 1440),
-  common_competition_latitude(Integer.class, 45),
-  common_competition_minimumOrderQuantity(Double.class, 0.01),
-  common_competition_minimumTimeslotCount(Integer.class, 1320),
-  common_competition_simulationBaseTime(String.class, "40096"),
-  common_competition_simulationTimeslotSeconds(Integer.class, 5),
-  common_competition_timeslotLength(Integer.class, 60),
-  common_competition_timeslotsOpen(Integer.class, 24),
-  common_competition_timezoneOffset(Integer.class, -6),
-  distributionutility_distributionUtilityService_distributionFee(Double.class, -0.01),
-  distributionutility_distributionUtilityService_distributionFeeMax(Double.class, -0.03),
-  distributionutility_distributionUtilityService_distributionFeeMin(Double.class, -0.003),
-  distributionutility_distributionUtilityService_useCapacityFee(Double.class, 1),
-  distributionutility_distributionUtilityService_useMeterFee(Double.class, 1),
-  distributionutility_distributionUtilityService_useTransportFee(Double.class, 0),
-  du_defaultBrokerService_buyLimitPriceMax(Double.class, -5),
-  du_defaultBrokerService_buyLimitPriceMin(Double.class, -100),
-  du_defaultBrokerService_consumptionRate(Double.class, -0.5),
-  du_defaultBrokerService_initialBidKWh(Double.class, 1000),
-  du_defaultBrokerService_productionRate(Double.class, 0.01),
-  du_defaultBrokerService_sellLimitPriceMax(Double.class, 30),
-  du_defaultBrokerService_sellLimitPriceMin(Double.class, 0.1),
-  // TODO How do we handle String arrays?
-  /* genco_cpGenco_coefficients(String.class, "[0.005,0.02,14]"), */
-  genco_cpGenco_minQuantity(Double.class, 150),
-  householdcustomer_householdCustomerService_configFile1(String.class, "VillageType1.properties"),
-  officecomplexcustomer_officeComplexCustomerService_configFile1(String.class, "OfficeComplexType1.properties"),
-  // server_bootstrapDataFile(String.class, "boot-data.xml"),
-  server_competitionControlService_bootstrapTimeslotMillis(Long.class, 400),
-  //server_competitionControlService_loginTimeout(Integer.class, 0),
-  server_competitionControlService_stackTraceDepth(Integer.class, 6),
-  //server_jmsManagementService_jmsBrokerUrl(String.class, "tcp://localhost:61616"),
-  server_logfileSuffix(String.class, "default"),
-  server_simulationClockControl_minAgentWindow(Integer.class, 2000),
-  server_weatherService_blocking(Boolean.class, 0),
-  server_weatherService_forecastHorizon(Integer.class, 24),
-  server_weatherService_serverUrl(String.class, "http://wolf31.ict.eur.nl:8080/WeatherServer/faces/index.xhtml"),
-  //server_weatherService_weatherLocation(String.class, "rotterdam"),
-  server_weatherService_weatherReqInterval(Integer.class, 24),
-  tariffmarket_tariffMarketService_maxPublicationFee(Double.class, -5000),
-  tariffmarket_TariffMarketService_maxRevocationFee(Double.class, -500),
-  tariffmarket_tariffMarketService_minPublicationFee(Double.class, -1000),
-  tariffmarket_TariffMarketService_minRevocationFee(Double.class, -100),
-  tariffmarket_tariffMarketService_publicationFee(Double.class, null),
-  tariffmarket_tariffMarketService_publicationInterval(Integer.class, 6),
-  tariffmarket_tariffMarketService_publicationOffset(Integer.class, 1),
-  tariffmarket_TariffMarketService_revocationFee(Double.class, null);
-
+  public String name;
   public Class clazz;
   public String preset;
   public String description;
+  // TODO Check if needed
   public boolean exclusive = true;
 
-  Type (Object... attributes)
+  private Type (Object... attributes)
   {
-    if (attributes.length > 0) {
-      this.clazz = (Class) attributes[0];
-    }
-    if (attributes.length > 1 && attributes[1] != null) {
-      this.preset = attributes[1].toString();
-    }
+    this.name = (String) attributes[0];
+    this.clazz = (Class) attributes[1];
     if (attributes.length > 2 && attributes[2] != null) {
-      this.description = attributes[2].toString();
+      this.preset = attributes[2].toString();
     }
-    if (attributes.length > 3) {
-      this.exclusive = (Boolean) attributes[3];
+    if (attributes.length > 3 && attributes[3] != null) {
+      this.description = attributes[3].toString();
+    }
+    if (attributes.length > 4) {
+      this.exclusive = (Boolean) attributes[4];
     }
   }
 
   public String getDefault ()
   {
-    if (this == brokers || this == pomId) {
+    if (name.equals(brokers) || name.equals(pomId)) {
       return preset.split(" ")[0];
     }
 
-    if (this == bootstrapId || this == seedId || this == location) {
+    if (name.equals(bootstrapId) ||
+        name.equals(seedId) ||
+        name.equals(location)) {
       String result = preset.split(",")[0];
 
       // Needed for boot files
@@ -131,89 +66,343 @@ public enum Type
       return result;
     }
 
-    if (this == simStartDate) {
+    if (name.equals(simStartDate)) {
       return preset.split(" - ")[0];
     }
 
-    if (this == multiplier) {
+    if (name.equals(multiplier)) {
       return "2";
     }
 
-    if (this == server_weatherService_serverUrl) {
+    if (name.equals("server.weatherService.serverUrl")) {
       return preset;
     }
 
     return "";
   }
 
-  public void setPreset (String preset)
-  {
-    this.preset = preset;
+  public String[] getStringArray () {
+    return new String[]{name, preset, getDefault(), description};
   }
 
-  public static Set<Type> getStudyTypes ()
-  {
-    lazyLoad();
+  //////////////////////////////////////////////////////////////////////////////
+  // Static stuff
+  //////////////////////////////////////////////////////////////////////////////
+  private static String scriptName = "dump_configs.sh";
+  private static String typesName = "types.txt"; // Defined in script
 
-    Set<Type> setTypes = new LinkedHashSet<>(Arrays.asList(Type.values()));
-    setTypes.remove(startTime);
-    return setTypes;
+  public static String brokers = "brokers";
+  public static String pomId = "pomId";
+  public static String bootstrapId = "bootstrapId";
+  public static String seedId = "seedId";
+  public static String location = "location";
+  public static String simStartDate = "simStartDate";
+  public static String createTime = "createTime";
+  public static String startTime = "startTime";
+  public static String multiplier = "multiplier";
+  public static String gameLength = "gameLength";
+
+  private static Map<String, Type> baseTypes = null;
+  private static Map<Integer, Map<String, Type>> pomTypesMap = null;
+
+  public static Type get (int pomId, String typeString)
+  {
+    Map<String, Type> pomMap = pomTypesMap.get(pomId);
+    if (pomMap != null) {
+      return pomMap.get(typeString);
+    }
+    return null;
   }
 
-  public static Set<Type> getExperimentTypes ()
+  public static Type pomId ()
   {
-    Set<Type> experimentTypes = new LinkedHashSet<>(Arrays.asList(Type.values()));
-    experimentTypes.remove(createTime);
-    experimentTypes.remove(startTime);
-    return experimentTypes;
+    return baseTypes.get(pomId);
   }
 
-  public static List<Type> getGameTypes ()
+  public static Type gameLength ()
   {
-    return Arrays.asList(Type.pomId, Type.bootstrapId,
-        Type.location, Type.simStartDate, Type.gameLength, Type.seedId);
+    return baseTypes.get(gameLength);
   }
 
-  private static boolean lazyLoaded;
-
-  private static void lazyLoad ()
+  public static Type createTime ()
   {
-    if (lazyLoaded) {
+    return baseTypes.get(createTime);
+  }
+
+  public static Type startTime ()
+  {
+    return baseTypes.get(startTime);
+  }
+
+  public static Type location ()
+  {
+    return baseTypes.get(location);
+  }
+
+  public static Type simStartDate ()
+  {
+    return baseTypes.get(simStartDate);
+  }
+
+  public static Type bootstrapId ()
+  {
+    return baseTypes.get(bootstrapId);
+  }
+
+  public static Type seedId ()
+  {
+    return baseTypes.get(seedId);
+  }
+
+  public static Type brokers ()
+  {
+    return baseTypes.get(brokers);
+  }
+
+  public static Type multiplier ()
+  {
+    return baseTypes.get(multiplier);
+  }
+
+  private static void loadAll ()
+  {
+    if (baseTypes != null) {
       return;
     }
 
-    lazyLoaded = true;
+    loadStatic();
+    loadGlobal();
+    loadServerTypes();
+  }
 
+  private static void loadStatic ()
+  {
+    baseTypes = new HashMap<>();
+
+    baseTypes.put(brokers, new Type(brokers, Integer.class, null,
+        "Comma separated list of broker ids", false));
+    baseTypes.put(pomId, new Type(pomId, Integer.class));
+    baseTypes.put(bootstrapId, new Type(bootstrapId, Integer.class));
+    baseTypes.put(seedId, new Type(seedId, Integer.class, null,
+        "If not set, no seed file will be used"));
+    baseTypes.put(location, new Type(location, String.class));
+    baseTypes.put(simStartDate, new Type(simStartDate, String.class, null,
+        "If not set, a random value will be used for all games in the set"));
+    baseTypes.put(createTime, new Type(createTime, String.class));
+    baseTypes.put(multiplier, new Type(multiplier, Integer.class, null,
+        "Games per experiment"));
+    baseTypes.put(gameLength, new Type(gameLength, Integer.class, null,
+        "If not set, this will be randomized"));
+    baseTypes.put(startTime, new Type(startTime, String.class));
+  }
+
+  private static void loadGlobal ()
+  {
     List<Broker> brokerList = Broker.getBrokerList();
     if (brokerList.size() > 0) {
-      brokers.setPreset(brokerList.toString().replace("[", "").replace("]", ""));
+      baseTypes.get(brokers).preset =
+          brokerList.stream().map(Broker::toString)
+              .collect(Collectors.joining(", "));
     }
 
     List<Pom> pomList = Pom.getPomList();
     if (pomList.size() > 0) {
-      pomId.setPreset(pomList.toString().replace("[", "").replace("]", ""));
+      baseTypes.get(pomId).preset =
+          pomList.toString().replace("[", "").replace("]", "");
     }
 
     List<String> bootList = Bootstrap.getBootstraps();
     if (bootList.size() > 0) {
-      bootstrapId.setPreset(bootList.stream().map(
-          p -> p.replace("bootstrap-", "").replace(".xml", ""))
-          .collect(Collectors.joining(", ")));
+      baseTypes.get(bootstrapId).preset = bootList.stream()
+          .map(p -> p.replace("bootstrap-", "").replace(".xml", ""))
+          .collect(Collectors.joining(", "));
     }
 
     List<String> seedList = Seed.getSeeds();
     if (seedList.size() > 0) {
-      seedId.setPreset(seedList.stream().map(
-          p -> p.replace("powertac-sim-", "").replace(".state", ""))
-          .collect(Collectors.joining(", ")));
+      baseTypes.get(seedId).preset = seedList.stream()
+          .map(p -> p.replace("powertac-sim-", "").replace(".state", ""))
+          .collect(Collectors.joining(", "));
     }
 
     List<Location> locList = Location.getLocationList();
     if (locList.size() > 0) {
-      location.setPreset(locList.stream().map(Location::getLocation)
-          .collect(Collectors.joining(", ")));
+      baseTypes.get(location).preset = locList.stream()
+          .map(Location::getLocation)
+          .collect(Collectors.joining(", "));
+
+      baseTypes.get(simStartDate).preset = locList.stream()
+          .map(Location::getRange)
+          .collect(Collectors.joining(", "));
     }
-    simStartDate.setPreset(locList.stream().map(Location::getRange)
-        .collect(Collectors.joining(", ")));
+  }
+
+  private static void loadServerTypes ()
+  {
+    pomTypesMap = new HashMap<>();
+
+    for (Pom pom : Pom.getPomList()) {
+      int pomId = pom.getPomId();
+
+      try {
+        Map<String, Type> pomTypes = loadPomTypes(pom);
+        pomTypesMap.put(pomId, pomTypes);
+      }
+      catch (IOException | ClassNotFoundException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  private static Map<String, Type> loadPomTypes (Pom pom)
+      throws IOException, ClassNotFoundException
+  {
+    // Copy files to (newly created) temp dir
+    Path tempDir = Files.createTempDirectory("tmp");
+    copyFiles(tempDir, pom);
+
+    // Run config dump
+    dumpConfigs(tempDir);
+
+    // Parse output
+    Map<String, Type> pomTypes = parseConfigs(tempDir);
+
+    // Remove temp dir
+    tempDir.toFile().deleteOnExit();
+
+    return pomTypes;
+  }
+
+  private static void copyFiles (Path tempDir, Pom pom) throws IOException
+  {
+    String pomLocation = Properties.getProperties().getProperty("pomLocation");
+
+    // Copy (and rename) pom to temp dir
+    Path targetPath = tempDir.resolve("pom.xml");
+    Path sourcePath = Paths.get(pomLocation, pom.pomFileName());
+    Files.copy(sourcePath, targetPath);
+
+    // Copy script to temp dir
+    targetPath = tempDir.resolve(scriptName);
+    sourcePath = Paths.get(pomLocation, scriptName);
+    Files.copy(sourcePath, targetPath);
+  }
+
+  private static void dumpConfigs (Path tempDir) throws IOException
+  {
+    Runtime rt = Runtime.getRuntime();
+    String[] commands = {"./" + scriptName};
+    Process proc = rt.exec(commands, null, tempDir.toFile());
+
+    BufferedReader stdInput = new BufferedReader(new
+        InputStreamReader(proc.getInputStream()));
+    BufferedReader stdError = new BufferedReader(new
+        InputStreamReader(proc.getErrorStream()));
+
+    // Wait until output is ready
+    while (stdInput.readLine() != null || stdError.readLine() != null) {
+
+    }
+  }
+
+  private static Map<String, Type> parseConfigs (Path tempDir)
+      throws IOException, ClassNotFoundException
+  {
+    Path path = tempDir.resolve(typesName);
+    FileReader fileReader = new FileReader(path.toFile());
+    BufferedReader bufferedReader = new BufferedReader(fileReader);
+    List<String> lines = new ArrayList<>();
+    String tmp;
+    while ((tmp = bufferedReader.readLine()) != null) {
+      lines.add(tmp);
+    }
+    fileReader.close();
+
+    // Don't allow the user to set these, ES will handle them
+    List<String> disallowed = Arrays.asList(
+        "server.bootstrapDataFile",
+        "server.competitionControlService.loginTimeout",
+        "server.jmsManagementService.jmsBrokerUrl");
+
+    Map<String, Type> pomTypes = new HashMap<>();
+    String[] annotations = new String[3];
+    int count = 0;
+    for (String line : lines) {
+      if (!line.startsWith("# ")) {
+        String name = line.split("=")[0].trim();
+        String preset = line.split("=")[1].trim();
+        // Get the class from the annotation or infer from preset
+        Class clazz = annotations[1] != null ?
+            Class.forName(getClassName(annotations[1])) : findClass(preset);
+        // Get the description if present
+        String description = annotations[0] != null ?
+            annotations[0].split(":")[1].trim() : null;
+
+        if (!disallowed.contains(name)) {
+          pomTypes.put(name, new Type(name, clazz, preset, description));
+        }
+        annotations = new String[3];
+        count = 0;
+      }
+      else {
+        annotations[count++] = line;
+      }
+    }
+
+    return pomTypes;
+  }
+
+  private static String getClassName (String classLine)
+  {
+    String typeName = classLine.split(":")[1].trim();
+    if (typeName.equals("List")) {
+      return "java.lang.String";
+    }
+    else {
+      return "java.lang." + typeName;
+    }
+  }
+
+  private static Class findClass (String value)
+  {
+    try {
+      Integer.valueOf(value);
+      return Integer.class;
+    }
+    catch (NumberFormatException ignored) {
+      try {
+        Double.valueOf(value);
+        return Double.class;
+      }
+      catch (NumberFormatException ignored2) {
+        return String.class;
+      }
+    }
+  }
+
+  public static Set<Type> getTypes (int pomId)
+  {
+    Map<String, Type> pomTypes = pomTypesMap.get(pomId);
+
+    if (pomTypes == null) {
+      return new HashSet<>();
+    }
+
+    return new HashSet<>(pomTypes.values());
+  }
+
+  public static Set<Type> getBaseTypes ()
+  {
+    return new HashSet<>(baseTypes.values());
+  }
+
+  public static List<Type> getGameTypes ()
+  {
+    return Arrays.asList(Type.pomId(), Type.bootstrapId(), Type.location(),
+        Type.simStartDate(), Type.gameLength(), Type.seedId());
+  }
+
+  static {
+    loadAll();
   }
 }

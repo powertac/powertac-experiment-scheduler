@@ -16,7 +16,6 @@
 package org.powertac.experiment.services;
 
 import org.apache.log4j.Logger;
-import org.powertac.experiment.models.Type;
 import org.springframework.stereotype.Component;
 
 import java.io.File;

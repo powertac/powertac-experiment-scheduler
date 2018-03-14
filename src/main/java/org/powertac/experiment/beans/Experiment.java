@@ -49,7 +49,7 @@ public class Experiment implements MapOwner
   private Study study;
   private ExperimentState state = ExperimentState.pending;
 
-  private Map<Type, Parameter> parameterMap = new HashMap<>();
+  private Map<String, Parameter> parameterMap = new HashMap<>();
   private ParamMap paramMap = new ParamMap(this, parameterMap);
   private Map<Integer, Game> gameMap = new HashMap<>();
 
@@ -57,26 +57,30 @@ public class Experiment implements MapOwner
   {
   }
 
-  public void copyParameters (ParamMap setMap, String name, String value)
+  public void copyParameters (ParamMap paramMap, String name, String value)
   {
     // Copy the params appropriate for experiments
-    for (Type type : Type.getExperimentTypes()) {
-      if (setMap.get(type) != null) {
-        paramMap.createParameter(type, setMap.get(type).getValue());
+    for (String key : paramMap.keySet()) {
+      if (key.equals(Type.createTime) || key.equals(Type.startTime)) {
+        continue;
+      }
+
+      if (paramMap.get(key) != null) {
+        this.paramMap.createParameter(key, paramMap.get(key).getValue());
       }
     }
 
     // Copy the variable
-    if (!name.isEmpty()) {
-      Type type = Type.valueOf(name);
-      paramMap.setOrUpdateValue(type, value, type.exclusive);
+    Type type = Type.get(paramMap.getPomId(), name);
+    if (!name.isEmpty() && type != null) {
+      this.paramMap.setOrUpdateValue(name, value, type.exclusive);
     }
   }
 
   public void createGames (Session session, int experimentCounter)
   {
     List<Broker> brokers = Broker.getBrokersByIds(session,
-        paramMap.get(Type.brokers).getValue());
+        paramMap.get(Type.brokers().name).getValue());
 
     int multiplier = Integer.valueOf(paramMap.get(Type.multiplier).getValue());
     for (int i = 0; i < multiplier; i++) {
@@ -184,12 +188,12 @@ public class Experiment implements MapOwner
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "experimentId")
   @MapKey(name = "type")
-  private Map<Type, Parameter> getParameterMap ()
+  private Map<String, Parameter> getParameterMap ()
   {
     return parameterMap;
   }
 
-  private void setParameterMap (Map<Type, Parameter> parameterMap)
+  private void setParameterMap (Map<String, Parameter> parameterMap)
   {
     this.parameterMap = parameterMap;
     paramMap = new ParamMap(this, parameterMap);

@@ -89,7 +89,8 @@ public class RunBoot
 
       log.info("Jenkins request to bootstrap game: " + game.getGameId());
       game.setState(GameState.boot_in_progress);
-      game.getParamMap().setOrUpdateValue(Type.startTime, Utils.dateToStringFull(Utils.offsetDate()));
+      game.getParamMap().setOrUpdateValue(Type.startTime,
+          Utils.dateToStringFull(Utils.offsetDate()));
       log.debug(String.format("Update game: %s to %s", game.getGameId(),
           GameState.boot_in_progress));
     }

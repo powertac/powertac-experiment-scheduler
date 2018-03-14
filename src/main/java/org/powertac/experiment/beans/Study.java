@@ -52,7 +52,7 @@ public class Study implements MapOwner
   private String name;
   private StudyState state = StudyState.pending;
 
-  private Map<Type, Parameter> parameterMap = new HashMap<>();
+  private Map<String, Parameter> parameterMap = new HashMap<>();
   private ParamMap paramMap = new ParamMap(this, parameterMap);
   private String variableName;
   private String variableValue;
@@ -206,16 +206,16 @@ public class Study implements MapOwner
   public void ensureParameters (ParamMap setMap, Location location)
   {
     // Guarantee required params
-    if (setMap.get(Type.gameLength) == null) {
-      setMap.put(Type.gameLength, new Parameter(this, Type.gameLength,
+    if (setMap.get(Type.gameLength().name) == null) {
+      setMap.put(Type.gameLength().name, new Parameter(this, Type.gameLength,
           Game.computeGameLength()));
     }
-    if (setMap.get(Type.location) == null) {
-      setMap.put(Type.location, new Parameter(this, Type.location,
+    if (setMap.get(Type.location().name) == null) {
+      setMap.put(Type.location().name, new Parameter(this, Type.location,
           location.getLocation()));
     }
-    if (setMap.get(Type.simStartDate) == null) {
-      setMap.put(Type.simStartDate, new Parameter(this, Type.simStartDate,
+    if (setMap.get(Type.simStartDate().name) == null) {
+      setMap.put(Type.simStartDate().name, new Parameter(this, Type.simStartDate,
           Utils.dateToStringSmall(location.getDateFrom())));
     }
     if (setMap.get(Type.bootstrapId) == null) {
@@ -226,8 +226,10 @@ public class Study implements MapOwner
       return;
     }
 
-    if (Type.valueOf(variableName).exclusive) {
-      setMap.remove(Type.valueOf(variableName));
+    // TODO Check this
+    Type type = Type.get(setMap.getPomId(), variableName);
+    if (type == null || type.exclusive) {
+      setMap.remove(variableName);
     }
   }
 
@@ -280,12 +282,12 @@ public class Study implements MapOwner
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "studyId")
   @MapKey(name = "type")
-  private Map<Type, Parameter> getParameterMap ()
+  private Map<String, Parameter> getParameterMap ()
   {
     return parameterMap;
   }
 
-  private void setParameterMap (Map<Type, Parameter> parameterMap)
+  private void setParameterMap (Map<String, Parameter> parameterMap)
   {
     this.parameterMap = parameterMap;
     paramMap = new ParamMap(this, parameterMap);

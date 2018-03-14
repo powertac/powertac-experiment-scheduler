@@ -9,6 +9,7 @@ import org.powertac.experiment.beans.Machine;
 import org.powertac.experiment.constants.Constants;
 import org.powertac.experiment.jobs.RunBoot;
 import org.powertac.experiment.jobs.RunSim;
+import org.powertac.experiment.models.Parameter;
 import org.powertac.experiment.states.ExperimentState;
 import org.powertac.experiment.states.GameState;
 import org.springframework.beans.factory.InitializingBean;
@@ -82,6 +83,9 @@ public class Scheduler implements InitializingBean
     }
 
     log.info("Starting Scheduler...");
+
+    // Trigger a load of all types
+    Parameter.getAvailableBaseParams();
 
     lastSchedulerRun = System.currentTimeMillis();
 

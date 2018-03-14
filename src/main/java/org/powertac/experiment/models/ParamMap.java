@@ -5,7 +5,7 @@ import org.powertac.experiment.services.Utils;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,9 +18,9 @@ import java.util.stream.IntStream;
 public class ParamMap
 {
   private MapOwner parent;
-  private Map<Type, Parameter> map;
+  private Map<String, Parameter> map;
 
-  public ParamMap (MapOwner parent, Map<Type, Parameter> paramMap)
+  public ParamMap (MapOwner parent, Map<String, Parameter> paramMap)
   {
     this.parent = parent;
     if (paramMap != null) {
@@ -36,20 +36,20 @@ public class ParamMap
     this(null, null);
   }
 
-  public void createParameter (Type type, Object value)
+  public void createParameter (String type, Object value)
   {
     Parameter parameter = new Parameter(parent, type, value);
     map.put(type, parameter);
   }
 
-  public String getValue (Type type)
+  public String getValue (String name)
   {
-    Parameter param = map.get(type);
+    Parameter param = map.get(name);
     if (param != null) {
       return param.getValue();
     }
     else {
-      return type.getDefault();
+      return Type.get(getPomId(), name).getDefault();
     }
   }
 
@@ -77,7 +77,7 @@ public class ParamMap
 
   public void setStartTime (Date date)
   {
-    Parameter startTime = map.get(Type.startTime);
+    Parameter startTime = map.get(Type.startTime().name);
     String newValue = Utils.dateToStringFull(date);
     if (startTime == null) {
       startTime = new Parameter(this, Type.startTime, newValue);
@@ -86,10 +86,10 @@ public class ParamMap
       startTime.setValue(newValue);
     }
 
-    map.put(Type.startTime, startTime);
+    map.put(Type.startTime().name, startTime);
   }
 
-  public void setOrUpdateValue (Type type, String value, boolean exclusive)
+  public void setOrUpdateValue (String type, String value, boolean exclusive)
   {
     Parameter param = map.get(type);
     if (param == null) {
@@ -103,30 +103,30 @@ public class ParamMap
     }
   }
 
-  public void setOrUpdateValue (Type type, String value)
+  public void setOrUpdateValue (String type, String value)
   {
     setOrUpdateValue(type, value, true);
   }
 
-  public List<Type> getSortedKeys ()
+  public List<String> getSortedKeys ()
   {
-    List<Type> keys = new ArrayList<>(map.keySet());
-    keys.sort(Comparator.comparing(Enum::toString));
+    List<String> keys = new ArrayList<>(map.keySet());
+    Collections.sort(keys);
     return keys;
   }
 
   //<editor-fold desc="Proxy methods for the map">
-  public Parameter get (Type type)
+  public Parameter get (String name)
   {
-    return map.get(type);
+    return map.get(name);
   }
 
-  public void put (Type type, Parameter parameter)
+  public void put (String name, Parameter parameter)
   {
-    map.put(type, parameter);
+    map.put(name, parameter);
   }
 
-  public Set<Type> keySet ()
+  public Set<String> keySet ()
   {
     return map.keySet();
   }
@@ -136,14 +136,14 @@ public class ParamMap
     return map.values();
   }
 
-  public Set<Map.Entry<Type, Parameter>> entrySet ()
+  public Set<Map.Entry<String, Parameter>> entrySet ()
   {
     return map.entrySet();
   }
 
-  public Parameter remove (Type type)
+  public Parameter remove (String name)
   {
-    return map.remove(type);
+    return map.remove(name);
   }
 
   @Override
@@ -154,26 +154,24 @@ public class ParamMap
   //</editor-fold>
 
   //<editor-fold desc="Methods for Variable">
-  public static List<String> validateVariable (String name, String value)
+  public static void validateVariableName (List<String> messages,
+                                           String name, String value, int pomId)
   {
-    List<String> messages = new ArrayList<>();
     if (name.isEmpty() || value.isEmpty()) {
-      Utils.growlMessage("Warn",
-          "No variable given, there will only be 1 experiment!");
-      return messages;
+      messages.add("No variable given, there will only be 1 experiment!");
     }
 
     // Check if variableName is allowed
-    Type variable;
-    try {
-      variable = Type.valueOf(name);
+    else if (Type.get(pomId, name) == null) {
+      messages.add("Variable name is not allowed!");
     }
-    catch (Exception ignored) {
-      messages.add("Variable name isn't an allowed type!");
-      return messages;
-    }
+  }
 
+  public static void validateVariable (List<String> messages,
+                                       String name, String value, int pomId)
+  {
     // Check if variableValues are allowed
+    Type variable = Type.get(pomId, name);
     for (String v : value.split(",")) {
       try {
         if (variable.clazz == Integer.class) {
@@ -182,25 +180,28 @@ public class ParamMap
         else if (variable.clazz == Double.class) {
           Double.parseDouble(v);
         }
+        // No need to check for String
       }
       catch (Exception ignored) {
         messages.add("Variable format isn't correct");
         break;
       }
     }
-
-    return messages;
   }
 
-  public static List<String> parseMinMaxStep (String name, String minString,
-                                              String maxString, String stepString)
+  public static String parseMinMaxStep (String name, String minString,
+                                        String maxString, String stepString,
+                                        int pomId)
   {
-    Type type = Type.valueOf(name.trim());
-    if (type.clazz == Integer.class) {
+    Type type = Type.get(pomId, name.trim());
+    if (type == null) {
+      return "";
+    }
+    else if (type.clazz == Integer.class) {
       int min = Integer.parseInt(minString);
       int max = Integer.parseInt(maxString);
       int step = Integer.parseInt(stepString);
-      return getIntValues(min, max, step);
+      return String.join(",", getIntValues(min, max, step));
     }
     else if (type.clazz == Double.class) {
       double min = Double.parseDouble(minString);
@@ -211,10 +212,10 @@ public class ParamMap
           stepString.split("\\.") : minString.split("\\.");
       int digits = parts.length > 1 ? parts[1].length() : 0;
 
-      return getDoubleValues(min, max, step, digits);
+      return String.join(",", getDoubleValues(min, max, step, digits));
     }
 
-    return new ArrayList<>();
+    return "";
   }
 
   private static List<String> getIntValues (int min, int max, int step)

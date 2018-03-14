@@ -93,7 +93,6 @@ public class RestDownload extends HttpServlet
       }
 
       response.flushBuffer();
-      in.close();
     }
     catch (Exception exc) {
       log.warn("File not found for downloading : " + downloadFile);

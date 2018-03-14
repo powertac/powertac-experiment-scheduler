@@ -2,8 +2,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:h="http://java.sun.com/jsf/html"
+<html xmlns:h="http://java.sun.com/jsf/html"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
@@ -65,11 +64,9 @@
         <br/>
       </h:form>
 
-      <h:form rendered="#{user.isResearcher()}">
-        <br/>
-
+      <h:form id="paramsForm" rendered="#{user.isResearcher()}">
         <h3 class="withButton">Parameters Global</h3>
-        <t:dataTable id="paramsGlobal" border="1"
+        <t:dataTable id="paramsGlobal" border="1" styleClass="global_table"
                      value="#{actionStudies.paramsGlobal}" var="a">
           <t:column>
             <f:facet name="header">Key</f:facet>
@@ -92,9 +89,10 @@
           </t:column>
         </t:dataTable>
         <br/>
+        <br/>
 
         <h3 class="withButton">Parameters Server</h3>
-        <t:dataTable id="paramsServer" border="1"
+        <t:dataTable id="paramsServer" border="1" styleClass="server_table"
                      value="#{actionStudies.paramsServer}" var="a">
           <t:column>
             <f:facet name="header">Key</f:facet>
@@ -142,6 +140,18 @@
         </h:panelGroup>
 
         <h:panelGroup>
+          <h:outputLabel for="nameInput" value="Select Pom File"
+                         styleClass="study_label1"/>
+          <h:selectOneMenu id="poms" styleClass="select_wide"
+                           value="#{actionStudies.selectedPomId}">
+            <f:selectItems value="#{actionStudies.pomList}" var="p"
+                           itemValue="#{p.pomId}" itemLabel="#{p.pomName}"/>
+            <f:ajax execute="paramsForm" render="paramsForm:paramsServer"/>
+          </h:selectOneMenu>
+          <br/>
+        </h:panelGroup>
+
+        <h:panelGroup>
           <h:outputLabel for="variableName" value="Variable name"
                          styleClass="study_label1"/>
           <h:inputText id="variableName" styleClass="input_huge"
@@ -179,11 +189,16 @@
         </p:outputPanel>
 
         <h:panelGroup>
-          <h:outputLabel for="contentInput"
-                         value="Parameters for all experiments / games"/>
-          <h:inputTextarea id="contentInput"
-                           value="#{actionStudies.paramString}"
-                           styleClass="contentInput"/>
+          <h:outputText value="Parameters for all experiments / games"/>
+          <br/>
+
+          <ui:repeat value="#{actionStudies.paramList}" var="entry">
+            <h:panelGroup>
+              <h:inputText value="#{entry.name}" styleClass="param_input"/>
+              <h:inputText value="#{entry.value}" styleClass="param_input"/>
+              <br/>
+            </h:panelGroup>
+          </ui:repeat>
           <br/>
         </h:panelGroup>
 
@@ -191,8 +206,7 @@
             value="#{actionStudies.studyId == -1 ? 'Create' : 'Update'}"
             action="#{actionStudies.createOrUpdateStudy()}"/>
 
-        <h:inputHidden id="studyId"
-                       value="#{actionStudies.studyId}"/>
+        <h:inputHidden id="studyId" value="#{actionStudies.studyId}"/>
         <br/>
       </h:form>
 

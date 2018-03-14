@@ -54,7 +54,7 @@ public class Game implements Serializable, MapOwner
   private Machine machine = null;
   private String serverQueue = "";
 
-  private Map<Type, Parameter> parameterMap = new HashMap<>();
+  private Map<String, Parameter> parameterMap = new HashMap<>();
   private ParamMap paramMap = new ParamMap(this, parameterMap);
   private Map<Integer, Agent> agentMap = new HashMap<>();
 
@@ -240,7 +240,7 @@ public class Game implements Serializable, MapOwner
     ParamMap experimentMap = experiment.getParamMap();
     ParamMap gameMap = game.getParamMap();
     for (Type type : Type.getGameTypes()) {
-      gameMap.createParameter(type, experimentMap.get(type).getValue());
+      gameMap.createParameter(type.name, experimentMap.get(type.name).getValue());
     }
   }
 
@@ -248,12 +248,12 @@ public class Game implements Serializable, MapOwner
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "gameId")
   @MapKey(name = "type")
-  private Map<Type, Parameter> getParameterMap ()
+  private Map<String, Parameter> getParameterMap ()
   {
     return parameterMap;
   }
 
-  private void setParameterMap (Map<Type, Parameter> parameterMap)
+  private void setParameterMap (Map<String, Parameter> parameterMap)
   {
     this.parameterMap = parameterMap;
     paramMap= new ParamMap(this, parameterMap);

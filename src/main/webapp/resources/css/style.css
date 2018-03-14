@@ -113,7 +113,8 @@ table.fixed_height td {
 }
 
 select.select_wide {
-  width: 250px;
+  width: 400px;
+  margin-bottom: 10px;
 }
 
 input[type="text"].input_huge {
@@ -147,6 +148,12 @@ input[type="text"].input_small {
   font-family: 'Times New Roman', Times, serif;
   font-size: 16px;
   text-align: left;
+}
+
+.param_input {
+  width: 400px;
+  display: inline-block;
+  font-size: 16px;
 }
 
 #page {
@@ -188,6 +195,16 @@ input[type="text"].input_small {
   width: 1000px;
   vertical-align: middle;
 }
+
+.global_table tbody tr td:first-child {
+  min-width: 150px;
+}
+
+.server_table tbody tr td:first-child{
+  max-width: 512px;
+  overflow-wrap: break-word;
+}
+
 
 textarea.contentInput {
   width: 960px;

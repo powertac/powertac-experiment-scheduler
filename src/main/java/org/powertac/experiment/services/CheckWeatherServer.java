@@ -2,7 +2,6 @@ package org.powertac.experiment.services;
 
 import org.apache.log4j.Logger;
 import org.powertac.experiment.beans.Location;
-import org.powertac.experiment.models.Type;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class CheckWeatherServer implements InitializingBean
     this.properties = properties;
   }
 
-  public void afterPropertiesSet () throws Exception
+  public void afterPropertiesSet ()
   {
     Executors.newScheduledThreadPool(1)
         .schedule(this::lazyStart, 10, TimeUnit.SECONDS);
@@ -101,7 +100,7 @@ public class CheckWeatherServer implements InitializingBean
       log.debug("Server Timeout or Network Error");
 
       if (!mailed) {
-        String msg = "Server Timeour or Network Error during Weather Server ping";
+        String msg = "Server Timeout or Network Error during Weather Server ping";
         Utils.sendMail("WeatherServer Timeout or Network Error", msg,
             properties.getProperty("scheduler.mailRecipient"));
         mailed = true;
@@ -156,7 +155,7 @@ public class CheckWeatherServer implements InitializingBean
   }
 
   @PreDestroy
-  private void cleanUp () throws Exception
+  private void cleanUp ()
   {
     if (weatherServerCheckerTimer != null) {
       weatherServerCheckerTimer.cancel();
@@ -172,7 +171,9 @@ public class CheckWeatherServer implements InitializingBean
   //<editor-fold desc="Setters and Getters">
   public String getWeatherServerLocation ()
   {
-    return Type.server_weatherService_serverUrl.preset;
+    // TODO
+    return "http://wolf31.ict.eur.nl:8080/WeatherServer/faces/index.xhtml";
+    // return Type.get("server.weatherService.serverUrl").preset;
   }
 
   public String getStatus ()
