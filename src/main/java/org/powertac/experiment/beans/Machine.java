@@ -84,7 +84,7 @@ public class Machine
 
             Machine machine = machines.remove(displayName);
             if (machine == null) {
-              log.warn("Machine " + displayName + " doesn't exist in the TS");
+              log.warn("Machine " + displayName + " doesn't exist in the ES");
               continue;
             }
 

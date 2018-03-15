@@ -91,7 +91,7 @@ public class ActionStudies implements Serializable
     valuesType = RadioOptions.values.toString();
     pomList = Pom.getPomList();
     selectedPomId = pomList.get(pomList.size() - 1).getPomId();
-    paramList = Parameter.getDefaultList(minimumLength);
+    paramList = Parameter.getDefaultList();
   }
 
   public void createOrUpdateStudy ()
@@ -156,8 +156,8 @@ public class ActionStudies implements Serializable
       session.saveOrUpdate(study);
       transaction.commit();
     }
-    catch (ConstraintViolationException ignored) {
-      ignored.printStackTrace();
+    catch (ConstraintViolationException cve) {
+      cve.printStackTrace();
       transaction.rollback();
       Utils.growlMessage("The Study name already exists");
     }
@@ -266,27 +266,7 @@ public class ActionStudies implements Serializable
 
   private ParamMap createParamMap (List<ParamEntry> paramList)
   {
-    ParamMap paramMap = new ParamMap();
-
-    for (ParamEntry entry : paramList) {
-      if (entry.isEmpty()) {
-        continue;
-      }
-
-      String name = entry.getName().trim();
-      String value = entry.getValue().trim();
-
-      if (value.isEmpty()) {
-        log.warn("Ignoring parameter " + name + ", value is empty");
-        Utils.growlMessage("Ignoring parameter " + name + ", value is empty");
-      }
-      else if (name.isEmpty()) {
-        log.warn("Ignoring parameter, name is empty : value is " + value);
-        Utils.growlMessage("Ignoring parameter, name is empty : value is " + value);
-      }
-
-      paramMap.put(name, new Parameter(null, name, value));
-    }
+    ParamMap paramMap = ParamEntry.createParamMap(paramList, log);
 
     Pom pom = pomList.get(selectedPomId - 1);
     paramMap.put(Type.pomId,
@@ -297,19 +277,15 @@ public class ActionStudies implements Serializable
 
   private boolean inputsValidated (ParamMap paramMap)
   {
-    List<String> messages = new ArrayList<>();
-    int pomId = paramMap.getPomId();
-
     // Ensure the variableValue
+    int pomId = paramMap.getPomId();
     ensureVariableValue(pomId);
 
-    // Validate the variableName and non-emptyness of variableValue
-    ParamMap.validateVariableName(messages, variableName, variableValue, pomId);
-
-    // Validate the variableValue
+    // Validate the variableValue and variableValue
+    List<String> messages = new ArrayList<>();
     ParamMap.validateVariable(messages, variableName, variableValue, pomId);
 
-    List<String> studyMapMessages = Parameter.validateStudyMap(paramMap);
+    List<String> studyMapMessages = paramMap.validateStudyMap(variableName);
     messages.addAll(studyMapMessages);
 
     if (studyName.trim().isEmpty()) {
@@ -443,6 +419,10 @@ public class ActionStudies implements Serializable
 
   public List<ParamEntry> getParamList ()
   {
+    while (paramList.size() < minimumLength) {
+      paramList.add(new ParamEntry("", ""));
+    }
+
     return paramList;
   }
 

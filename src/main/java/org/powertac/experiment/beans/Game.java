@@ -165,9 +165,8 @@ public class Game implements Serializable, MapOwner
   @Transient
   public String getBootLocation ()
   {
-    String bootId = getParamMap().getValue(Type.bootstrapId);
-    return String.format("%sboot.%s.xml",
-        properties.getProperty("bootLocation"), bootId);
+    String logLoc = properties.getProperty("bootLocation");
+    return String.format("%s%s.xml", logLoc, gameName);
   }
 
   // Computes a random game length as outlined in the game specification
@@ -218,8 +217,46 @@ public class Game implements Serializable, MapOwner
     return (Game) query.uniqueResult();
   }
 
-  public static Game createGame (Experiment experiment, int experimentCounter,
-                                 int gameCounter)
+  public static Game createGame (Experiment experiment,
+                                 String variableName, String variableValue,
+                                 int experimentCounter, int gameCounter)
+  {
+    String gameName = String.format("%s_%d_%d",
+        experiment.getStudy().getName(), experimentCounter, gameCounter);
+
+    Game game = new Game();
+    game.setGameName(gameName);
+    game.setExperiment(experiment);
+    game.setServerQueue(Utils.createQueueName());
+
+    // Always generate boot for first game in experiment, or when not re-using
+    boolean reuseBoot = experiment.getParamMap().getReuseBoot();
+    if (gameCounter == 1 || !reuseBoot) {
+      game.setState(GameState.boot_pending);
+    }
+    else {
+      game.setState(GameState.boot_complete);
+    }
+    game.cloneParams(experiment, variableName, variableValue);
+
+    log.info(String.format("Created game (%s) : %s = %s",
+        game.getGameId(), variableName, variableValue));
+
+    return game;
+  }
+
+  private void cloneParams (Experiment experiment,
+                            String variableName, String variableValue)
+  {
+    ParamMap experimentMap = experiment.getParamMap();
+    for (Type type : Type.getGameTypes()) {
+      paramMap.createParameter(type.name, experimentMap.get(type.name).getValue());
+    }
+    paramMap.createParameter(variableName, variableValue);
+  }
+
+  public static Game createGameTODO (Experiment experiment, int experimentCounter,
+                                     int gameCounter)
   {
     String gameName = String.format("%s_%d_%d",
         experiment.getStudy().getName(), experimentCounter, gameCounter);
@@ -230,12 +267,12 @@ public class Game implements Serializable, MapOwner
     game.setServerQueue(Utils.createQueueName());
     game.setState(GameState.boot_complete);
 
-    Game.cloneParams(experiment, game);
+    Game.cloneParamsTODO(experiment, game);
 
     return game;
   }
 
-  private static void cloneParams (Experiment experiment, Game game)
+  private static void cloneParamsTODO (Experiment experiment, Game game)
   {
     ParamMap experimentMap = experiment.getParamMap();
     ParamMap gameMap = game.getParamMap();

@@ -28,8 +28,6 @@ public class Type
   public Class clazz;
   public String preset;
   public String description;
-  // TODO Check if needed
-  public boolean exclusive = true;
 
   private Type (Object... attributes)
   {
@@ -41,9 +39,6 @@ public class Type
     if (attributes.length > 3 && attributes[3] != null) {
       this.description = attributes[3].toString();
     }
-    if (attributes.length > 4) {
-      this.exclusive = (Boolean) attributes[4];
-    }
   }
 
   public String getDefault ()
@@ -52,13 +47,8 @@ public class Type
       return preset.split(" ")[0];
     }
 
-    if (name.equals(bootstrapId) ||
-        name.equals(seedId) ||
-        name.equals(location)) {
+    if (name.equals(seedId) || name.equals(location)) {
       String result = preset.split(",")[0];
-
-      // Needed for boot files
-      result = result.replace("boot.", "").replace(".xml", "");
 
       // Needed for seed files
       result = result.replace("seed.", "").replace(".state", "");
@@ -70,18 +60,17 @@ public class Type
       return preset.split(" - ")[0];
     }
 
-    if (name.equals(multiplier)) {
-      return "2";
-    }
-
-    if (name.equals("server.weatherService.serverUrl")) {
+    if (name.equals("server.weatherService.serverUrl") ||
+        name.equals(reuseBoot) ||
+        name.equals(multiplier)) {
       return preset;
     }
 
     return "";
   }
 
-  public String[] getStringArray () {
+  public String[] getStringArray ()
+  {
     return new String[]{name, preset, getDefault(), description};
   }
 
@@ -93,7 +82,7 @@ public class Type
 
   public static String brokers = "brokers";
   public static String pomId = "pomId";
-  public static String bootstrapId = "bootstrapId";
+  public static String reuseBoot = "reuseBoot";
   public static String seedId = "seedId";
   public static String location = "location";
   public static String simStartDate = "simStartDate";
@@ -112,6 +101,11 @@ public class Type
       return pomMap.get(typeString);
     }
     return null;
+  }
+
+  public static Type getBaseType (String typeString)
+  {
+    return baseTypes.get(typeString);
   }
 
   public static Type pomId ()
@@ -144,9 +138,9 @@ public class Type
     return baseTypes.get(simStartDate);
   }
 
-  public static Type bootstrapId ()
+  public static Type reuseBoot ()
   {
-    return baseTypes.get(bootstrapId);
+    return baseTypes.get(reuseBoot);
   }
 
   public static Type seedId ()
@@ -180,17 +174,18 @@ public class Type
     baseTypes = new HashMap<>();
 
     baseTypes.put(brokers, new Type(brokers, Integer.class, null,
-        "Comma separated list of broker ids", false));
+        "Comma separated list of broker ids"));
     baseTypes.put(pomId, new Type(pomId, Integer.class));
-    baseTypes.put(bootstrapId, new Type(bootstrapId, Integer.class));
+    baseTypes.put(reuseBoot, new Type(reuseBoot, Boolean.class, true,
+        "If TRUE, all games in a single experiment uses the same boot files"));
     baseTypes.put(seedId, new Type(seedId, Integer.class, null,
         "If not set, no seed file will be used"));
     baseTypes.put(location, new Type(location, String.class));
     baseTypes.put(simStartDate, new Type(simStartDate, String.class, null,
         "If not set, a random value will be used for all games in the set"));
     baseTypes.put(createTime, new Type(createTime, String.class));
-    baseTypes.put(multiplier, new Type(multiplier, Integer.class, null,
-        "Games per experiment"));
+    baseTypes.put(multiplier, new Type(multiplier, Integer.class, 2,
+        "Experiments per study (only used when no seed set is given)"));
     baseTypes.put(gameLength, new Type(gameLength, Integer.class, null,
         "If not set, this will be randomized"));
     baseTypes.put(startTime, new Type(startTime, String.class));
@@ -209,13 +204,6 @@ public class Type
     if (pomList.size() > 0) {
       baseTypes.get(pomId).preset =
           pomList.toString().replace("[", "").replace("]", "");
-    }
-
-    List<String> bootList = Bootstrap.getBootstraps();
-    if (bootList.size() > 0) {
-      baseTypes.get(bootstrapId).preset = bootList.stream()
-          .map(p -> p.replace("bootstrap-", "").replace(".xml", ""))
-          .collect(Collectors.joining(", "));
     }
 
     List<String> seedList = Seed.getSeeds();
@@ -396,9 +384,15 @@ public class Type
     return new HashSet<>(baseTypes.values());
   }
 
+  // These types can also be used as variable
+  public static List<String> getVariableBaseTypes ()
+  {
+    return Arrays.asList(brokers, location, simStartDate, gameLength);
+  }
+
   public static List<Type> getGameTypes ()
   {
-    return Arrays.asList(Type.pomId(), Type.bootstrapId(), Type.location(),
+    return Arrays.asList(Type.pomId(), Type.location(),
         Type.simStartDate(), Type.gameLength(), Type.seedId());
   }
 

@@ -57,7 +57,7 @@ public class Experiment implements MapOwner
   {
   }
 
-  public void copyParameters (ParamMap paramMap, String name, String value)
+  public void copyParameters (ParamMap paramMap)
   {
     // Copy the params appropriate for experiments
     for (String key : paramMap.keySet()) {
@@ -69,12 +69,6 @@ public class Experiment implements MapOwner
         this.paramMap.createParameter(key, paramMap.get(key).getValue());
       }
     }
-
-    // Copy the variable
-    Type type = Type.get(paramMap.getPomId(), name);
-    if (!name.isEmpty() && type != null) {
-      this.paramMap.setOrUpdateValue(name, value, type.exclusive);
-    }
   }
 
   public void createGames (Session session, int experimentCounter)
@@ -82,9 +76,33 @@ public class Experiment implements MapOwner
     List<Broker> brokers = Broker.getBrokersByIds(session,
         paramMap.get(Type.brokers().name).getValue());
 
+    // Create a game for each part of the variable
+    String variableName = study.getVariableName();
+    String variableValue = study.getVariableValue();
+
+    int gameCounter = 1;
+    for (String value : variableValue.split(",")) {
+      Game game = Game.createGame(
+          this, variableName, value, experimentCounter, gameCounter++);
+      session.saveOrUpdate(game);
+
+      for (Broker broker : brokers) {
+        Agent agent = Agent.createAgent(broker, game);
+        game.getAgentMap().put(broker.getBrokerId(), agent);
+        session.save(agent);
+        log.info(String.format("Added broker: %s", broker.getBrokerId()));
+      }
+    }
+  }
+
+  public void createGamesTODO (Session session, int experimentCounter)
+  {
+    List<Broker> brokers = Broker.getBrokersByIds(session,
+        paramMap.get(Type.brokers().name).getValue());
+
     int multiplier = Integer.valueOf(paramMap.get(Type.multiplier).getValue());
     for (int i = 0; i < multiplier; i++) {
-      Game game = Game.createGame(this, experimentCounter, i + 1);
+      Game game = Game.createGameTODO(this, experimentCounter, i + 1);
       session.saveOrUpdate(game);
       log.info(String.format("Created game : %s", game.getGameId()));
 

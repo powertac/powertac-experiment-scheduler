@@ -155,7 +155,7 @@ public class ActionOverview implements InitializingBean
     try {
       if (game.getState() == GameState.boot_failed) {
         log.info("Resetting boot game: " + gameId);
-        game.setState(GameState.boot_complete);
+        game.setState(GameState.boot_pending);
       }
       if (game.getState() == GameState.game_failed) {
         log.info("Resetting sim game: " + gameId);

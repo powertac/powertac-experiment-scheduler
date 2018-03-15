@@ -2,7 +2,6 @@ package org.powertac.experiment.models;
 
 import org.powertac.experiment.beans.Experiment;
 import org.powertac.experiment.beans.Game;
-import org.powertac.experiment.beans.Location;
 import org.powertac.experiment.beans.Study;
 
 import javax.persistence.Column;
@@ -131,90 +130,15 @@ public class Parameter
   //</editor-fold>
 
   //<editor-fold desc="Static stuff">
-  // TODO Move to ParamMap
-  public static List<String> validateStudyMap (ParamMap paramMap)
-  {
-    List<String> messages = new ArrayList<>();
-
-    try {
-      if (Integer.valueOf(paramMap.get(Type.pomId).getValue().trim()) <= 0) {
-        messages.add("The pomId needs to be > 0");
-      }
-    }
-    catch (Exception ignored) {
-      messages.add("The pomId needs to be > 0");
-    }
-
-    try {
-      if (Integer.valueOf(paramMap.get(Type.multiplier).getValue().trim()) <= 0) {
-        messages.add("The multiplier needs to be > 0");
-      }
-      else {
-        if (Integer.valueOf(paramMap.get(Type.multiplier).getValue().trim()) > 10) {
-          messages.add("The multiplier needs to be <= 10");
-        }
-      }
-    }
-    catch (Exception ignored) {
-      messages.add("The multiplier needs to be > 0");
-    }
-
-    if (paramMap.get(Type.brokers) == null) {
-      messages.add("Brokers need to be defined");
-    }
-    else {
-      try {
-        String[] strArray = paramMap.get(Type.brokers).getValue().split(",");
-        for (String aStrArray : strArray) {
-          if (Integer.valueOf(aStrArray) <= 0) {
-            messages.add("BrokerIds need to be > 0");
-          }
-        }
-        if (strArray.length == 0) {
-          messages.add("Brokers need to be defined");
-        }
-      }
-      catch (Exception ignored) {
-        messages.add("Brokers definition not correct\nneeds to be ints separated by ','");
-      }
-    }
-
-    // TODO Check simStartDate, bootstrapId, gameLength
-    try {
-      List<String> locations = Location.getLocationNames();
-      if (!locations.contains(paramMap.get(Type.location).getValue().trim())) {
-        messages.add("The location isn't valid");
-      }
-    }
-    catch (Exception ignored) {
-      messages.add("Location needs to be defined");
-    }
-
-    try {
-      List<String> locations = Location.getLocationNames();
-      if (!locations.contains(paramMap.get(Type.location).getValue().trim())) {
-        messages.add("The location isn't valid");
-      }
-    }
-    catch (Exception ignored) {
-      messages.add("Location needs to be defined");
-    }
-
-    return messages;
-  }
-
-  public static List<ParamEntry> getDefaultList (int minLength)
+  public static List<ParamEntry> getDefaultList ()
   {
     List<ParamEntry> defaultList = new ArrayList<>();
 
-    Type[] types = {Type.brokers(), Type.bootstrapId(),
+    Type[] types = {Type.brokers(), Type.reuseBoot(),
         Type.seedId(), Type.location(), Type.simStartDate(), Type.multiplier()};
 
     for (Type type : types) {
       defaultList.add(new ParamEntry(type.name, type.getDefault()));
-    }
-    while (defaultList.size() < minLength) {
-      defaultList.add(new ParamEntry("", ""));
     }
 
     return defaultList;

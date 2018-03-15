@@ -12,10 +12,10 @@ import org.powertac.experiment.services.HibernateUtil;
 import org.powertac.experiment.services.JenkinsConnector;
 import org.powertac.experiment.services.Properties;
 import org.powertac.experiment.services.Utils;
-import org.powertac.experiment.states.ExperimentState;
 import org.powertac.experiment.states.GameState;
 import org.powertac.experiment.states.MachineState;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -41,6 +41,11 @@ public class RunSim
     session = HibernateUtil.getSession();
     Transaction transaction = session.beginTransaction();
     try {
+      if (!checkFiles()) {
+        transaction.rollback();
+        return;
+      }
+
       if (!checkBrokers()) {
         transaction.rollback();
         return;
@@ -54,7 +59,6 @@ public class RunSim
       setMachineToGame();
       startJob();
       session.merge(game);
-      game.getExperiment().setState(ExperimentState.in_progress);
       transaction.commit();
     }
     catch (Exception e) {
@@ -65,6 +69,22 @@ public class RunSim
     finally {
       session.close();
     }
+  }
+
+  private boolean checkFiles ()
+  {
+    // Check if bootFile exists
+    File file = new File(game.getBootLocation());
+    if (!file.exists() || file.isDirectory()) {
+      log.info(String.format(
+          "Game: %s (experiment %s) reports boot file not present",
+          game.getGameId(), game.getExperiment().getExperimentId()));
+      return false;
+    }
+
+    // Check if seedFile exists (if needed)
+
+    return true;
   }
 
   private boolean checkBrokers ()

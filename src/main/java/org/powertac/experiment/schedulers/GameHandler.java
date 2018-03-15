@@ -10,6 +10,9 @@ import org.powertac.experiment.services.Utils;
 import org.powertac.experiment.states.AgentState;
 import org.powertac.experiment.states.GameState;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 
 
@@ -26,7 +29,7 @@ public class GameHandler
     this.gameId = game.getGameId();
   }
 
-  public void handleStatus (Session session, String status) throws Exception
+  public void handleStatus (Session session, String status)
   {
     GameState newState = GameState.valueOf(status);
     if (newState.equals(game.getState())) {
@@ -48,6 +51,27 @@ public class GameHandler
           session.update(agent);
         }
         MemStore.removeGameInfo(gameId);
+
+        // Duplicate boot files for other games in this experiment
+        boolean reuse = game.getExperiment().getParamMap().getReuseBoot();
+        boolean first = "1".equals(game.getGameName().replaceAll(".*_", ""));
+        if (reuse && first) {
+          for (Game otherGame : game.getExperiment().getGameMap().values()) {
+            if (otherGame.getGameId().equals(game.getGameId())) {
+              continue;
+            }
+
+            try {
+              Files.copy(new File(game.getBootLocation()).toPath(),
+                  new File(otherGame.getBootLocation()).toPath());
+              log.info(String.format("Copied boot for game: %s ", otherGame.getGameName()));
+            }
+            catch (IOException ioe) {
+              ioe.printStackTrace();
+            }
+          }
+        }
+
         break;
 
       case boot_failed:

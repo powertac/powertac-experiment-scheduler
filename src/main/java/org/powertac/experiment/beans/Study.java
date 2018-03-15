@@ -34,8 +34,10 @@ import javax.persistence.Transient;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -157,23 +159,32 @@ public class Study implements MapOwner
       String startDate =
           Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
       paramMap.setOrUpdateValue(Type.createTime, startDate);
-      int experimentCounter = 1;
-      for (String value : variableValue.split(",")) {
-        createExperiment(session, experimentCounter++, variableName, value);
+
+      Set<Object> seedSet = new HashSet<>();
+
+      // Create experiments based length of seed-set
+      if (seedSet.size() > 0) {
+      }
+
+      // Create experiments based on multiplier
+      else {
+        int multiplier = Integer.valueOf(paramMap.getValue(Type.multiplier));
+        for (int counter = 1; counter < multiplier; counter++) {
+          createExperiment(session, counter);
+        }
       }
     }
 
     state = StudyState.in_progress;
   }
 
-  private void createExperiment (Session session, int experimentCounter,
-                                 String variableName, String variableValue)
+  private void createExperiment (Session session, int counter)
   {
     Experiment experiment = new Experiment();
     experiment.setStudy(this);
-    experiment.copyParameters(paramMap, variableName, variableValue);
+    experiment.copyParameters(paramMap);
     session.saveOrUpdate(experiment);
-    experiment.createGames(session, experimentCounter);
+    experiment.createGames(session, counter);
 
     log.info(String.format("Created experiment: %s", experiment.getExperimentId()));
   }
@@ -218,8 +229,8 @@ public class Study implements MapOwner
       setMap.put(Type.simStartDate().name, new Parameter(this, Type.simStartDate,
           Utils.dateToStringSmall(location.getDateFrom())));
     }
-    if (setMap.get(Type.bootstrapId) == null) {
-      setMap.put(Type.bootstrapId, new Parameter(this, Type.bootstrapId, "1"));
+    if (setMap.get(Type.reuseBoot().name) == null) {
+      setMap.put(Type.reuseBoot().name, new Parameter(this, Type.reuseBoot, true));
     }
 
     if (variableName.isEmpty()) {
@@ -228,7 +239,7 @@ public class Study implements MapOwner
 
     // TODO Check this
     Type type = Type.get(setMap.getPomId(), variableName);
-    if (type == null || type.exclusive) {
+    if (type == null) {
       setMap.remove(variableName);
     }
   }

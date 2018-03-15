@@ -171,9 +171,7 @@ public class CheckWeatherServer implements InitializingBean
   //<editor-fold desc="Setters and Getters">
   public String getWeatherServerLocation ()
   {
-    // TODO
     return "http://wolf31.ict.eur.nl:8080/WeatherServer/faces/index.xhtml";
-    // return Type.get("server.weatherService.serverUrl").preset;
   }
 
   public String getStatus ()

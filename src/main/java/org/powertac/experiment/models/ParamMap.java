@@ -1,5 +1,6 @@
 package org.powertac.experiment.models;
 
+import org.powertac.experiment.beans.Location;
 import org.powertac.experiment.services.Utils;
 
 import java.text.DecimalFormat;
@@ -75,6 +76,17 @@ public class ParamMap
     }
   }
 
+  public boolean getReuseBoot ()
+  {
+    Parameter reuseBoot = map.get(Type.reuseBoot);
+    try {
+      return Boolean.valueOf(reuseBoot.getValue());
+    }
+    catch (Exception ignored) {
+      return true;
+    }
+  }
+
   public void setStartTime (Date date)
   {
     Parameter startTime = map.get(Type.startTime().name);
@@ -89,23 +101,15 @@ public class ParamMap
     map.put(Type.startTime().name, startTime);
   }
 
-  public void setOrUpdateValue (String type, String value, boolean exclusive)
+  public void setOrUpdateValue (String type, String value)
   {
     Parameter param = map.get(type);
     if (param == null) {
       map.put(type, new Parameter(parent, type, value));
     }
-    else if (exclusive) {
+    else {
       param.setValue(value);
     }
-    else {
-      param.setValue(param.getValue() + "," + value);
-    }
-  }
-
-  public void setOrUpdateValue (String type, String value)
-  {
-    setOrUpdateValue(type, value, true);
   }
 
   public List<String> getSortedKeys ()
@@ -113,6 +117,92 @@ public class ParamMap
     List<String> keys = new ArrayList<>(map.keySet());
     Collections.sort(keys);
     return keys;
+  }
+
+  public List<String> validateStudyMap (String variableName)
+  {
+    List<String> messages = new ArrayList<>();
+    checkValidPomId(messages);
+    checkValidMultiplier(messages);
+    checkValidBrokers(messages, variableName);
+    checkValidLocation(messages, variableName);
+
+    // TODO Check simStartDate, bootstrapId, gameLength ??
+
+    return messages;
+  }
+
+  private void checkValidPomId (List<String> messages)
+  {
+    try {
+      if (Integer.valueOf(get(Type.pomId).getValue().trim()) <= 0) {
+        messages.add("The pomId needs to be > 0");
+      }
+    }
+    catch (Exception ignored) {
+      messages.add("The pomId needs to be > 0");
+    }
+  }
+
+  private void checkValidMultiplier (List<String> messages)
+  {
+    try {
+      if (Integer.valueOf(get(Type.multiplier).getValue().trim()) <= 0) {
+        messages.add("The multiplier needs to be > 0");
+      }
+      else {
+        if (Integer.valueOf(get(Type.multiplier).getValue().trim()) > 10) {
+          messages.add("The multiplier needs to be <= 10");
+        }
+      }
+    }
+    catch (Exception ignored) {
+      messages.add("The multiplier needs to be > 0");
+    }
+  }
+
+  private void checkValidBrokers (List<String> messages, String variableName)
+  {
+    if (Type.brokers.equals(variableName)) {
+      return;
+    }
+
+    if (get(Type.brokers) == null) {
+      messages.add("Brokers need to be defined");
+    }
+    else {
+      try {
+        String[] strArray = get(Type.brokers).getValue().split(",");
+        for (String aStrArray : strArray) {
+          if (Integer.valueOf(aStrArray) <= 0) {
+            messages.add("BrokerIds need to be > 0");
+          }
+        }
+        if (strArray.length == 0) {
+          messages.add("Brokers need to be defined");
+        }
+      }
+      catch (Exception ignored) {
+        messages.add("Brokers definition not correct\nneeds to be ints separated by ','");
+      }
+    }
+  }
+
+  private void checkValidLocation (List<String> messages, String variableName)
+  {
+    if (Type.location.equals(variableName)) {
+      return;
+    }
+
+    try {
+      List<String> locations = Location.getLocationNames();
+      if (!locations.contains(get(Type.location).getValue().trim())) {
+        messages.add("The location isn't valid");
+      }
+    }
+    catch (Exception ignored) {
+      messages.add("Location needs to be defined");
+    }
   }
 
   //<editor-fold desc="Proxy methods for the map">
@@ -154,24 +244,26 @@ public class ParamMap
   //</editor-fold>
 
   //<editor-fold desc="Methods for Variable">
-  public static void validateVariableName (List<String> messages,
-                                           String name, String value, int pomId)
-  {
-    if (name.isEmpty() || value.isEmpty()) {
-      messages.add("No variable given, there will only be 1 experiment!");
-    }
-
-    // Check if variableName is allowed
-    else if (Type.get(pomId, name) == null) {
-      messages.add("Variable name is not allowed!");
-    }
-  }
-
   public static void validateVariable (List<String> messages,
                                        String name, String value, int pomId)
   {
-    // Check if variableValues are allowed
+    if (name.isEmpty() || value.isEmpty()) {
+      messages.add("No variable given, there will only be 1 experiment!");
+      return;
+    }
+
     Type variable = Type.get(pomId, name);
+    if (Type.getVariableBaseTypes().contains(name)) {
+      variable = Type.getBaseType(name);
+    }
+
+    // Check if variableName is allowed
+    if (variable == null) {
+      messages.add("Variable name '" + name + "' is not allowed!");
+      return;
+    }
+
+    // Check if variableValues are allowed
     for (String v : value.split(",")) {
       try {
         if (variable.clazz == Integer.class) {
@@ -179,6 +271,9 @@ public class ParamMap
         }
         else if (variable.clazz == Double.class) {
           Double.parseDouble(v);
+        }
+        else if (variable.clazz == Boolean.class) {
+          Boolean.getBoolean(v);
         }
         // No need to check for String
       }

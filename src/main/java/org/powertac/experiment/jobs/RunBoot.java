@@ -11,6 +11,7 @@ import org.powertac.experiment.services.HibernateUtil;
 import org.powertac.experiment.services.JenkinsConnector;
 import org.powertac.experiment.services.Properties;
 import org.powertac.experiment.services.Utils;
+import org.powertac.experiment.states.ExperimentState;
 import org.powertac.experiment.states.GameState;
 import org.powertac.experiment.states.MachineState;
 
@@ -41,6 +42,8 @@ public class RunBoot
       setMachineToGame();
       startJob();
       session.update(game);
+      game.getExperiment().setState(ExperimentState.in_progress);
+      session.update(game.getExperiment());
       transaction.commit();
     }
     catch (Exception e) {
