@@ -268,9 +268,16 @@ public class ActionStudies implements Serializable
   {
     ParamMap paramMap = ParamEntry.createParamMap(paramList, log);
 
-    Pom pom = pomList.get(selectedPomId - 1);
-    paramMap.put(Type.pomId,
-        new Parameter(null, Type.pomId, String.valueOf(pom.getPomId())));
+    Pom selectedPom = pomList.get(pomList.size() - 1);
+    for (Pom pom : pomList) {
+      if (pom.getPomId() == selectedPomId) {
+        selectedPom = pom;
+        break;
+      }
+    }
+
+    paramMap.put(Type.pomId, new Parameter(
+        null, Type.pomId, String.valueOf(selectedPom.getPomId())));
 
     return paramMap;
   }
