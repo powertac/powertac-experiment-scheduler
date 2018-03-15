@@ -169,7 +169,7 @@ public class Study implements MapOwner
       // Create experiments based on multiplier
       else {
         int multiplier = Integer.valueOf(paramMap.getValue(Type.multiplier));
-        for (int counter = 1; counter < multiplier; counter++) {
+        for (int counter = 1; counter <= multiplier; counter++) {
           createExperiment(session, counter);
         }
       }

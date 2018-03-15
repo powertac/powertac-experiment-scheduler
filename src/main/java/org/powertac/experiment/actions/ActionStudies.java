@@ -197,6 +197,7 @@ public class ActionStudies implements Serializable
   public void scheduleStudy (Study study)
   {
     saveStudy(null, "Schedule", study.getStudyId());
+    // TODO Only when not admin
     Utils.growlMessage("Study ready",
         "Email <a href=\"mailto:buijs@rsm.nl\">admin</a> for scheduling");
   }
