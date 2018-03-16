@@ -84,7 +84,13 @@ public class RestProperties extends HttpServlet
       session.close();
     }
 
-    return getGamePropertiesString(game);
+    try {
+      return getGamePropertiesString(game);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return "ParseError";
+    }
   }
 
   private String getGamePropertiesString (Game game)
@@ -105,7 +111,7 @@ public class RestProperties extends HttpServlet
       Location location = Location.getLocationByName(locParam.getValue());
       addParam(result, Prop.timezoneOffset, location.getTimezone());
     }
-    addParam(result, Prop.startTime, gameMap.getValue(Type.startTime));
+    addParam(result, Prop.startTime, gameMap.getValue(Type.simStartDate));
     addParam(result, Prop.jms, "tcp://0.0.0.0:61616");
     addParam(result, Prop.serverFirstTimeout, 600000);
     addParam(result, Prop.serverTimeout, 120000);
@@ -150,7 +156,13 @@ public class RestProperties extends HttpServlet
       session.close();
     }
 
-    return getBrokerPropertiesString(broker, gameId);
+    try {
+      return getBrokerPropertiesString(broker, gameId);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return "ParseError";
+    }
   }
 
   private String getBrokerPropertiesString (Broker broker, int gameId)

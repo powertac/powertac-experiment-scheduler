@@ -310,7 +310,8 @@ public class Type
     List<String> disallowed = Arrays.asList(
         "server.bootstrapDataFile",
         "server.competitionControlService.loginTimeout",
-        "server.jmsManagementService.jmsBrokerUrl");
+        "server.jmsManagementService.jmsBrokerUrl",
+        "common.competition.pomId");
 
     Map<String, Type> pomTypes = new HashMap<>();
     String[] annotations = new String[3];
