@@ -38,6 +38,11 @@ public class MemStore
     availableLocations = new ArrayList<>();
   }
 
+  public static void setGameId (int gameId, String niceName)
+  {
+    gameIds.put(niceName, gameId);
+  }
+
   public static int getGameId (String niceName)
   {
     Integer gameId = gameIds.get(niceName);
@@ -47,7 +52,7 @@ public class MemStore
     return gameId;
   }
 
-  public static void getNameMapping (boolean force)
+  public static void updateNameMapping (boolean force)
   {
     if (gameIds == null) {
       gameIds = new ConcurrentHashMap<>(200, 0.9f, 1);

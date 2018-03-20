@@ -73,38 +73,26 @@ public class Experiment implements MapOwner
 
   public void createGames (Session session, int experimentCounter)
   {
-    List<Broker> brokers = Broker.getBrokersByIds(session,
-        paramMap.get(Type.brokers().name).getValue());
-
     // Create a game for each part of the variable
     String variableName = study.getVariableName();
     String variableValue = study.getVariableValue();
 
+    // Get the list of brokers if not defined by variable
+    List<Broker> brokers = new ArrayList<>();
+    if (!Type.brokers.equals(variableName)) {
+      brokers = Broker.getBrokersByIds(session,
+          paramMap.get(Type.brokers().name).getValue());
+    }
+
     int gameCounter = 1;
-    for (String value : variableValue.split(",")) {
+    for (String value : Utils.valueList(variableValue)) {
+      if (Type.brokers.equals(variableName)) {
+        brokers = Broker.getBrokersByIds(session, value);
+      }
+
       Game game = Game.createGame(
           this, variableName, value, experimentCounter, gameCounter++);
       session.saveOrUpdate(game);
-
-      for (Broker broker : brokers) {
-        Agent agent = Agent.createAgent(broker, game);
-        game.getAgentMap().put(broker.getBrokerId(), agent);
-        session.save(agent);
-        log.info(String.format("Added broker: %s", broker.getBrokerId()));
-      }
-    }
-  }
-
-  public void createGamesTODO (Session session, int experimentCounter)
-  {
-    List<Broker> brokers = Broker.getBrokersByIds(session,
-        paramMap.get(Type.brokers().name).getValue());
-
-    int multiplier = Integer.valueOf(paramMap.get(Type.multiplier).getValue());
-    for (int i = 0; i < multiplier; i++) {
-      Game game = Game.createGameTODO(this, experimentCounter, i + 1);
-      session.saveOrUpdate(game);
-      log.info(String.format("Created game : %s", game.getGameId()));
 
       for (Broker broker : brokers) {
         Agent agent = Agent.createAgent(broker, game);

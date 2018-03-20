@@ -97,7 +97,7 @@ public class Scheduler implements InitializingBean
         // Empty line to make logs more readable
         log.info(System.getProperty("line.separator"));
         try {
-          MemStore.getNameMapping(false);
+          MemStore.updateNameMapping(false);
           List<Game> notCompleteGames = Game.getNotCompleteGamesList();
           List<Machine> freeMachines = Machine.checkMachines();
           RunSim.startRunnableGames(getRunningExperimentIds(), notCompleteGames, freeMachines);

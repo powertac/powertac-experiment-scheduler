@@ -255,32 +255,6 @@ public class Game implements Serializable, MapOwner
     paramMap.createParameter(variableName, variableValue);
   }
 
-  public static Game createGameTODO (Experiment experiment, int experimentCounter,
-                                     int gameCounter)
-  {
-    String gameName = String.format("%s_%d_%d",
-        experiment.getStudy().getName(), experimentCounter, gameCounter);
-
-    Game game = new Game();
-    game.setGameName(gameName);
-    game.setExperiment(experiment);
-    game.setServerQueue(Utils.createQueueName());
-    game.setState(GameState.boot_complete);
-
-    Game.cloneParamsTODO(experiment, game);
-
-    return game;
-  }
-
-  private static void cloneParamsTODO (Experiment experiment, Game game)
-  {
-    ParamMap experimentMap = experiment.getParamMap();
-    ParamMap gameMap = game.getParamMap();
-    for (Type type : Type.getGameTypes()) {
-      gameMap.createParameter(type.name, experimentMap.get(type.name).getValue());
-    }
-  }
-
   //<editor-fold desc="Collections">
   @OneToMany(cascade = CascadeType.ALL)
   @JoinColumn(name = "gameId")

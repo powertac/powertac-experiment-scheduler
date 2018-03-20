@@ -21,10 +21,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -79,7 +79,8 @@ public class Broker implements Serializable
   @SuppressWarnings("unchecked")
   public static List<Broker> getBrokersByIds (Session session, String arrayString)
   {
-    Integer[] brokerIds = brokerIdsFromString(arrayString);
+    List<Integer> brokerIds = Utils.valueList(arrayString)
+        .stream().map(Integer::valueOf).collect(Collectors.toList());
 
     Query query = session.createQuery(Constants.HQL.GET_BROKERS);
     List<Broker> Allbrokers = (List<Broker>) query.
@@ -87,22 +88,12 @@ public class Broker implements Serializable
 
     List<Broker> brokers = new ArrayList<>();
     for (Broker broker : Allbrokers) {
-      if (Arrays.asList(brokerIds).contains(broker.getBrokerId())) {
+      if (brokerIds.contains(broker.getBrokerId())) {
         brokers.add(broker);
       }
     }
 
     return brokers;
-  }
-
-  private static Integer[] brokerIdsFromString (String arrayString)
-  {
-    String[] idStrings = arrayString.split(",");
-    Integer[] brokerIds = new Integer[idStrings.length];
-    for (int i = 0; i < idStrings.length; i++) {
-      brokerIds[i] = Integer.valueOf(idStrings[i]);
-    }
-    return brokerIds;
   }
 
   public boolean save ()

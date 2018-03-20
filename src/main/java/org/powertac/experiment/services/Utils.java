@@ -17,9 +17,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.TimeZone;
 
@@ -206,6 +209,22 @@ public class Utils
   public static void growlMessage (String message)
   {
     growlMessage("Error", message);
+  }
+
+  public static List<String> valueList (String valuesString)
+  {
+    valuesString = valuesString.replaceAll(" ", "");
+    List<String> result = new ArrayList<>();
+    if (valuesString.contains("[")) {
+      for (String value : valuesString.split("],\\[")) {
+        result.add(value.replace("[", "").replace("]", ""));
+      }
+    }
+    else {
+      result.addAll(Arrays.asList(valuesString.split(",")));
+    }
+
+    return result;
   }
 
   public static class agentIdComparator implements Comparator<Agent>

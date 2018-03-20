@@ -47,6 +47,7 @@ public class Type
       return preset.split(" ")[0];
     }
 
+    // TODO SeedId shoudn't be here when seed-set is defined
     if (name.equals(seedId) || name.equals(location)) {
       String result = preset.split(",")[0];
 

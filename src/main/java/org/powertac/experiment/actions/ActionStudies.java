@@ -16,13 +16,13 @@ import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
 import org.powertac.experiment.services.MemStore;
 import org.powertac.experiment.services.Utils;
+import org.powertac.experiment.states.StudyState;
 
 import javax.annotation.PostConstruct;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -144,12 +144,10 @@ public class ActionStudies implements Serializable
         case "Schedule":
           study = (Study) session.get(Study.class, studyId);
           study.scheduleStudy(session);
-          MemStore.getNameMapping(true);
           break;
         case "Pause":
           study = (Study) session.get(Study.class, studyId);
           study.pauseStudy();
-          MemStore.getNameMapping(true);
           break;
       }
 
@@ -176,6 +174,8 @@ public class ActionStudies implements Serializable
         resetValues();
       }
       session.close();
+
+      MemStore.updateNameMapping(true);
     }
 
     studyList = Study.getAllStudies();
@@ -197,9 +197,17 @@ public class ActionStudies implements Serializable
   public void scheduleStudy (Study study)
   {
     saveStudy(null, "Schedule", study.getStudyId());
-    // TODO Only when not admin
-    Utils.growlMessage("Study ready",
-        "Email <a href=\"mailto:buijs@rsm.nl\">admin</a> for scheduling");
+
+    if (study.getState() == StudyState.in_progress) {
+      User currentUser = User.getCurrentUser();
+      if (currentUser.isAdmin()) {
+        Utils.growlMessage("Study ready", "Schedule the study in the admin tab");
+      }
+      else {
+        Utils.growlMessage("Study ready",
+            "Email <a href=\"mailto:buijs@rsm.nl\">admin</a> for scheduling");
+      }
+    }
   }
 
   public void pauseStudy (Study study)
@@ -252,11 +260,7 @@ public class ActionStudies implements Serializable
 
     ParamMap studyParamMap = study.getParamMap();
     // First remove params that aren't there anymore
-    for (Iterator<String> it = studyParamMap.keySet().iterator(); it.hasNext(); ) {
-      if (paramMap.get(it.next()) == null) {
-        it.remove();
-      }
-    }
+    studyParamMap.keySet().removeIf(s -> paramMap.get(s) == null);
     // Add or update params
     for (Parameter parameter : paramMap.values()) {
       studyParamMap.setOrUpdateValue(parameter.getType(), parameter.getValue());
@@ -291,9 +295,10 @@ public class ActionStudies implements Serializable
 
     // Validate the variableValue and variableValue
     List<String> messages = new ArrayList<>();
-    ParamMap.validateVariable(messages, variableName, variableValue, pomId);
+    ParamEntry variableEntry = new ParamEntry(variableName, variableValue);
+    ParamMap.validateVariable(messages, variableEntry, pomId);
 
-    List<String> studyMapMessages = paramMap.validateStudyMap(variableName);
+    List<String> studyMapMessages = paramMap.validateStudyMap(variableEntry);
     messages.addAll(studyMapMessages);
 
     if (studyName.trim().isEmpty()) {

@@ -119,13 +119,14 @@ public class ParamMap
     return keys;
   }
 
-  public List<String> validateStudyMap (String variableName)
+  public List<String> validateStudyMap (ParamEntry variableEntry)
   {
     List<String> messages = new ArrayList<>();
     checkValidPomId(messages);
     checkValidMultiplier(messages);
-    checkValidBrokers(messages, variableName);
-    checkValidLocation(messages, variableName);
+    checkValidBrokers(messages, variableEntry);
+    checkValidLocation(messages, variableEntry);
+    checkDoubling(variableEntry);
 
     // TODO Check simStartDate, bootstrapId, gameLength ??
 
@@ -161,36 +162,42 @@ public class ParamMap
     }
   }
 
-  private void checkValidBrokers (List<String> messages, String variableName)
+  private void checkValidBrokers (List<String> messages,
+                                  ParamEntry variableEntry)
   {
-    if (Type.brokers.equals(variableName)) {
-      return;
-    }
-
-    if (get(Type.brokers) == null) {
-      messages.add("Brokers need to be defined");
+    String brokersIdString = "";
+    if (Type.brokers.equals(variableEntry.getName())) {
+      brokersIdString = variableEntry.getValue();
     }
     else {
-      try {
-        String[] strArray = get(Type.brokers).getValue().split(",");
-        for (String aStrArray : strArray) {
-          if (Integer.valueOf(aStrArray) <= 0) {
-            messages.add("BrokerIds need to be > 0");
-          }
-        }
-        if (strArray.length == 0) {
-          messages.add("Brokers need to be defined");
+      if (get(Type.brokers) != null) {
+        brokersIdString = get(Type.brokers).getValue();
+      }
+    }
+
+    // Could be comma-sep of ids, or arrays of comma-sep of ids
+    List<String> brokerIdArrays = Utils.valueList(brokersIdString);
+
+    boolean emptyArray = brokerIdArrays.isEmpty();
+    for (String brokerIdArray : brokerIdArrays) {
+      emptyArray |= brokerIdArray.isEmpty();
+
+      for (String brokerId : brokerIdArray.split(",")) {
+        if (Integer.valueOf(brokerId) <= 0) {
+          messages.add("BrokerIds need to be > 0");
         }
       }
-      catch (Exception ignored) {
-        messages.add("Brokers definition not correct\nneeds to be ints separated by ','");
-      }
+    }
+    if (emptyArray) {
+      messages.add("Brokers need to be defined");
     }
   }
 
-  private void checkValidLocation (List<String> messages, String variableName)
+  private void checkValidLocation (List<String> messages,
+                                   ParamEntry variableEntry)
   {
-    if (Type.location.equals(variableName)) {
+    // TODO Also allow and check when variable : see check brokers
+    if (Type.location.equals(variableEntry.getName())) {
       return;
     }
 
@@ -202,6 +209,20 @@ public class ParamMap
     }
     catch (Exception ignored) {
       messages.add("Location needs to be defined");
+    }
+  }
+
+  private void checkDoubling (ParamEntry variableEntry)
+  {
+    String variableName = variableEntry.getName();
+
+    for (String parameterName : map.keySet()) {
+      if (variableName.equals(parameterName)) {
+        map.remove(parameterName);
+        Utils.growlMessage ("Warning", "Droppping parameter " +
+            parameterName + ", already defined as variable");
+        return;
+      }
     }
   }
 
@@ -245,41 +266,46 @@ public class ParamMap
 
   //<editor-fold desc="Methods for Variable">
   public static void validateVariable (List<String> messages,
-                                       String name, String value, int pomId)
+                                       ParamEntry variableEntry, int pomId)
   {
-    if (name.isEmpty() || value.isEmpty()) {
+    String variableName = variableEntry.getName();
+    String variableValue = variableEntry.getValue();
+
+    if (variableName.isEmpty() || variableValue.isEmpty()) {
       messages.add("No variable given, there will only be 1 experiment!");
       return;
     }
 
-    Type variable = Type.get(pomId, name);
-    if (Type.getVariableBaseTypes().contains(name)) {
-      variable = Type.getBaseType(name);
+    Type variable = Type.get(pomId, variableName);
+    if (Type.getVariableBaseTypes().contains(variableName)) {
+      variable = Type.getBaseType(variableName);
     }
 
     // Check if variableName is allowed
     if (variable == null) {
-      messages.add("Variable name '" + name + "' is not allowed!");
+      messages.add("Variable name '" + variableName + "' is not allowed!");
       return;
     }
 
-    // Check if variableValues are allowed
-    for (String v : value.split(",")) {
-      try {
-        if (variable.clazz == Integer.class) {
-          Integer.parseInt(v);
+    List<String> valueArrays = Utils.valueList(variableValue);
+    for (String valueArray : valueArrays) {
+      for (String value : valueArray.split(",")) {
+        try {
+          if (variable.clazz == Integer.class) {
+            Integer.parseInt(value);
+          }
+          else if (variable.clazz == Double.class) {
+            Double.parseDouble(value);
+          }
+          else if (variable.clazz == Boolean.class) {
+            Boolean.getBoolean(value);
+          }
+          // No need to check for String
         }
-        else if (variable.clazz == Double.class) {
-          Double.parseDouble(v);
+        catch (Exception ignored) {
+          messages.add("Variable format isn't correct");
+          break;
         }
-        else if (variable.clazz == Boolean.class) {
-          Boolean.getBoolean(v);
-        }
-        // No need to check for String
-      }
-      catch (Exception ignored) {
-        messages.add("Variable format isn't correct");
-        break;
       }
     }
   }
