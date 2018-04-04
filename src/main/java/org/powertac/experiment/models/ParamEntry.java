@@ -3,7 +3,6 @@ package org.powertac.experiment.models;
 import org.apache.log4j.Logger;
 import org.powertac.experiment.services.Utils;
 
-import java.util.Iterator;
 import java.util.List;
 
 
@@ -42,29 +41,27 @@ public class ParamEntry
   {
     ParamMap paramMap = new ParamMap();
 
-    Iterator<ParamEntry> iterator = paramList.iterator();
-    while (iterator.hasNext()) {
-      ParamEntry entry = iterator.next();
+    for (ParamEntry entry : paramList) {
       String name = entry.getName();
       String value = entry.getValue();
 
+      // Both empty, ignore line completely
       if (name.isEmpty() && value.isEmpty()) {
-        iterator.remove();
         continue;
       }
-
       if (value.isEmpty()) {
-        iterator.remove();
-        log.warn("Ignoring parameter " + name + ", value is empty");
-        Utils.growlMessage("Ignoring parameter " + name + ", value is empty");
+        String msg = "Ignoring parameter " + name + ", value is empty";
+        log.warn(msg);
+        Utils.growlMessage("Warning", msg);
       }
       else if (name.isEmpty()) {
-        iterator.remove();
-        log.warn("Ignoring parameter, name is empty : value is " + value);
-        Utils.growlMessage("Ignoring parameter, name is empty : value is " + value);
+        String msg = "Ignoring parameter, name is empty : value is " + value;
+        log.warn(msg);
+        Utils.growlMessage("Warning", msg);
       }
-
-      paramMap.put(name, new Parameter(null, name, value));
+      else {
+        paramMap.put(name, new Parameter(null, name, value));
+      }
     }
 
     return paramMap;

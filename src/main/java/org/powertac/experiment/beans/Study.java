@@ -8,8 +8,10 @@ import org.powertac.experiment.constants.Constants;
 import org.powertac.experiment.models.ParamMap;
 import org.powertac.experiment.models.ParamMap.MapOwner;
 import org.powertac.experiment.models.Parameter;
+import org.powertac.experiment.models.Seed;
 import org.powertac.experiment.models.Type;
 import org.powertac.experiment.services.HibernateUtil;
+import org.powertac.experiment.services.MemStore;
 import org.powertac.experiment.services.Properties;
 import org.powertac.experiment.services.Scheduler;
 import org.powertac.experiment.services.Utils;
@@ -34,10 +36,8 @@ import javax.persistence.Transient;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -156,33 +156,104 @@ public class Study implements MapOwner
   public void scheduleStudy (Session session)
   {
     if (state == StudyState.pending) {
-      String startDate =
-          Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
-      paramMap.setOrUpdateValue(Type.createTime, startDate);
-
-      Set<Object> seedSet = new HashSet<>();
-
-      // Create experiments based length of seed-set
-      if (seedSet.size() > 0) {
+      String seedList = paramMap.getValue(Type.seedList);
+      if (seedList != null && seedList.contains("http")) {
+        // We need a separate thread, downloading might take too long
+        log.info("Scheduling study in background");
+        new Thread(new ScheduleRunnable(studyId, paramMap.clone())).start();
       }
-
-      // Create experiments based on multiplier
       else {
-        int multiplier = Integer.valueOf(paramMap.getValue(Type.multiplier));
-        for (int counter = 1; counter <= multiplier; counter++) {
-          createExperiment(session, counter);
-        }
+        actuallyScheduleStudy(paramMap, session);
       }
     }
 
     state = StudyState.in_progress;
   }
 
-  private void createExperiment (Session session, int counter)
+  private class ScheduleRunnable implements Runnable
+  {
+    private int studyId;
+    private ParamMap paramMap;
+
+    public ScheduleRunnable (int studyId, ParamMap paramMap)
+    {
+      this.studyId = studyId;
+      this.paramMap = paramMap;
+    }
+
+    public void run ()
+    {
+      Utils.secondsSleep(2);
+
+      Session session = HibernateUtil.getSession();
+      Transaction transaction = session.beginTransaction();
+      Study study = null;
+      try {
+        study = (Study) session.get(Study.class, studyId);
+        study.actuallyScheduleStudy(paramMap, session);
+      }
+      catch (Exception e) {
+        transaction.rollback();
+        e.printStackTrace();
+        String msg = "Error Scheduling Study";
+        log.error(msg);
+        Utils.growlMessage(msg);
+      }
+      finally {
+        if (transaction.wasCommitted()) {
+          if (study != null) {
+            log.info(String.format("Scheduled Study %s", study.getStudyId()));
+          }
+        }
+        session.close();
+
+        MemStore.updateNameMapping(true);
+      }
+      log.info("Background Scheduling Study done");
+    }
+  }
+
+  private void actuallyScheduleStudy (ParamMap paramMap, Session session)
+  {
+    String startDate =
+        Utils.dateToStringFull(Utils.offsetDate()).replace(" ", "_");
+    paramMap.setOrUpdateValue(Type.createTime, startDate);
+
+    String seedList = paramMap.getValue(Type.seedList);
+    // Create experiments based length of seed-set
+    if (!seedList.isEmpty()) {
+      List<Integer> seedIds = Seed.retrieveSeeds(seedList);
+      if (seedIds == null) {
+        Utils.growlMessage("Not scheduling Study, seed list invalid");
+        return;
+      }
+
+      int multiplier = seedIds.size();
+
+      for (int counter = 1; counter <= multiplier; counter++) {
+        int seedId = seedIds.get(counter - 1);
+        createExperiment(session, seedId, counter);
+      }
+    }
+
+    // Create experiments based on multiplier
+    else {
+      int multiplier = Integer.valueOf(paramMap.getValue(Type.multiplier));
+      for (int counter = 1; counter <= multiplier; counter++) {
+        createExperiment(session, null, counter);
+      }
+    }
+  }
+
+  private void createExperiment (Session session, Integer seedId, int counter)
   {
     Experiment experiment = new Experiment();
     experiment.setStudy(this);
     experiment.copyParameters(paramMap);
+    if (seedId != null) {
+      Parameter parameter = new Parameter(experiment, Type.seedId, seedId);
+      experiment.getParamMap().put(Type.seedId, parameter);
+    }
     session.saveOrUpdate(experiment);
     experiment.createGames(session, counter);
 

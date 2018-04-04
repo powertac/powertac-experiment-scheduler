@@ -12,6 +12,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -134,8 +135,8 @@ public class Parameter
   {
     List<ParamEntry> defaultList = new ArrayList<>();
 
-    Type[] types = {Type.brokers(), Type.reuseBoot(),
-        Type.seedId(), Type.location(), Type.simStartDate(), Type.multiplier()};
+    Type[] types = {Type.brokers(), Type.reuseBoot(), Type.location(),
+        Type.simStartDate(), Type.multiplier()};
 
     for (Type type : types) {
       defaultList.add(new ParamEntry(type.name, type.getDefault()));
@@ -149,7 +150,7 @@ public class Parameter
     List<ParamEntry> paramList = new ArrayList<>();
 
     for (Map.Entry<String, Parameter> entry : map.entrySet()) {
-      if (entry.getKey().equals(Type.pomId)) {
+      if (Arrays.asList(Type.pomId, Type.seedList ).contains(entry.getKey())) {
         continue;
       }
       paramList.add(new ParamEntry(entry.getKey(), entry.getValue().value));

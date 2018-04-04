@@ -123,8 +123,8 @@
 
         <h:panelGroup>
           <h:outputText>
-            An experiment will be created for each variable, with
-            <i>multiplier</i> games per experiment<br/>
+            The list of seed URLs / ids or the multiplier defines the number of experiments<br/>
+            Each experiment will be created with the set of variables<br/>
             Variable name is the same as parameters, value format is comma separated values<br/>
             Numeric values can also be min-max,step<br/>
           </h:outputText>
@@ -187,6 +187,16 @@
           </h:panelGrid>
           <br/>
         </p:outputPanel>
+
+        <h:panelGroup>
+          <h:outputLabel for="seedList" styleClass="study_label1" escape="false"
+                         value="List of seed URLs or ids&lt;br/&gt;
+                         - Overrides multiplier and seedId&lt;br/&gt;
+                         - URLs are downloaded during scheduling"/>
+          <h:inputTextarea id="seedList" value="#{actionStudies.seedList}"
+                           styleClass="input_huge" rows="5"/>
+          <br/>
+        </h:panelGroup>
 
         <h:panelGroup>
           <h:outputText value="Parameters for all experiments / games"/>

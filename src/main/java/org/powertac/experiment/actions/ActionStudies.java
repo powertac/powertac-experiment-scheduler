@@ -23,6 +23,7 @@ import javax.faces.bean.ManagedBean;
 import javax.faces.bean.SessionScoped;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 
@@ -49,6 +50,7 @@ public class ActionStudies implements Serializable
   private String variableStep;
   private String valuesType;
   private int selectedPomId;
+  private String seedList;
 
   private List<Location> availableLocations;
   private List<Study> studyList;
@@ -91,6 +93,7 @@ public class ActionStudies implements Serializable
     valuesType = RadioOptions.values.toString();
     pomList = Pom.getPomList();
     selectedPomId = pomList.get(pomList.size() - 1).getPomId();
+    seedList = "";
     paramList = Parameter.getDefaultList();
   }
 
@@ -189,6 +192,7 @@ public class ActionStudies implements Serializable
     variableValue = study.getVariableValue();
     valuesType = RadioOptions.values.toString();
     selectedPomId = study.getParamMap().getPomId();
+    seedList = study.getParamMap().get(Type.seedList).getValue();
     paramList = Parameter.getParamList(study.getParamMap(), minimumLength);
 
     log.info("Editing study : " + studyId + " " + study.getName());
@@ -260,7 +264,11 @@ public class ActionStudies implements Serializable
 
     ParamMap studyParamMap = study.getParamMap();
     // First remove params that aren't there anymore
-    studyParamMap.keySet().removeIf(s -> paramMap.get(s) == null);
+    for (Iterator<String> it = studyParamMap.keySet().iterator(); it.hasNext(); ) {
+      if (paramMap.get(it.next()) == null) {
+        it.remove();
+      }
+    }
     // Add or update params
     for (Parameter parameter : paramMap.values()) {
       studyParamMap.setOrUpdateValue(parameter.getType(), parameter.getValue());
@@ -283,6 +291,8 @@ public class ActionStudies implements Serializable
 
     paramMap.put(Type.pomId, new Parameter(
         null, Type.pomId, String.valueOf(selectedPom.getPomId())));
+
+    paramMap.put(Type.seedList, new Parameter(null, Type.seedList, seedList));
 
     return paramMap;
   }
@@ -428,6 +438,16 @@ public class ActionStudies implements Serializable
   public RadioOptions[] getRadioOptions ()
   {
     return RadioOptions.values();
+  }
+
+  public String getSeedList ()
+  {
+    return seedList;
+  }
+
+  public void setSeedList (String seedList)
+  {
+    this.seedList = seedList;
   }
 
   public List<ParamEntry> getParamList ()

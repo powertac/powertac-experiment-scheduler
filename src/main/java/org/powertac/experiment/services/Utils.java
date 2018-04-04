@@ -16,6 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -202,8 +204,14 @@ public class Utils
 
   public static void growlMessage (String title, String message)
   {
-    FacesContext.getCurrentInstance().addMessage(null,
-        new FacesMessage(FacesMessage.SEVERITY_INFO, title, message));
+    FacesContext context = FacesContext.getCurrentInstance();
+    if (context != null) {
+      context.addMessage(null,
+          new FacesMessage(FacesMessage.SEVERITY_INFO, title, message));
+    }
+    else {
+      log.info(title + " : " + message);
+    }
   }
 
   public static void growlMessage (String message)
@@ -225,6 +233,24 @@ public class Utils
     }
 
     return result;
+  }
+
+  public static boolean doesURLExist(String urlString)
+  {
+    try {
+      URL url = new URL(urlString);
+      HttpURLConnection.setFollowRedirects(false);
+      HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
+      httpURLConnection.setRequestMethod("HEAD");
+      httpURLConnection.setRequestProperty("User-Agent",
+          "Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.9.1.2) " +
+              "Gecko/20090729 Firefox/3.5.2 (.NET CLR 3.5.30729)");
+      int responseCode = httpURLConnection.getResponseCode();
+      return responseCode == HttpURLConnection.HTTP_OK;
+    }
+    catch (IOException e) {
+      return false;
+    }
   }
 
   public static class agentIdComparator implements Comparator<Agent>

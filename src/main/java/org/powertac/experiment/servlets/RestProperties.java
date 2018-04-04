@@ -193,7 +193,6 @@ public class RestProperties extends HttpServlet
       String name = param.getType();
 
       // TODO Get from some list
-      // TODO Check for dot?
       if (name.contains(".") &&
           !name.equals("server.weatherService.serverUrl") &&
           !name.equals("common.competition.timezoneOffset")) {

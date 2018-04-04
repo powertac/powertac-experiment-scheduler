@@ -136,14 +136,22 @@ input[type="text"].input_small {
   font-size: 14px;
 }
 
+textarea.input_huge {
+  width: 400px;
+  margin-bottom: 20px;
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 14px;
+}
+
 .study_label1 {
-  width: 191px;
+  width: 403px;
   display: inline-block;
   font-size: 16px;
+  vertical-align: top;
 }
 
 .study_label2 {
-  width: 140px;
+  width: 353px;
   display: inline-block;
   font-family: 'Times New Roman', Times, serif;
   font-size: 16px;

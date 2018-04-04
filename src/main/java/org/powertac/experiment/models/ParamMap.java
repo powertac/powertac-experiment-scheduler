@@ -5,6 +5,7 @@ import org.powertac.experiment.services.Utils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -123,7 +124,7 @@ public class ParamMap
   {
     List<String> messages = new ArrayList<>();
     checkValidPomId(messages);
-    checkValidMultiplier(messages);
+    checkValidSeedsMultiplier(messages);
     checkValidBrokers(messages, variableEntry);
     checkValidLocation(messages, variableEntry);
     checkDoubling(variableEntry);
@@ -145,6 +146,34 @@ public class ParamMap
     }
   }
 
+  private void checkValidSeedList (List<String> messages)
+  {
+    try {
+      Parameter seedList = get(Type.seedList);
+      List<String> validSeedUrls = new ArrayList<>();
+      // Seed string might be an id or URL
+      for (String seed : seedList.getValue().split("\n")) {
+        if (Seed.isExistingSeedId(seed)) {
+          validSeedUrls.add(seed);
+        }
+        else if (Utils.doesURLExist(seed)) {
+          validSeedUrls.add(seed);
+        }
+        else {
+          Utils.growlMessage("Warning", "Seed is not valid : " + seed);
+        }
+      }
+
+      if (validSeedUrls.isEmpty()) {
+        messages.add("No valid Seed URLs defined");
+      }
+      seedList.setValue(String.join("\n", validSeedUrls));
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
   private void checkValidMultiplier (List<String> messages)
   {
     try {
@@ -159,6 +188,18 @@ public class ParamMap
     }
     catch (Exception ignored) {
       messages.add("The multiplier needs to be > 0");
+    }
+  }
+
+  private void checkValidSeedsMultiplier (List<String> messages)
+  {
+    // Check if the seedUrls are valid
+    if (!get(Type.seedList).getValue().isEmpty()) {
+      checkValidSeedList(messages);
+    }
+    // SeedList is empty, check the validity of the multiplier
+    else {
+      checkValidMultiplier(messages);
     }
   }
 
@@ -219,11 +260,30 @@ public class ParamMap
     for (String parameterName : map.keySet()) {
       if (variableName.equals(parameterName)) {
         map.remove(parameterName);
-        Utils.growlMessage ("Warning", "Droppping parameter " +
+        Utils.growlMessage("Warning", "Droppping parameter " +
             parameterName + ", already defined as variable");
-        return;
       }
     }
+
+    if (map.keySet().contains(Type.seedList)) {
+      for (String name : Arrays.asList(Type.seedId, Type.multiplier)) {
+        if (map.keySet().contains(name)) {
+          map.remove(name);
+          Utils.growlMessage("Warning", "Droppping parameter " +
+              name + ", already defined as variable");
+        }
+      }
+    }
+  }
+
+  public ParamMap clone ()
+  {
+    ParamMap clone = new ParamMap();
+    clone.parent = parent;
+    for (String key : map.keySet()) {
+      clone.map.put(key, map.get(key));
+    }
+    return clone;
   }
 
   //<editor-fold desc="Proxy methods for the map">

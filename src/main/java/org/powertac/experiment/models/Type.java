@@ -47,14 +47,8 @@ public class Type
       return preset.split(" ")[0];
     }
 
-    // TODO SeedId shoudn't be here when seed-set is defined
-    if (name.equals(seedId) || name.equals(location)) {
-      String result = preset.split(",")[0];
-
-      // Needed for seed files
-      result = result.replace("seed.", "").replace(".state", "");
-
-      return result;
+    if (name.equals(location)) {
+      return preset.split(",")[0];
     }
 
     if (name.equals(simStartDate)) {
@@ -91,6 +85,7 @@ public class Type
   public static String startTime = "startTime";
   public static String multiplier = "multiplier";
   public static String gameLength = "gameLength";
+  public static String seedList = "seedList";
 
   private static Map<String, Type> baseTypes = null;
   private static Map<Integer, Map<String, Type>> pomTypesMap = null;
@@ -159,6 +154,11 @@ public class Type
     return baseTypes.get(multiplier);
   }
 
+  public static Type seedList ()
+  {
+    return baseTypes.get(seedList);
+  }
+
   private static void loadAll ()
   {
     if (baseTypes != null) {
@@ -190,6 +190,8 @@ public class Type
     baseTypes.put(gameLength, new Type(gameLength, Integer.class, null,
         "If not set, this will be randomized"));
     baseTypes.put(startTime, new Type(startTime, String.class));
+    baseTypes.put(seedList, new Type(seedList, String.class, null,
+        "If not set, the multiplier will be used"));
   }
 
   private static void loadGlobal ()
@@ -207,10 +209,10 @@ public class Type
           pomList.toString().replace("[", "").replace("]", "");
     }
 
-    List<String> seedList = Seed.getSeeds();
+    List<Integer> seedList = Seed.getSeedIds();
     if (seedList.size() > 0) {
       baseTypes.get(seedId).preset = seedList.stream()
-          .map(p -> p.replace("powertac-sim-", "").replace(".state", ""))
+          .map(Object::toString)
           .collect(Collectors.joining(", "));
     }
 
