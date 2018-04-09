@@ -5,11 +5,11 @@ import org.powertac.experiment.services.Utils;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -193,13 +193,16 @@ public class ParamMap
 
   private void checkValidSeedsMultiplier (List<String> messages)
   {
-    // Check if the seedUrls are valid
-    if (!get(Type.seedList).getValue().isEmpty()) {
-      checkValidSeedList(messages);
-    }
     // SeedList is empty, check the validity of the multiplier
-    else {
+    if (get(Type.seedList).getValue().isEmpty()) {
+      map.remove(Type.seedList);
       checkValidMultiplier(messages);
+    }
+    // Seedlist not empty, check if the seedUrls are valid
+    else {
+      map.remove(Type.seedId);
+      map.remove(Type.multiplier);
+      checkValidSeedList(messages);
     }
   }
 
@@ -255,23 +258,15 @@ public class ParamMap
 
   private void checkDoubling (ParamEntry variableEntry)
   {
+    String fmt = "Droppping parameter %s, already defined as variable";
+
     String variableName = variableEntry.getName();
-
-    for (String parameterName : map.keySet()) {
+    Iterator<String> iter = map.keySet().iterator();
+    while (iter.hasNext()) {
+      String parameterName = iter.next();
       if (variableName.equals(parameterName)) {
-        map.remove(parameterName);
-        Utils.growlMessage("Warning", "Droppping parameter " +
-            parameterName + ", already defined as variable");
-      }
-    }
-
-    if (map.keySet().contains(Type.seedList)) {
-      for (String name : Arrays.asList(Type.seedId, Type.multiplier)) {
-        if (map.keySet().contains(name)) {
-          map.remove(name);
-          Utils.growlMessage("Warning", "Droppping parameter " +
-              name + ", already defined as variable");
-        }
+        iter.remove();
+        Utils.growlMessage("Warning", String.format(fmt, parameterName));
       }
     }
   }

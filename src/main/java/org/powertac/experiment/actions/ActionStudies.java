@@ -192,7 +192,8 @@ public class ActionStudies implements Serializable
     variableValue = study.getVariableValue();
     valuesType = RadioOptions.values.toString();
     selectedPomId = study.getParamMap().getPomId();
-    seedList = study.getParamMap().get(Type.seedList).getValue();
+    Parameter seedListParam = study.getParamMap().get(Type.seedList);
+    seedList = seedListParam == null ? "" : seedListParam.getValue();
     paramList = Parameter.getParamList(study.getParamMap(), minimumLength);
 
     log.info("Editing study : " + studyId + " " + study.getName());
