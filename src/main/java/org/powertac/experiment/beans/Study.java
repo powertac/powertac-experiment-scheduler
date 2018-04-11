@@ -191,6 +191,7 @@ public class Study implements MapOwner
       try {
         study = (Study) session.get(Study.class, studyId);
         study.actuallyScheduleStudy(paramMap, session);
+        transaction.commit();
       }
       catch (Exception e) {
         transaction.rollback();
