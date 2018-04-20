@@ -54,12 +54,9 @@ public class Seed
     List<Integer> seedIds = new ArrayList<>();
     for (String seedUrl : seedUrls) {
       // Download the seed / state file, store them on file system
-      System.out.println("Download      : " + seedId);
       boolean downloaded = retrieveFile(seedUrl, seedId);
       if (downloaded) {
-        System.out.println("Seed added    : " + seedId);
         seedIds.add(seedId++);
-        System.out.println("ID after      : " + seedId);
       }
     }
 
