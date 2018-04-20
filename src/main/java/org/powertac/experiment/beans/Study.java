@@ -194,8 +194,11 @@ public class Study implements MapOwner
         transaction.commit();
       }
       catch (Exception e) {
-        transaction.rollback();
+        System.out.println();
         e.printStackTrace();
+
+        transaction.rollback();
+
         String msg = "Error Scheduling Study";
         log.error(msg);
         Utils.growlMessage(msg);
@@ -221,28 +224,29 @@ public class Study implements MapOwner
     paramMap.setOrUpdateValue(Type.createTime, startDate);
 
     String seedList = paramMap.getValue(Type.seedList);
-    // Create experiments based length of seed-set
-    if (!seedList.isEmpty()) {
-      List<Integer> seedIds = Seed.retrieveSeeds(seedList);
-      if (seedIds == null) {
-        Utils.growlMessage("Not scheduling Study, seed list invalid");
-        return;
-      }
+    List<Integer> seedIds = Seed.retrieveSeeds(seedList);
+    String value = paramMap.getValue(Type.multiplier);
+    int multiplier = Integer.valueOf(value != null ? value : "0");
 
-      int multiplier = seedIds.size();
-
-      for (int counter = 1; counter <= multiplier; counter++) {
-        int seedId = seedIds.get(counter - 1);
-        createExperiment(session, seedId, counter);
-      }
+    if (seedIds.isEmpty() && multiplier < 1) {
+      Utils.growlMessage("Not scheduling Study, seed list empty " +
+          "and multiplier < 1");
+      return;
+    }
+    else if (seedIds.isEmpty()) {
+      paramMap.remove(Type.seedList);
+    }
+    else {
+      paramMap.remove(Type.multiplier);
+      multiplier = seedIds.size();
     }
 
-    // Create experiments based on multiplier
-    else {
-      int multiplier = Integer.valueOf(paramMap.getValue(Type.multiplier));
-      for (int counter = 1; counter <= multiplier; counter++) {
-        createExperiment(session, null, counter);
+    for (int counter = 0; counter < multiplier; counter++) {
+      Integer seedId = null;
+      if (counter < seedIds.size()) {
+        seedId = seedIds.get(counter);
       }
+      createExperiment(session, seedId, counter + 1);
     }
   }
 
@@ -266,19 +270,26 @@ public class Study implements MapOwner
     boolean allDone = true;
 
     List<Experiment> experiments = Experiment.getAllExperiments(session);
+    List<Integer> seedIds = new ArrayList<>();
 
     for (Experiment experiment : experiments) {
-      // The state of the finished game isn't in the db yet.
-      if (experiment.getStudy().getStudyId() != studyId ||
-          experiment.getExperimentId() == finishedExperimentId) {
+      if (experiment.getStudy().getStudyId() != studyId) {
         continue;
       }
       allDone &= experiment.getState().equals(ExperimentState.complete);
+
+      Parameter seedIdParam = experiment.getParamMap().get(Type.seedId);
+      seedIds.add(Integer.valueOf(seedIdParam.getValue()));
     }
 
     if (allDone) {
       state = StudyState.complete;
       session.update(this);
+
+      // Remove all seed files to preserve storage space
+      for (int seedId : seedIds) {
+        Seed.removeSeedFile(seedId);
+      }
     }
 
     // Always generate new CSVs

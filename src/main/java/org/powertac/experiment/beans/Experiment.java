@@ -119,6 +119,7 @@ public class Experiment implements MapOwner
       state = ExperimentState.complete;
       Scheduler scheduler = Scheduler.getScheduler();
       scheduler.unloadExperiment(experimentId);
+      session.update(this);
 
       study.experimentCompleted(session, experimentId);
     }

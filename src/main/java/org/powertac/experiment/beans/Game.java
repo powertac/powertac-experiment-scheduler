@@ -250,8 +250,15 @@ public class Game implements Serializable, MapOwner
   {
     ParamMap experimentMap = experiment.getParamMap();
     for (Type type : Type.getGameTypes()) {
+      System.out.println(type);
+      System.out.println(type.name);
+      System.out.println(experimentMap.get(type.name));
       paramMap.createParameter(type.name, experimentMap.get(type.name).getValue());
     }
+
+    paramMap.createParameter(Type.seedId,
+        experimentMap.get(Type.seedId).getValue());
+
     paramMap.createParameter(variableName, variableValue);
   }
 

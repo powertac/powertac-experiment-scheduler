@@ -46,32 +46,20 @@ public class Seed
     return seedIds;
   }
 
-  private static void sleep(int millis) {
-    try {
-      Thread.sleep(millis);
-    }
-    catch (Exception ignored) {}
-  }
-
   public static List<Integer> retrieveSeeds (String seedList)
   {
     String[] seedUrls = seedList.split("\n");
-    if (seedUrls.length == 0) {
-      return null;
-    }
-
     int seedId = getNextId();
+
     List<Integer> seedIds = new ArrayList<>();
     for (String seedUrl : seedUrls) {
-      if (isExistingSeedId(seedUrl)) {
-        seedIds.add(getSeedId(seedUrl));
-      }
       // Download the seed / state file, store them on file system
-      else {
-        boolean downloaded = retrieveFile(seedUrl, seedId);
-        if (downloaded) {
-          seedIds.add(seedId++);
-        }
+      System.out.println("Download      : " + seedId);
+      boolean downloaded = retrieveFile(seedUrl, seedId);
+      if (downloaded) {
+        System.out.println("Seed added    : " + seedId);
+        seedIds.add(seedId++);
+        System.out.println("ID after      : " + seedId);
       }
     }
 
@@ -90,12 +78,6 @@ public class Seed
       }
     }
     return lastId + 1;
-  }
-
-  public static boolean isExistingSeedId (String seedUrl)
-  {
-    int seedId = getSeedId(seedUrl);
-    return getSeedIds().contains(seedId);
   }
 
   private static int getSeedId (String name)
@@ -234,6 +216,18 @@ public class Seed
     }
     catch (IOException ioe) {
       return null;
+    }
+  }
+
+  public static void removeSeedFile (int seedId)
+  {
+    String seedPath = seedsLocation + "seed." + seedId + ".state";
+    File file = new File(seedPath);
+    if (file.delete()) {
+      log.info("Removed seed file : " + seedId);
+    }
+    else {
+      log.error("Failed to remove seed file : " + seedId);
     }
   }
 }

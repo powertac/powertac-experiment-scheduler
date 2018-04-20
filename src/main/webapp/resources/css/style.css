@@ -138,6 +138,7 @@ input[type="text"].input_small {
 
 textarea.input_huge {
   width: 400px;
+  max-width: 400px;
   margin-bottom: 20px;
   font-family: 'Times New Roman', Times, serif;
   font-size: 14px;

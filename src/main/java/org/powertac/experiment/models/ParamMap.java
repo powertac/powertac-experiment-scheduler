@@ -50,9 +50,10 @@ public class ParamMap
     if (param != null) {
       return param.getValue();
     }
-    else {
+    else if (Type.get(getPomId(), name) != null) {
       return Type.get(getPomId(), name).getDefault();
     }
+    else return null;
   }
 
   public int getPomId ()
@@ -153,10 +154,7 @@ public class ParamMap
       List<String> validSeedUrls = new ArrayList<>();
       // Seed string might be an id or URL
       for (String seed : seedList.getValue().split("\n")) {
-        if (Seed.isExistingSeedId(seed)) {
-          validSeedUrls.add(seed);
-        }
-        else if (Utils.doesURLExist(seed)) {
+        if (Utils.doesURLExist(seed)) {
           validSeedUrls.add(seed);
         }
         else {
@@ -195,13 +193,10 @@ public class ParamMap
   {
     // SeedList is empty, check the validity of the multiplier
     if (get(Type.seedList).getValue().isEmpty()) {
-      map.remove(Type.seedList);
       checkValidMultiplier(messages);
     }
     // Seedlist not empty, check if the seedUrls are valid
     else {
-      map.remove(Type.seedId);
-      map.remove(Type.multiplier);
       checkValidSeedList(messages);
     }
   }

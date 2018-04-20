@@ -139,11 +139,6 @@ public class Type
     return baseTypes.get(reuseBoot);
   }
 
-  public static Type seedId ()
-  {
-    return baseTypes.get(seedId);
-  }
-
   public static Type brokers ()
   {
     return baseTypes.get(brokers);
@@ -179,8 +174,6 @@ public class Type
     baseTypes.put(pomId, new Type(pomId, Integer.class));
     baseTypes.put(reuseBoot, new Type(reuseBoot, Boolean.class, true,
         "If TRUE, all games in a single experiment uses the same boot files"));
-    baseTypes.put(seedId, new Type(seedId, Integer.class, null,
-        "If not set, no seed file will be used"));
     baseTypes.put(location, new Type(location, String.class));
     baseTypes.put(simStartDate, new Type(simStartDate, String.class, null,
         "If not set, a random value will be used for all games in the set"));
@@ -207,13 +200,6 @@ public class Type
     if (pomList.size() > 0) {
       baseTypes.get(pomId).preset =
           pomList.toString().replace("[", "").replace("]", "");
-    }
-
-    List<Integer> seedList = Seed.getSeedIds();
-    if (seedList.size() > 0) {
-      baseTypes.get(seedId).preset = seedList.stream()
-          .map(Object::toString)
-          .collect(Collectors.joining(", "));
     }
 
     List<Location> locList = Location.getLocationList();
@@ -397,7 +383,7 @@ public class Type
   public static List<Type> getGameTypes ()
   {
     return Arrays.asList(Type.pomId(), Type.location(),
-        Type.simStartDate(), Type.gameLength(), Type.seedId());
+        Type.simStartDate(), Type.gameLength());
   }
 
   static {
