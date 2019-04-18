@@ -13,17 +13,17 @@ import javax.annotation.PreDestroy;
 import javax.faces.bean.ManagedBean;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 
 @ManagedBean
@@ -31,22 +31,23 @@ import java.util.concurrent.TimeUnit;
 public class CheckWeatherServer implements InitializingBean
 {
   private static Logger log = Utils.getLogger();
-  private static String status = "";
-  private final Properties properties;
-  private Timer weatherServerCheckerTimer;
-  private boolean mailed;
 
   @Autowired
-  public CheckWeatherServer (Properties properties)
+  private Properties properties;
+
+  private String weatherServerLocation = "";
+  private static String status = "";
+  private Timer weatherServerCheckerTimer = null;
+  private boolean mailed;
+
+  public CheckWeatherServer ()
   {
     super();
-    this.properties = properties;
   }
 
-  public void afterPropertiesSet ()
+  public void afterPropertiesSet () throws Exception
   {
-    Executors.newScheduledThreadPool(1)
-        .schedule(this::lazyStart, 10, TimeUnit.SECONDS);
+    lazyStart();
   }
 
   private void lazyStart ()
@@ -72,11 +73,14 @@ public class CheckWeatherServer implements InitializingBean
     log.info("Checking WeatherService");
     InputStream is = null;
     try {
-      URL url = new URL(getWeatherServerLocation());
-      URLConnection conn = url.openConnection();
+      HttpURLConnection conn = getConnection("");
       is = conn.getInputStream();
+      BufferedReader rd = new BufferedReader(new InputStreamReader(is));
+      while (rd.readLine() != null) {
+      }
+      rd.close();
 
-      int status = ((HttpURLConnection) conn).getResponseCode();
+      int status = conn.getResponseCode();
       if (status == 200) {
         setStatus("Server Alive and Well");
         log.info("Server Alive and Well");
@@ -95,9 +99,8 @@ public class CheckWeatherServer implements InitializingBean
       }
     }
     catch (Exception e) {
-      e.printStackTrace();
       setStatus("Server Timeout or Network Error");
-      log.debug("Server Timeout or Network Error");
+      log.info("Server Timeout or Network Error");
 
       if (!mailed) {
         String msg = "Server Timeout or Network Error during Weather Server ping";
@@ -122,12 +125,11 @@ public class CheckWeatherServer implements InitializingBean
   {
     // Check the available weather locations at startup
     try {
-      String url = String.format("%s?type=showLocations",
-          getWeatherServerLocation());
+      HttpURLConnection conn = getConnection("?type=showLocations");
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
       DocumentBuilder docB = dbf.newDocumentBuilder();
-      Document doc = docB.parse(new URL(url).openStream());
+      Document doc = docB.parse(conn.getInputStream());
       NodeList nodeList = doc.getElementsByTagName("location");
 
       List<Location> availableLocations = new ArrayList<>();
@@ -150,28 +152,48 @@ public class CheckWeatherServer implements InitializingBean
       MemStore.setAvailableLocations(availableLocations);
     }
     catch (Exception e) {
-      e.printStackTrace();
+      log.info("Server Timeout or Network Error");
     }
   }
 
-  @PreDestroy
-  private void cleanUp ()
+  private HttpURLConnection getConnection (String path) throws IOException
   {
+    URL url = new URL(getWeatherServerLocation() + path);
+
+    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+    HttpURLConnection.setFollowRedirects(false);
+    conn.setConnectTimeout(10 * 1000);
+    conn.connect();
+
+    return conn;
+  }
+
+  @PreDestroy
+  private void cleanUp () throws Exception
+  {
+    log.info("Spring Container is destroyed! CheckWeatherServer clean up");
+
     if (weatherServerCheckerTimer != null) {
       weatherServerCheckerTimer.cancel();
       weatherServerCheckerTimer.purge();
       weatherServerCheckerTimer = null;
       log.info("Stopping weatherServerCheckerTimer ...");
     }
-    else {
-      log.warn("weatherServerCheckerTimer Already Stopped");
-    }
   }
 
   //<editor-fold desc="Setters and Getters">
   public String getWeatherServerLocation ()
   {
-    return "http://wolf31.ict.eur.nl:8080/WeatherServer/faces/index.xhtml";
+    if (weatherServerLocation.equals("")) {
+      setWeatherServerLocation(properties.getProperty("weatherServerLocation"));
+    }
+
+    return weatherServerLocation;
+  }
+
+  public void setWeatherServerLocation (String weatherServerLocation)
+  {
+    this.weatherServerLocation = weatherServerLocation;
   }
 
   public String getStatus ()

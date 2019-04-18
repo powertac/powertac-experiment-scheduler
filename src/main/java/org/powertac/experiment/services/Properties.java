@@ -20,11 +20,8 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -44,11 +41,6 @@ public class Properties
   private java.util.Properties properties = new java.util.Properties();
   private boolean loaded = false;
   private List<String> messages = new ArrayList<>();
-
-  public static Properties getProperties ()
-  {
-    return (Properties) SpringApplicationContext.getBean("properties");
-  }
 
   // delegate to props
   public String getProperty (String key)
@@ -195,31 +187,9 @@ public class Properties
 
   private void checkJenkinsLocation ()
   {
-    InputStream is = null;
-    try {
-      URL url = new URL(properties.getProperty("jenkins.location"));
-      URLConnection conn = url.openConnection();
-      is = conn.getInputStream();
-      if (is == null) {
-        throw new Exception("Couldn't open Jenkins Location");
-      }
-    }
-    catch (Exception e) {
-      e.printStackTrace();
-      String msg = "Jenkins Location could not be reached!";
-      if (!messages.contains(msg)) {
-        messages.add(msg);
-      }
-    }
-    finally {
-      if (is != null) {
-        try {
-          is.close();
-        }
-        catch (Exception e) {
-          e.printStackTrace();
-        }
-      }
+    String msg = JenkinsConnector.checkJenkinsLocation();
+    if (msg != null && !messages.contains(msg)) {
+      messages.add(msg);
     }
   }
 
@@ -250,5 +220,10 @@ public class Properties
       messages.add(msg);
       properties.setProperty(name, catalinaBase);
     }
+  }
+
+  public static Properties getProperties ()
+  {
+    return (Properties) SpringApplicationContext.getBean("properties");
   }
 }

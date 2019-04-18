@@ -1,48 +1,31 @@
 #!/bin/bash
 
-HOST="localhost:8080"
+HOST="192.168.56.101:8080"
+USER="admin"
+TOKEN="1186ff617e130303ef797a99a8db55dd2e"
 
-if [ "$#" -eq "0" ]; then
-  echo "No arguments given. Using default values."
-elif [ "$#" -eq "1" ]; then
-  HOST=$1
-fi
+AUTH=$USER:$TOKEN
+URL="http://"$HOST"/jenkins/createItem?name=JOBNAME"
+PAYLOAD="--data-binary @FILENAME -H Content-Type:text/xml"
 
-echo "Configuring Jenkins Boot Job..."
-status=`curl -o /dev/null --write-out %{http_code} --upload-file ./config.boot.xml -H Content-Type:text/xml http://$HOST/jenkins/createItem?name=start-boot-server&mode=create`
-if [ "$status" != "200" ] ; then
-    echo -e "\nConfiguration of start-boot-server Failed!" $status
-else
-    echo -e "\nConfiguration of start-boot-server Success!" $status
-fi
+install () {
+    echo -e "\nConfiguring $1 Job..."
+    url="${URL/JOBNAME/$1}"
+    payload="${PAYLOAD/FILENAME/$2}"
+    cmd="curl -s --write-out %{http_code} -XPOST $payload -u $AUTH $url"
 
-echo
-echo -e "\n\nConfiguring Jenkins Start Job...\n"
-status=`curl -o /dev/null --write-out %{http_code} --upload-file ./config.sim.xml -H Content-Type:text/xml http://$HOST/jenkins/createItem?name=start-sim-server&mode=create`
-if [ "$status" != "200" ] ; then
-    echo -e "\nConfiguration of start-sim-server Failed!" $status
-else
-    echo -e "\nConfiguration of start-sim-server Success!" $status
-fi
+    status=`$cmd`
+    if [ "$status" != "200" ] ; then
+        echo "Configuration of $1 Failed!"
+    else
+        echo "Configuration of $1 Success!"
+    fi
+}
 
-echo -e "\n\nConfiguring Jenkins Abort Job..."
-status=`curl -o /dev/null --write-out %{http_code} --upload-file ./config.abort.xml -H Content-Type:text/xml http://$HOST/jenkins/createItem?name=abort-server-instance&mode=create`
+install abort-server-instance config.abort.xml
+install start-agent           config.agent.xml
+install start-boot-server     config.boot.xml
+install kill-server-instance  config.kill.xml
+install start-sim-server      config.sim.xml
 
-if [ "$status" != "200" ] ; then
-    echo -e "\nConfiguring abort-server-instance Failed!" $status
-    exit 1
-else
-    echo -e "\nConfiguring abort-server-instance Success!" $status
-fi
-
-echo -e "\n\nConfiguring Jenkins Kill Job..."
-status=`curl -o /dev/null --write-out %{http_code} --upload-file ./config.kill.xml -H Content-Type:text/xml http://$HOST/jenkins/createItem?name=kill-server-instance&mode=create`
-
-if [ "$status" != "200" ] ; then
-    echo -e "\nConfiguring kill-server-instance Failed!" $status
-    exit 1
-else
-    echo -e "\nConfiguring kill-server-instance Success!" $status
-fi
-
-echo "done."
+echo -e "\ndone"
