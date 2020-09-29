@@ -1,0 +1,8 @@
+{
+  "type": "Set server parameter",
+  "mutation": {
+    "parameters": [
+      {"key": "common.competition.simulationTimeslotSeconds", "value": "1"}
+    ]
+  }
+}

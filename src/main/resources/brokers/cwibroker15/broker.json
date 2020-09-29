@@ -1,0 +1,5 @@
+{
+  "name": "CwiBroker15",
+  "image": "cwibroker15:latest",
+  "disabled": true
+}

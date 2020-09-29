@@ -1,0 +1,50 @@
+{
+  "name": "Some Name",
+  "baseline": [
+    {
+      "serverParameters": [
+        {"key": "accounting.accountingService.bankInterest", "value": "0.05"},
+        {"key": "common.competition.simulationBaseTime", "value": "2010-06-06"}
+      ],
+      "brokers": [
+        {
+          "name": "AgentUDE",
+          "version": "2015",
+          "config": {
+            "hans": "1234",
+            "other": "55586"
+          }
+        },
+        {
+          "name": "EWIIS3",
+          "version": "2020.1"
+        },
+        {
+          "name": "CrocodileAgent"
+        }
+      ]
+    }
+  ],
+  "treatments": [
+    {
+      "type": "ServerParameter",
+      "key": "common.competition.simulationTimeslotSeconds",
+      "value": "1"
+    },
+    {
+      "type": "ServerParameter",
+      "key": "common.competition.simulationTimeslotSeconds",
+      "value": "2"
+    },
+    {
+      "type": "ServerParameter",
+      "key": "common.competition.simulationTimeslotSeconds",
+      "value": "3"
+    },
+    {
+      "type": "ServerParameter",
+      "key": "common.competition.simulationTimeslotSeconds",
+      "value": "4"
+    }
+  ]
+}

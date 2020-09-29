@@ -1,0 +1,14 @@
+DOCKER_OPTIONS:
+   these are options for the `docker run` command
+   you can find a detailed description of all options in the docker documentation:
+   https://docs.docker.com/engine/reference/commandline/run/
+
+   In the beginning you probably want to use the `-v` option which allows you to bind the /data/bootstrap/ directory
+   of the container to a local directory.
+
+   If you want to remove the docker container after it has completed its task, use the `--rm` option. It will remove
+   the container and the volumes assigned to it when it's done.
+
+VERSION:
+    the version of the server you want to use; if you don't know which to use `latest` is a good start.
+
