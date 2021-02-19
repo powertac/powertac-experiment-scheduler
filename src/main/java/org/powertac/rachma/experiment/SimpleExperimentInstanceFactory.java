@@ -20,13 +20,29 @@ public class SimpleExperimentInstanceFactory implements ExperimentInstanceFactor
     @Override
     public List<Instance> createInstances(Experiment experiment) {
         List<Instance> instances = new ArrayList<>();
+        int baselineIndex = 0;
         for (Instance baselineInstance : experiment.getBaseline()) {
+            int treatmentIndex = 0;
             for (Treatment treatment : experiment.getTreatments()) {
-                Instance instanceCopy = instanceDuplicator.createCopy(baselineInstance);
+                String name = getInstanceName(experiment.getName(), baselineIndex, treatmentIndex);
+                Instance instanceCopy = instanceDuplicator.createNamedCopy(name, baselineInstance);
                 instances.add(treatment.mutate(instanceCopy));
+                treatmentIndex++;
             }
+            baselineIndex++;
         }
         return instances;
+    }
+
+    private String getInstanceName(String experimentName, int baselineIndex, int treatmentIndex) {
+        return String.format("%s - %s%d",
+            experimentName,
+            getAlphaIndex(baselineIndex),
+            treatmentIndex);
+    }
+
+    private Character getAlphaIndex(int index) {
+        return "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray()[index % 26];
     }
 
 }

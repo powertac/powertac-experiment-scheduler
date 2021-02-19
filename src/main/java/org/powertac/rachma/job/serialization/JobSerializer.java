@@ -3,10 +3,10 @@ package org.powertac.rachma.job.serialization;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.job.Job;
 import org.powertac.rachma.powertac.broker.Broker;
 import org.powertac.rachma.powertac.broker.BrokerImpl;
-import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.powertac.simulation.SimulationJob;
 import org.powertac.rachma.util.IdGenerator;
 
@@ -37,6 +37,8 @@ public class JobSerializer extends StdSerializer<Job> {
                 writeSimulationJobFields((SimulationJob) job, jsonGenerator, serializerProvider);
             }
             serializerProvider.defaultSerializeField("status", job.getStatus(), jsonGenerator);
+            writeFilesField(jsonGenerator, job.getFiles());
+            serializerProvider.defaultSerializeField("experiment", job.getExperiment(), jsonGenerator);
             jsonGenerator.writeEndObject();
         }
     }
@@ -89,6 +91,16 @@ public class JobSerializer extends StdSerializer<Job> {
             brokerType.getName(),
             brokerType
         );
+    }
+
+    private void writeFilesField(JsonGenerator gen, Map<String, Path> files) throws IOException {
+        gen.writeObjectFieldStart("files");
+        for (Map.Entry<String, Path> file : files.entrySet()) {
+            if (Files.exists(file.getValue())) {
+                gen.writeStringField(file.getKey(), file.getValue().toString());
+            }
+        }
+        gen.writeEndObject();
     }
 
     @Deprecated

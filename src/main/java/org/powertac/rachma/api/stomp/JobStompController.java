@@ -9,6 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
+/**
+ * @deprecated use REST controller instead
+ * @see org.powertac.rachma.api.rest.GameController
+ */
+@Deprecated
 @Controller
 public class JobStompController {
 

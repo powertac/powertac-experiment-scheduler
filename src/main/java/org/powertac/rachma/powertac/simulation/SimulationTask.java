@@ -7,6 +7,8 @@ import org.powertac.rachma.powertac.server.ServerTask;
 import org.powertac.rachma.resource.WorkDirectory;
 import org.powertac.rachma.task.AbstractTask;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

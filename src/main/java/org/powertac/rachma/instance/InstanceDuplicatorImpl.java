@@ -23,6 +23,17 @@ public class InstanceDuplicatorImpl implements InstanceDuplicator {
     public Instance createCopy(Instance instance) {
         return new InstanceImpl(
             idProvider.getAnyId(),
+            instance.getName(),
+            copyBrokers(instance.getBrokers()),
+            copyServerParameters(instance.getServerParameters()));
+    }
+
+    @Override
+    // TODO : add test
+    public Instance createNamedCopy(String name, Instance instance) {
+        return new InstanceImpl(
+            idProvider.getAnyId(),
+            name,
             copyBrokers(instance.getBrokers()),
             copyServerParameters(instance.getServerParameters()));
     }
@@ -34,8 +45,6 @@ public class InstanceDuplicatorImpl implements InstanceDuplicator {
     }
 
     private ServerParameters copyServerParameters(ServerParameters serverParameters) {
-        return new TransientServerParameters(
-            new HashMap<>(
-                serverParameters.getParameters()));
+        return new TransientServerParameters(new HashMap<>(serverParameters.getParameters()));
     }
 }

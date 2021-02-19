@@ -23,12 +23,9 @@ public class BrokerContainerSpecificationFactory {
     @Value("${container.directory.base}")
     private String containerBaseDir;
 
-    public DockerContainerSpec createSpecification(Task task, BrokerType brokerType)
-        throws IOException {
-
-        SharedFile sharedPropertiesFile = createSharedPropertiesFile(task.getWorkDirectory(), brokerType);
+    public DockerContainerSpec createSpecification(Task task, BrokerType brokerType) throws IOException {
+        SharedFile sharedPropertiesFile = createSharedPropertiesFile(task.getJob().getWorkDirectory(), brokerType);
         BrokerDockerContainerCommand command = createCommand(sharedPropertiesFile);
-
         return DockerContainerSpec.builder()
             .image(brokerType.getImage())
             .file(sharedPropertiesFile)
@@ -64,8 +61,9 @@ public class BrokerContainerSpecificationFactory {
         return String.format("%s.%s", brokerType.getName(), task.getId());
     }
 
+    // TODO : duplicate of SimulationTaskContainerSpecificationFactory::getNetworkName()
     private String getNetworkName(Task task) {
-        return String.format("sim.%s", task.getId());
+        return String.format("sim.%s", task.getJob().getId());
     }
 
     private String getPropertiesFileName(BrokerType brokerType) {

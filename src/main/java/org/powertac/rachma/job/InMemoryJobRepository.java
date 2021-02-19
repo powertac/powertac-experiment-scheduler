@@ -2,11 +2,10 @@ package org.powertac.rachma.job;
 
 import org.apache.commons.lang.NotImplementedException;
 import org.powertac.rachma.job.exception.JobNotFoundException;
-import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Service
+@Deprecated
 public class InMemoryJobRepository implements JobRepository {
 
     private Map<String, Job> jobs = new HashMap<>();
@@ -20,12 +19,17 @@ public class InMemoryJobRepository implements JobRepository {
     }
 
     @Override
-    public Set<Job> findAllQueuedJobs() {
+    public Set<Job> findQueuedJobs() {
         throw new NotImplementedException("This method should not be called!");
     }
 
     @Override
-    public List<Job> list() {
+    public Set<Job> findRunningJobs() {
+        throw new NotImplementedException("This method should not be called!");
+    }
+
+    @Override
+    public List<Job> findAll() {
         return new ArrayList<>(jobs.values());
     }
 

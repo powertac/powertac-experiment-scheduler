@@ -1,5 +1,6 @@
 package org.powertac.rachma;
 
+import org.powertac.rachma.docker.network.DockerNetworkCleaner;
 import org.powertac.rachma.job.JobSchedulerInitializer;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
@@ -11,6 +12,10 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.scheduling.annotation.EnableScheduling;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
 @EnableScheduling
@@ -55,7 +60,10 @@ public class RachmaApplication implements ApplicationRunner, ApplicationContextA
     @Override
     public void run(ApplicationArguments args) {
         final JobSchedulerInitializer schedulerInitializer = context.getBean(JobSchedulerInitializer.class);
+        final DockerNetworkCleaner networkCleaner = context.getBean(DockerNetworkCleaner.class);
+        final ScheduledExecutorService networkCleanupExecutor = Executors.newSingleThreadScheduledExecutor();
         schedulerInitializer.initialize();
+        networkCleanupExecutor.scheduleAtFixedRate(networkCleaner::removeOrphanedNetworks, 0, 30, TimeUnit.MINUTES);
     }
 
 }

@@ -20,9 +20,10 @@ public class InstanceDeserializer extends StdNodeBasedDeserializer<Instance> {
 
     @Override
     public Instance convert(JsonNode root, DeserializationContext context) throws IOException {
+        String name = root.has("name") ? root.get("name").asText() : null;
         Set<Broker> brokers = parseBrokers(root, context);
         ServerParameters serverParameters = parseServerParameters(root);
-        return new InstanceImpl(brokers, serverParameters);
+        return new InstanceImpl(name, brokers, serverParameters);
     }
 
     private ServerParameters parseServerParameters(JsonNode root) {

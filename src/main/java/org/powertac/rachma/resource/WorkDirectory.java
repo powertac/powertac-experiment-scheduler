@@ -5,6 +5,7 @@ import lombok.Getter;
 import java.io.File;
 
 // TODO : merge with sharedDirectory ... because its basically the same...
+// TODO : ... or just get rid of this concept... in the end it's clumsy and somewhat overengineered
 public class WorkDirectory {
 
     @Getter

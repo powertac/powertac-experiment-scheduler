@@ -39,12 +39,10 @@ public class BootstrapContainerSpecificationFactory extends AbstractServerContai
         return sharedBootstrapFile;
     }
 
-    private DockerContainerSpec createSpecification(BootstrapTask task) throws NotFoundException, IOException {
-
+    private DockerContainerSpec createSpecification(BootstrapTask task) throws IOException {
         SharedFile bootstrapFile = createSharedBootstrapFile(task);
-        SharedFile propertiesFile = createSharedPropertiesFile(task, getPropertiesFileName());
+        SharedFile propertiesFile = createSharedPropertiesFile(task, getPropertiesFileName(task));
         ServerDockerContainerCommand command = createCommand(bootstrapFile, propertiesFile);
-
         return DockerContainerSpec.builder()
             .image(defaultServerImageTag)
             .name(getContainerName(task))
@@ -61,12 +59,12 @@ public class BootstrapContainerSpecificationFactory extends AbstractServerContai
             .build();
     }
 
-    private String getPropertiesFileName() {
-        return "bootstrap.properties";
+    private String getPropertiesFileName(BootstrapTask task) {
+        return String.format("%s.bootstrap.properties", task.getJob().getId());
     }
 
     private String getContainerName(BootstrapTask task) {
-        return String.format("boot.%s", task.getId());
+        return String.format("boot.%s", task.getJob().getId());
     }
 
 }

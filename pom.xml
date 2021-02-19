@@ -25,15 +25,15 @@
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java</artifactId>
-            <version>3.1.5</version>
+            <version>3.2.7</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.8</version>
+            <version>1.18.16</version>
             <scope>provided</scope>
         </dependency>
-        <!-- Spring (Boot) -->
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -54,20 +54,13 @@
             <artifactId>spring-data-mongodb</artifactId>
             <version>2.2.7.RELEASE</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>28.2-jre</version>
-        </dependency>
-        <!-- backwards compatibility -->
+        <!-- dependency for docker-java or more precisely jersey 2.27;
+             broke after migration to java 11;
+             TODO : update to new docker-java transport scheme and remove this dependency -->
         <dependency>
             <groupId>javax.activation</groupId>
             <artifactId>activation</artifactId>
             <version>1.1.1</version>
-            <!-- dependency for docker-java or more precisely jersey 2.27;
-                 broke after migration to java 11;
-                 TODO : check again later if this fix is still required
-             -->
         </dependency>
         <!-- Testing dependencies -->
         <dependency>
@@ -83,6 +76,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
     <build>
         <plugins>
             <plugin>
@@ -112,6 +106,14 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <configuration>
+                    <mainClass>org.powertac.rachma.RachmaApplication</mainClass>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
+
 </project>

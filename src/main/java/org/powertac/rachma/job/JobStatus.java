@@ -15,4 +15,6 @@ public interface JobStatus {
     void setCompleted();
     void setFailed();
 
+    boolean isFinished();
+
 }

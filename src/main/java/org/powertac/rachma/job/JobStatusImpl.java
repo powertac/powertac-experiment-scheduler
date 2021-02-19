@@ -57,6 +57,11 @@ public class JobStatusImpl implements JobStatus {
         return Duration.between(start, end).abs().toMillis();
     }
 
+    @Override
+    public boolean isFinished() {
+        return state.equals(JobState.COMPLETED) || state.equals(JobState.FAILED);
+    }
+
     private void start() {
         start = Instant.now();
     }

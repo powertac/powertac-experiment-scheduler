@@ -42,18 +42,19 @@ public class ExperimentRestController {
     }
 
     @GetMapping("/")
-    public Object getExperiment() {
+    public Object getExperiments() {
+        List<Experiment> exps = experimentRepository.findAll();
         try {
             return new Object() {
-                @Getter boolean success = true;
-                @Getter List<Experiment> experiments = experimentRepository.findAll();
+                @Getter final boolean success = true;
+                @Getter final List<Experiment> experiments = exps;
             };
         }
         catch (Exception e) {
             // TODO : send correct status code
             return new Object() {
-                @Getter boolean success = false;
-                @Getter String error = e.getMessage();
+                @Getter final boolean success = false;
+                @Getter final String error = e.getMessage();
             };
         }
     }
@@ -70,14 +71,14 @@ public class ExperimentRestController {
             jobRepository.addAll(jobs);
             jobScheduler.schedule(jobs);
             return new Object() {
-                @Getter boolean success = true;
+                @Getter final boolean success = true;
             };
         }
         catch (Exception e) {
             // TODO : send correct status code
             return new Object() {
-                @Getter boolean success = false;
-                @Getter String error = e.getMessage();
+                @Getter final boolean success = false;
+                @Getter final String error = e.getMessage();
             };
         }
     }

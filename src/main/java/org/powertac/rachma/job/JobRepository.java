@@ -9,8 +9,9 @@ import java.util.Set;
 public interface JobRepository {
 
     Job find(String id) throws JobNotFoundException;
-    Set<Job> findAllQueuedJobs();
-    List<Job> list();
+    Set<Job> findQueuedJobs();
+    Set<Job> findRunningJobs();
+    List<Job> findAll();
     void add(Job job);
     void addAll(Collection<Job> jobs);
     void update(Job job);

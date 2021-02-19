@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
 import org.powertac.rachma.api.request.CreateJobRequest;
+import org.powertac.rachma.experiment.ExperimentRepository;
 import org.powertac.rachma.job.Job;
 import org.powertac.rachma.job.JobRepository;
 import org.powertac.rachma.job.JobScheduler;
@@ -30,27 +31,26 @@ public class JobRestController {
     private final JobScheduler jobScheduler;
     private final SimulationJobFactory simulationJobFactory;
     private final ObjectMapper mapper;
+    private final ExperimentRepository experimentRepository;
 
     @Autowired
-    public JobRestController(JobRepository jobRepository, JobScheduler jobScheduler, SimulationJobFactory simulationJobFactory, ObjectMapper mapper) {
+    public JobRestController(JobRepository jobRepository, JobScheduler jobScheduler, SimulationJobFactory simulationJobFactory, ObjectMapper mapper, ExperimentRepository experimentRepository) {
         this.jobRepository = jobRepository;
         this.jobScheduler = jobScheduler;
         this.simulationJobFactory = simulationJobFactory;
         this.mapper = mapper;
+        this.experimentRepository = experimentRepository;
     }
 
     @PostMapping("/simulation")
     public Object createJob(@RequestBody CreateJobRequest jobRequest) {
         try {
-            SimulationJob newJob = simulationJobFactory.create(jobRequest.getName(), jobRequest.getBrokers(),
-                jobRequest.getParams());
-
+            SimulationJob newJob = simulationJobFactory.create(jobRequest.getName(), jobRequest.getBrokers(), jobRequest.getParams());
             jobRepository.add(newJob);
             jobScheduler.schedule(newJob);
-
             return new Object() {
-                @Getter boolean success = true;
-                @Getter Job job = newJob;
+                @Getter final boolean success = true;
+                @Getter final Job job = newJob;
             };
         }
         catch (Exception e) {
@@ -63,9 +63,14 @@ public class JobRestController {
 
     @GetMapping("/")
     public Object getJobs() {
+        List<Job> jobs = jobRepository.findAll();
+        // TODO : make experiment <-> job mapping explicit; 0.1.2 refactor
+        for (Job job : jobs) {
+            job.setExperiment(experimentRepository.findByInstanceId(job.getId()));
+        }
         return new Object() {
-            @Getter boolean success = true;
-            @Getter List<Job> payload = jobRepository.list();
+            @Getter final boolean success = true;
+            @Getter final List<Job> payload = jobs;
         };
     }
 

@@ -19,12 +19,23 @@ public class JobSchedulerInitializer {
     }
 
     public void initialize() {
+        updateFailedJobs();
         scheduleQueuedJobs();
         startScheduler();
     }
 
+    private void updateFailedJobs() {
+        for (Job job : jobRepository.findRunningJobs()) {
+            // TODO : this is just a workaround that assumes that all jobs that were still running at the time the
+            //        orchestrator shut down are assumed to have failed; Update in version 0.1.2 with new execution
+            //        model
+            job.getStatus().setFailed();
+            jobRepository.update(job);
+        }
+    }
+
     private void scheduleQueuedJobs() {
-        for (Job job : jobRepository.findAllQueuedJobs()) {
+        for (Job job : jobRepository.findQueuedJobs()) {
             try {
                 scheduler.schedule(job);
             }
@@ -35,6 +46,7 @@ public class JobSchedulerInitializer {
     }
 
     private void startScheduler() {
+        // TODO : refactor ... this uses implicit behaviour (tasks being delayed until thread becomes free)
         final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(scheduler::runNextJob, 0, 1, TimeUnit.SECONDS);
     }

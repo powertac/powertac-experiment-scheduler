@@ -1,4 +1,5 @@
 {
+  "name": "Test Game One",
   "serverParameters": [
     {"key": "accounting.accountingService.bankInterest", "value": "0.05"},
     {"key": "common.competition.simulationBaseTime", "value": "2010-06-06"}

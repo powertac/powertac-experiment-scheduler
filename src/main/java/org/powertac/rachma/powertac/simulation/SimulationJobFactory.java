@@ -38,13 +38,7 @@ public class SimulationJobFactory implements JobFactory<SimulationJob> {
 
     public SimulationJob create(String name, List<String> brokerNames, Set<ConfigurationParameter> simulationParameters)
             throws BrokerNotFoundException, ParameterValidationException, IOException {
-        SimulationJob job = new SimulationJob();
-        job.setId(idProvider.getAnyId());
-        job.setName(name);
-        job.setWorkDirectory(workDirectoryManager.create(job));
-        job.setBootstrapTask(createBootstrapTask(job));
-        job.setSimulationTask(simulationTaskFactory.create(job, brokerNames, parseConfigMap(simulationParameters)));
-        return job;
+        return create(idProvider.getAnyId(), name, brokerNames, simulationParameters);
     }
 
     @Override
@@ -53,11 +47,23 @@ public class SimulationJobFactory implements JobFactory<SimulationJob> {
             .map(Broker::getName)
             .collect(Collectors.toList());
         Set<ConfigurationParameter> configurationParameters = instance.getServerParameters().toConfigurationParameterSet();
-        // TODO : how to derive/pass name for instance?
+        // TODO : using the same ID for both Job and Instance is well ... this should be dealt with in 0.1.2
         return create(
-            "any name",
+            instance.getId(),
+            instance.getName(),
             brokerNames,
             configurationParameters);
+    }
+
+    private SimulationJob create(String id, String name, List<String> brokerNames, Set<ConfigurationParameter> simulationParameters)
+        throws BrokerNotFoundException, ParameterValidationException, IOException {
+        SimulationJob job = new SimulationJob();
+        job.setId(id);
+        job.setName(name);
+        job.setWorkDirectory(workDirectoryManager.create(job));
+        job.setBootstrapTask(createBootstrapTask(job));
+        job.setSimulationTask(simulationTaskFactory.create(job, brokerNames, parseConfigMap(simulationParameters)));
+        return job;
     }
 
     private BootstrapTask createBootstrapTask(Job job) {

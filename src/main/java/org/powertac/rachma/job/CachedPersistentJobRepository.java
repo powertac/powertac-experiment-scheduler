@@ -1,17 +1,18 @@
 package org.powertac.rachma.job;
 
 import org.powertac.rachma.job.exception.JobNotFoundException;
+import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 // TODO : add caching
-
-@Service
+@Component
 public class CachedPersistentJobRepository implements JobRepository {
 
     private final MongoRepository<Job, String> mongoRepository;
@@ -32,7 +33,7 @@ public class CachedPersistentJobRepository implements JobRepository {
     }
 
     @Override
-    public Set<Job> findAllQueuedJobs() {
+    public Set<Job> findQueuedJobs() {
         Query query = new Query();
         query.addCriteria(Criteria.where("status.state").is(JobState.QUEUED.toString()));
         List<Job> queuedJobs = mongoTemplate.find(query, Job.class, "job");
@@ -40,7 +41,15 @@ public class CachedPersistentJobRepository implements JobRepository {
     }
 
     @Override
-    public List<Job> list() {
+    public Set<Job> findRunningJobs() {
+        Query query = new Query();
+        query.addCriteria(Criteria.where("status.state").is(JobState.RUNNING.toString()));
+        List<Job> queuedJobs = mongoTemplate.find(query, Job.class, "job");
+        return new HashSet<>(queuedJobs);
+    }
+
+    @Override
+    public List<Job> findAll() {
         return mongoRepository.findAll();
     }
 

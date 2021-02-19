@@ -10,7 +10,9 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PreDestroy;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class ApiDrivenDockerNetworkRepository implements DockerNetworkRepository {
@@ -25,6 +27,12 @@ public class ApiDrivenDockerNetworkRepository implements DockerNetworkRepository
         this.dockerClient = dockerClient;
     }
 
+    @Override
+    public Set<DockerNetwork> findAll() throws DockerException {
+        return new HashSet<>(managedNetworks.values());
+    }
+
+    @Override
     public DockerNetwork createNetwork(String name) throws DockerException {
         CreateNetworkResponse response = dockerClient.createNetworkCmd()
             .withDriver(defaultDriver)
@@ -35,6 +43,7 @@ public class ApiDrivenDockerNetworkRepository implements DockerNetworkRepository
         return network;
     }
 
+    @Override
     public DockerNetwork findByName(String name) throws NotFoundException, DockerException {
         DockerNetwork network = dockerClient.listNetworksCmd()
             .withNameFilter(name)
@@ -49,6 +58,7 @@ public class ApiDrivenDockerNetworkRepository implements DockerNetworkRepository
         throw new NotFoundException(String.format("No network found with name '%s'", name));
     }
 
+    @Override
     public void removeNetwork(DockerNetwork network) throws DockerException {
         dockerClient.removeNetworkCmd(network.getId()).exec();
         managedNetworks.remove(network.getName());

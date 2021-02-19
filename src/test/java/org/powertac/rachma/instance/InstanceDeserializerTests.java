@@ -17,6 +17,14 @@ import java.util.Set;
 class InstanceDeserializerTests {
 
     @Test
+    void NameIsDeserializedCorrectlyTest() throws IOException {
+        Instance instance = getMapper().readValue(
+            TestHelper.getContent("/instance.json"),
+            Instance.class);
+        Assertions.assertEquals("Test Game One", instance.getName());
+    }
+
+    @Test
     void brokersAreDeserializedCorrectlyTest() throws IOException {
         Instance instance = getMapper().readValue(
             TestHelper.getContent("/instance.json"),

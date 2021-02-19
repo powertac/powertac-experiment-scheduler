@@ -8,13 +8,9 @@ import java.util.List;
 public interface Experiment {
 
     String getHash();
-
     String getName();
-
     List<Instance> getBaseline();
-
     List<Treatment> getTreatments();
-
     List<Instance> getInstances();
 
 }

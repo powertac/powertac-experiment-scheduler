@@ -27,13 +27,13 @@ public abstract class AbstractServerContainerSpecificationFactory<T extends Serv
             .localDirectory(task.getJob().getWorkDirectory().getLocalDirectory())
             .hostDirectory(task.getJob().getWorkDirectory().getHostDirectory())
             .containerDirectory(containerBaseDir)
-            .file("bootstrap.xml")
+            .file(getBootstrapFileName(task))
             .build();
     }
 
     protected SharedFile createSharedPropertiesFile(T task, String propertiesFileName) throws IOException {
         return SharedPropertiesFileBuilder.newFile()
-            .workDirectory(task.getWorkDirectory())
+            .workDirectory(task.getJob().getWorkDirectory())
             .containerDirectory(containerBaseDir)
             .file(propertiesFileName)
             .properties(getDefaultProperties())
@@ -45,6 +45,10 @@ public abstract class AbstractServerContainerSpecificationFactory<T extends Serv
         Properties properties = new Properties();
         properties.load(Files.newInputStream(Paths.get(defaultPropertiesFile)));
         return properties;
+    }
+
+    private String getBootstrapFileName(T task) {
+        return String.format("%s.bootstrap.xml", task.getJob().getId());
     }
 
 }

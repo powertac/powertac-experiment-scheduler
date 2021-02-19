@@ -61,14 +61,12 @@ public class SimulationTaskContainerSpecificationFactory
         return specifications;
     }
 
-    private DockerContainerSpec createServerSpecification(SimulationTask task) throws NotFoundException, IOException {
-
+    private DockerContainerSpec createServerSpecification(SimulationTask task) throws IOException {
         SharedDirectory logDirectory = createLogDirectory(task);
         SharedFile bootstrapFile = createSharedBootstrapFile(task);
-        SharedFile propertiesFile = createSharedPropertiesFile(task, getPropertiesFileName());
+        SharedFile propertiesFile = createSharedPropertiesFile(task, getPropertiesFileName(task));
         List<String> brokerNames = getBrokerNames(task);
         DockerContainerCommand command = createCommand(bootstrapFile, propertiesFile, brokerNames);
-
         return  DockerContainerSpec.builder()
             .image(defaultServerImageTag)
             .name(getContainerName(task))
@@ -93,8 +91,8 @@ public class SimulationTaskContainerSpecificationFactory
 
     private SharedDirectory createLogDirectory(SimulationTask task) {
         return (SharedDirectory) SharedFileBuilder.create()
-            .localDirectory(task.getWorkDirectory().getLocalDirectory())
-            .hostDirectory(task.getWorkDirectory().getHostDirectory())
+            .localDirectory(task.getJob().getWorkDirectory().getLocalDirectory())
+            .hostDirectory(task.getJob().getWorkDirectory().getHostDirectory())
             .containerDirectory(containerBaseDir)
             .directory("log/")
             .build();
@@ -108,16 +106,17 @@ public class SimulationTaskContainerSpecificationFactory
         return Stream.of(serverAliases).collect(Collectors.toSet());
     }
 
-    private String getPropertiesFileName() {
-        return "simulation.properties";
+    private String getPropertiesFileName(Task task) {
+        return String.format("%s.simulation.properties", task.getJob().getId());
     }
 
+    // TODO : duplicate of BrokerContainerSpecificationFactory::getNetworkName()
     private String getNetworkName(Task task) {
-        return String.format("sim.%s", task.getId());
+        return String.format("sim.%s", task.getJob().getId());
     }
 
     private String getContainerName(Task task) {
-        return String.format("sim.%s", task.getId());
+        return String.format("sim.%s", task.getJob().getId());
     }
 
 }
