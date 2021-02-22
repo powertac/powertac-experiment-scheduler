@@ -94,6 +94,7 @@ public class CachedDirectoryBasedBrokerTypeRepository implements BrokerTypeRepos
     private BrokerType createBrokerFromDir(File dir) {
         try {
             BrokerType type = mapper.readValue(new File(dir.getAbsolutePath() + File.separator + descriptorFileName), BrokerType.class);
+            type.setPath(dir.getAbsolutePath());
             return type.isEnabled() ? type : null;
         }
         catch (IOException e) {

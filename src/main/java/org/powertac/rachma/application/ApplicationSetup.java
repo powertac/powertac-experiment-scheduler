@@ -38,9 +38,6 @@ public class ApplicationSetup {
     @Value("${broker.policy.descriptorFileName}")
     private String brokerDescriptorFilename;
 
-    @Value("${broker.baseimage.java}")
-    private String brokerBaseImageJava;
-
     @Autowired
     public ApplicationSetup(DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
                             BrokerTypeRepository brokerTypeRepository, ApplicationStatus status,
@@ -61,7 +58,6 @@ public class ApplicationSetup {
         try {
             workDirectoryManager.createMainDirectoriesAndCopyResourceFiles();
             pullImage(defaultServerImage);
-            pullImage(brokerBaseImageJava);
             buildBrokerImages();
         }
         catch (IOException e) {
@@ -107,12 +103,11 @@ public class ApplicationSetup {
     }
 
     private String getDockerfilePath(BrokerType type) {
-        return String.format("%s%s/Dockerfile", brokerDirectory, type.getName().toLowerCase());
+        return String.format("%s/Dockerfile", type.getPath());
     }
 
     private Set<String> getDefaultImageTags(BrokerType type) {
-        String latestTag = String.format("%s:latest", type.getName().toLowerCase());
-        return Stream.of(latestTag).collect(Collectors.toSet());
+        return Stream.of(type.getImage()).collect(Collectors.toSet());
     }
 
 }

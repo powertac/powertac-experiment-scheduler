@@ -1,4 +1,4 @@
-# PowerTAC Orchestrator Prototype
+# PowerTAC Experiment Scheduler
 
 ## Installation
 
@@ -18,6 +18,12 @@ At this time the Orchestrator setup is only tested on a Linux system. The follow
 ### Orchestrator
 To install the orchestrator download or clone this repository (https://github.com/powertac/powertac-experiment-scheduler).
 
+Now switch to the orchestrator's root directory and run the Maven `install` goal to download the required dependencies and install the orchestrator:
+
+```bash
+$ mvn install
+```
+
 Although there are more configuration options, you'll probably have to edit the MongoDB credentials as well as the base path for the Power TAC files to adapt the orchestrator to your system.
 
 Create a file called `application.properties` in the root folder of the orchestrator and add/edit the parameters below. Please make sure that the path you enter as `directory.local.base` is writeable by the user that will run the orchestrator.
@@ -29,6 +35,11 @@ spring.data.mongodb.username=username
 spring.data.mongodb.password=password
 directory.local.base=/var/opt/powertac/
 ```
+
+### Web UI
+To install the web UI download or clone this repository (https://github.com/powertac/powertac-experiment-scheduler). **TODO: replace with correct link**
+
+Switch to its root directory and run `npm install` to download and install its dependencies.
 
 ### MongoDB configuration
 
@@ -45,11 +56,6 @@ Using the mongodb client you'll first have to authenticate using the admin crede
 > db.createCollection('admin');  
 > db.createUser({ user: "ORCHESTRATOR_USER", pwd: "ORCHESTRATOR_PASSWORD", roles: [{ role: "readWrite", db: "powertac" }], mechanisms: [ "SCRAM-SHA-1", "SCRAM-SHA-256" ]});
 ```
-
-### Web UI
-To install the web UI download or clone the Experiment Scheduler UI repository (https://github.com/powertac/experiment-scheduler-ui).
-
-Switch to its root directory and run `npm install` to download and install its dependencies.
 
 ### Docker
 The orchestrator requires access to the Docker daemon. Therefore the user that will be running the orchestrator needs permissions. Please refer to the Docker documentation for details: https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user.
@@ -85,7 +91,9 @@ To restrict access for the time being, we recommend blocking the orchestrator's 
 
 ## Brokers
 
-At this time there are docker images for the following brokers:
+The orchestrator currently uses json files within the orchestrator's working directory to manage brokers. Options to manage brokers via the web UI will be added in the first update.
+
+At this time the docker images for the following brokers are created during the orchestrator's first startup:
 
 * TUC_TAC_2020
 * AgentUDE17
@@ -93,7 +101,11 @@ At this time there are docker images for the following brokers:
 * CrocodileAgent16
 * Maxon16
 
-The orchestrator currently uses json files within the orchestrator's working directory to manage brokers. Options to manage brokers via the web UI will be added in the first update.
+An image for the EWIIS3 broker is available for download via Docker Hub. You can pull the image with the following command and add the broker as described below.
+
+```bash
+$ docker pull is3cologne/ewiis3:2020-latest
+```
 
 ### Adding broker images
 

@@ -1,4 +1,4 @@
-FROM powertac/broker-base:java
+FROM powertac/broker:java-8
 
 RUN wget http://www.powertac.org/wiki/images/c/c4/Maxon16.zip \
     && unzip -p Maxon16.zip maxon16.jar > maxon16.jar \

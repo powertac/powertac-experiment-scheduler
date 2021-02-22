@@ -1,4 +1,4 @@
-FROM powertac/broker-base:java
+FROM powertac/broker:java-8
 
 COPY broker.json .
 

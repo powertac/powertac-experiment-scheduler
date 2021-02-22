@@ -1,6 +1,10 @@
-FROM powertac/broker-base:java
+FROM powertac/broker:java-8
 
-RUN apk add --update --no-cache R R-dev g++ \
+RUN apt-get update \
+    && apt-get -y install --no-install-recommends build-essential r-base r-base-dev \
+    && apt-get -y autoremove \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/lib/R/packages/ \
     && chmod a+rwx /var/lib/R/packages/ \
     && echo "install.packages('Rserve', lib='/var/lib/R/packages/', repos='http://cran.us.r-project.org')" | R --save

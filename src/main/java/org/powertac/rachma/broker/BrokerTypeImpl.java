@@ -2,6 +2,7 @@ package org.powertac.rachma.broker;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @AllArgsConstructor
 public class BrokerTypeImpl implements BrokerType {
@@ -15,10 +16,20 @@ public class BrokerTypeImpl implements BrokerType {
     @Getter
     private final boolean enabled;
 
+    @Getter
+    @Setter
+    private String path;
+
     public BrokerTypeImpl(String name, String image) {
         this.name = name;
         this.image = image;
         this.enabled = true;
+    }
+
+    public BrokerTypeImpl(String name, String image, boolean isEnabled) {
+        this.name = name;
+        this.image = image;
+        this.enabled = isEnabled;
     }
 
 }
