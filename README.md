@@ -37,7 +37,7 @@ directory.local.base=/var/opt/powertac/
 ```
 
 ### Web UI
-To install the web UI download or clone this repository (https://github.com/powertac/powertac-experiment-scheduler). **TODO: replace with correct link**
+To install the web UI download or clone this repository (https://github.com/powertac/experiment-scheduler-ui).
 
 Switch to its root directory and run `npm install` to download and install its dependencies.
 
