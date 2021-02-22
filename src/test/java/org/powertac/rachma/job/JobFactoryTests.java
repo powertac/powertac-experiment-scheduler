@@ -67,6 +67,7 @@ class JobFactoryTests {
         ServerParameters parameters = new TransientServerParameters(parameterMap);
 
         Instance instance = Mockito.mock(Instance.class);
+        Mockito.when(instance.getId()).thenReturn(id);
         Mockito.when(instance.getBrokers()).thenReturn(brokers);
         Mockito.when(instance.getServerParameters()).thenReturn(parameters);
 
