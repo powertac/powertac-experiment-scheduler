@@ -23,7 +23,9 @@ public class InstanceDeserializer extends StdNodeBasedDeserializer<Instance> {
         String name = root.has("name") ? root.get("name").asText() : null;
         Set<Broker> brokers = parseBrokers(root, context);
         ServerParameters serverParameters = parseServerParameters(root);
-        return new InstanceImpl(name, brokers, serverParameters);
+        String bootstrapFile = root.has("bootstrapFile") ? root.get("bootstrapFile").asText() : null;
+        String seedFile = root.has("seedFile") ? root.get("seedFile").asText() : null;
+        return new InstanceImpl(name, brokers, serverParameters, bootstrapFile, seedFile);
     }
 
     private ServerParameters parseServerParameters(JsonNode root) {

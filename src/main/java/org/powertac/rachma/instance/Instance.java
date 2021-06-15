@@ -12,6 +12,8 @@ public interface Instance extends RunnableEntity {
     String getName();
     ServerParameters getServerParameters();
     Set<Broker> getBrokers();
+    String getBootstrapFile();
+    String getSeedFile();
     JobStatus getStatus();
 
     // TODO : this is just a workaround for the time being

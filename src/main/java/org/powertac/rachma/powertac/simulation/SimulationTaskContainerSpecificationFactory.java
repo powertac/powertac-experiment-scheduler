@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -65,28 +67,35 @@ public class SimulationTaskContainerSpecificationFactory
         SharedDirectory logDirectory = createLogDirectory(task);
         SharedFile bootstrapFile = createSharedBootstrapFile(task);
         SharedFile propertiesFile = createSharedPropertiesFile(task, getPropertiesFileName(task));
+        SharedFile seedFile = createSharedSeedFile(task);
         List<String> brokerNames = getBrokerNames(task);
-        DockerContainerCommand command = createCommand(bootstrapFile, propertiesFile, brokerNames);
-        return  DockerContainerSpec.builder()
+        DockerContainerCommand command = createCommand(bootstrapFile, propertiesFile, brokerNames, seedFile);
+        DockerContainerSpec.DockerContainerSpecBuilder builder = DockerContainerSpec.builder()
             .image(defaultServerImageTag)
             .name(getContainerName(task))
+            .command(command)
             .file(bootstrapFile)
             .file(propertiesFile)
             .directory(logDirectory)
-            .command(command)
             .network(getNetworkName(task))
             .exposedPort(defaultMessageBrokerPort)
-            .aliases(getAliases())
-            .build();
+            .aliases(getAliases());
+        if (null != seedFile) {
+            builder.file(seedFile);
+        }
+        return builder.build();
     }
 
     private ServerDockerContainerCommand createCommand(SharedFile bootstrapFile, SharedFile propertiesFile,
-                                                       List<String> brokerNames) {
-        return ServerContainerCommandBuilder.sim()
-            .withInputFile(bootstrapFile.getContainerPath())
+                                                       List<String> brokerNames, SharedFile seedFile) {
+        ServerContainerCommandBuilder builder = ServerContainerCommandBuilder.sim()
+            .withBootstrapFile(bootstrapFile.getContainerPath())
             .withPropertyFile(propertiesFile.getContainerPath())
-            .withBrokers(brokerNames)
-            .build();
+            .withBrokers(brokerNames);
+        if (null != seedFile) {
+            builder.withSeedFile(seedFile.getContainerPath());
+        }
+        return builder.build();
     }
 
     private SharedDirectory createLogDirectory(SimulationTask task) {
@@ -108,6 +117,38 @@ public class SimulationTaskContainerSpecificationFactory
 
     private String getPropertiesFileName(Task task) {
         return String.format("%s.simulation.properties", task.getJob().getId());
+    }
+
+    protected SharedFile createSharedBootstrapFile(SimulationTask task) throws IOException {
+        if (null != task.getBootstrapFilePath()) {
+            Path bootstrapFilePath = Path.of(task.getBootstrapFilePath());
+            if (!Files.exists(bootstrapFilePath)) {
+                throw new IOException(String.format("bootstrap file '%s' does not exist", bootstrapFilePath));
+            }
+            return SharedFileBuilder.create()
+                .localDirectory(bootstrapFilePath.getParent().toString())  // FIXME : local path = host path
+                .hostDirectory(bootstrapFilePath.getParent().toString())
+                .containerDirectory(containerBaseDir)
+                .file(bootstrapFilePath.getFileName().toString())
+                .build();
+        }
+        return super.createSharedBootstrapFile(task);
+    }
+
+    private SharedFile createSharedSeedFile(SimulationTask task) throws IOException {
+        if (null != task.getSeedFilePath()) {
+            Path seedFilePath = Path.of(task.getSeedFilePath());
+            if (!Files.exists(seedFilePath)) {
+                throw new IOException(String.format("seed file '%s' does not exist", seedFilePath));
+            }
+            return SharedFileBuilder.create()
+                .localDirectory(seedFilePath.getParent().toString()) // FIXME : local path = host path
+                .hostDirectory(seedFilePath.getParent().toString())
+                .containerDirectory(containerBaseDir)
+                .file(seedFilePath.getFileName().toString())
+                .build();
+        }
+        return null;
     }
 
     // TODO : duplicate of BrokerContainerSpecificationFactory::getNetworkName()

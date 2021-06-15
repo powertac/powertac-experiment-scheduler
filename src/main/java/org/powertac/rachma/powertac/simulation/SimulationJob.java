@@ -37,11 +37,20 @@ public class SimulationJob extends AbstractJob implements Job {
     @Override
     public Map<String, Path> getFiles() {
         Map<String, Path> files = new HashMap<>();
-        files.put("bootstrap-file", getJobFile(String.format("%s.bootstrap.xml", getId())));
+        Path bootstrapFile;
+        if (null != simulationTask.getBootstrapFilePath()) {
+            bootstrapFile = Path.of(simulationTask.getBootstrapFilePath());
+        } else {
+            bootstrapFile = getJobFile(String.format("%s.bootstrap.xml", getId()));
+        }
+        files.put("bootstrap-file", bootstrapFile);
         files.put("bootstrap-properties", getJobFile(String.format("%s.bootstrap.properties", getId())));
         files.put("simulation-properties", getJobFile(String.format("%s.simulation.properties", getId())));
         files.put("state-log", getJobFile("log/powertac-sim-0.state"));
         files.put("trace-log", getJobFile("log/powertac-sim-0.trace"));
+        if (null != simulationTask.getSeedFilePath()) {
+            files.put("seed-file", Path.of(simulationTask.getSeedFilePath()));
+        }
         return files;
     }
 

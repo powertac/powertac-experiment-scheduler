@@ -31,6 +31,7 @@ public class ServerDockerContainerCommand implements DockerContainerCommand {
     private String outputFile;
     private String propertyFile;
     private List<String> brokers;
+    private String seedFile;
 
     @Override
     public List<String> toList() {
@@ -59,6 +60,11 @@ public class ServerDockerContainerCommand implements DockerContainerCommand {
         if (!brokers.isEmpty() && command == ServerDockerContainerCommand.COMMAND.SIM) {
             dockerCommand.add("-b");
             dockerCommand.add(String.join(",", brokers));
+        }
+
+        if (null != seedFile && command == ServerDockerContainerCommand.COMMAND.SIM) {
+            dockerCommand.add("-s");
+            dockerCommand.add(seedFile);
         }
 
         return dockerCommand;

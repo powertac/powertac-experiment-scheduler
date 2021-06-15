@@ -56,7 +56,9 @@ public class JobDeserializer extends StdNodeBasedDeserializer<Job> {
     private SimulationTask createSimulationTask(Job job, JsonNode rootNode, DeserializationContext context) throws IOException {
         Set<BrokerType> brokerTypes = parseBrokerTypes(rootNode.get("brokers"), context);
         Map<String, String> parameters = parseParameters(rootNode);
-        return new SimulationTask(IdGenerator.generateId(), job, brokerTypes, parameters);
+        String bootstrapFile = rootNode.hasNonNull("bootstrapFile") ? rootNode.get("bootstrapFile").asText() : null;
+        String seedFile = rootNode.hasNonNull("seedFile") ? rootNode.get("seedFile").asText() : null;
+        return new SimulationTask(IdGenerator.generateId(), job, brokerTypes, parameters, bootstrapFile, seedFile);
     }
 
     private Set<BrokerType> parseBrokerTypes(JsonNode brokersNode, DeserializationContext context) throws IOException {

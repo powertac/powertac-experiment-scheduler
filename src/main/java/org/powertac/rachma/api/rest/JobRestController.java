@@ -78,6 +78,7 @@ public class JobRestController {
     public Object getSupportedParams() {
 
         try {
+            // TODO : cache this
             InputStream paramFileStream = getClass().getClassLoader().getResourceAsStream("editable-server-properties.names.json");
             BufferedReader paramFileReader = new BufferedReader(new InputStreamReader(paramFileStream));
 

@@ -6,6 +6,7 @@ outFile=bootstrap.xml
 inFile=""
 propertyFile=""
 brokers=""
+seedFile=""
 
 # prints a reference of arguments and options for this script
 printHelp() {
@@ -53,6 +54,7 @@ simulation() {
     bootstrapOption=""
     brokersOption=""
     configOption=""
+    seedOption=""
 
     if [[ ! -z $2 ]]; then
         bootstrapOption="--boot-data $2"
@@ -66,6 +68,10 @@ simulation() {
         configOption="--config ${propertyFile}"
     fi
 
+    if [[ ! -z ${seedFile} ]]; then
+        seedOption="--random-seeds ${seedFile}"
+    fi
+
     echo -e "server jar: \t\t$1"
     echo -e "bootstrap file: \t$2"
     echo -e "brokers: \t\t$3"
@@ -74,7 +80,7 @@ simulation() {
 
     # TODO : remove debugging output
     echo -e "command:"
-    echo -e "java -server -Xmx1024m -jar $1 --sim ${bootstrapOption} ${brokersOption} ${configOption}\n"
+    echo -e "java -server -Xmx1024m -jar $1 --sim ${bootstrapOption} ${brokersOption} ${configOption} ${seedOption}\n"
 
     java    -server \
             -Xmx1024m \
@@ -82,7 +88,8 @@ simulation() {
             --sim \
             ${bootstrapOption} \
             ${brokersOption} \
-            ${configOption}
+            ${configOption} \
+            ${seedOption}
 
     echo -e "\nserver run in simulation mode complete"
 }
@@ -97,7 +104,7 @@ if [[ ${mode} =~ ^(\-\-help|\-h|help)$ ]]; then
 fi
 
 # parse options
-while getopts "o:x:c:b:f:" opt; do
+while getopts "o:x:c:b:f:s:" opt; do
     case ${opt} in
         o ) outFile=$OPTARG
         ;;
@@ -108,6 +115,8 @@ while getopts "o:x:c:b:f:" opt; do
         c ) propertyFile=$OPTARG
         ;;
         b ) brokers=$OPTARG
+        ;;
+        s ) seedFile=$OPTARG
         ;;
         \? )
             printError

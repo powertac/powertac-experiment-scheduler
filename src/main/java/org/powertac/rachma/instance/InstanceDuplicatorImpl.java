@@ -5,7 +5,8 @@ import org.powertac.rachma.broker.BrokerDuplicator;
 import org.powertac.rachma.util.IdProvider;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -25,7 +26,9 @@ public class InstanceDuplicatorImpl implements InstanceDuplicator {
             idProvider.getAnyId(),
             instance.getName(),
             copyBrokers(instance.getBrokers()),
-            copyServerParameters(instance.getServerParameters()));
+            copyServerParameters(instance.getServerParameters()),
+            instance.getBootstrapFile(),
+            instance.getSeedFile());
     }
 
     @Override
@@ -35,7 +38,9 @@ public class InstanceDuplicatorImpl implements InstanceDuplicator {
             idProvider.getAnyId(),
             name,
             copyBrokers(instance.getBrokers()),
-            copyServerParameters(instance.getServerParameters()));
+            copyServerParameters(instance.getServerParameters()),
+            instance.getBootstrapFile(),
+            instance.getSeedFile());
     }
 
     private Set<Broker> copyBrokers(Set<Broker> brokers) {
@@ -47,4 +52,5 @@ public class InstanceDuplicatorImpl implements InstanceDuplicator {
     private ServerParameters copyServerParameters(ServerParameters serverParameters) {
         return new TransientServerParameters(new HashMap<>(serverParameters.getParameters()));
     }
+
 }

@@ -52,17 +52,24 @@ public class SimulationJobFactory implements JobFactory<SimulationJob> {
             instance.getId(),
             instance.getName(),
             brokerNames,
-            configurationParameters);
+            configurationParameters,
+            instance.getBootstrapFile(),
+            instance.getSeedFile());
     }
 
     private SimulationJob create(String id, String name, List<String> brokerNames, Set<ConfigurationParameter> simulationParameters)
         throws BrokerNotFoundException, ParameterValidationException, IOException {
+        return create(id, name, brokerNames, simulationParameters, null, null);
+    }
+
+    private SimulationJob create(String id, String name, List<String> brokerNames, Set<ConfigurationParameter> simulationParameters, String bootstrapFile, String seedFile)
+            throws BrokerNotFoundException, ParameterValidationException, IOException {
         SimulationJob job = new SimulationJob();
         job.setId(id);
         job.setName(name);
         job.setWorkDirectory(workDirectoryManager.create(job));
         job.setBootstrapTask(createBootstrapTask(job));
-        job.setSimulationTask(simulationTaskFactory.create(job, brokerNames, parseConfigMap(simulationParameters)));
+        job.setSimulationTask(simulationTaskFactory.create(job, brokerNames, parseConfigMap(simulationParameters), bootstrapFile, seedFile));
         return job;
     }
 

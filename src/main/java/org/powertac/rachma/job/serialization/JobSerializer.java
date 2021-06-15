@@ -43,10 +43,12 @@ public class JobSerializer extends StdSerializer<Job> {
         }
     }
 
-    private void writeSimulationJobFields(SimulationJob job, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        jsonGenerator.writeStringField("type", "SIMULATION");
-        writeConfigField(job, jsonGenerator);
-        writeBrokersField(jsonGenerator, job.getSimulationTask().getBrokers(), serializerProvider);
+    private void writeSimulationJobFields(SimulationJob job, JsonGenerator json, SerializerProvider serializerProvider) throws IOException {
+        json.writeStringField("type", "SIMULATION");
+        writeConfigField(job, json);
+        writeBrokersField(json, job.getSimulationTask().getBrokers(), serializerProvider);
+        writeStringOrNull(json, "bootstrapFile", job.getSimulationTask().getBootstrapFilePath());
+        writeStringOrNull(json, "seedFile", job.getSimulationTask().getSeedFilePath());
     }
 
     private void writeConfigField(SimulationJob job, JsonGenerator jsonGenerator) throws IOException {
@@ -103,14 +105,11 @@ public class JobSerializer extends StdSerializer<Job> {
         gen.writeEndObject();
     }
 
-    @Deprecated
-    private void writeLogField(JsonGenerator gen, Job job) throws IOException {
-        File logFile = new File(job.getWorkDirectory().getLocalDirectory() + "/job." + job.getId() + ".log");
-        if (logFile.exists()) {
-            Path path = Paths.get(logFile.getCanonicalPath());
-            Charset charset = StandardCharsets.UTF_8;
-            String jobLog = new String(Files.readAllBytes(path), charset);
-            gen.writeStringField("log", jobLog);
+    private void writeStringOrNull(JsonGenerator json, String fieldname, String value) throws IOException {
+        if (null == value) {
+            json.writeNullField(fieldname);
+        } else {
+            json.writeStringField(fieldname, value);
         }
     }
 

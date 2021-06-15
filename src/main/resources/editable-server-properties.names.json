@@ -5,6 +5,7 @@
   "server.weatherService.weatherReqInterval",
   "server.weatherService.blocking",
   "server.weatherService.forecastHorizon",
+  "server.weatherService.weatherLocation",
   "common.competition.simulationBaseTime",
   "common.competition.timezoneOffset",
   "common.competition.latitude",

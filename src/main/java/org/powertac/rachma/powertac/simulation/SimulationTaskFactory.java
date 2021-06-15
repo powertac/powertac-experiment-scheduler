@@ -15,4 +15,6 @@ public interface SimulationTaskFactory {
     SimulationTask create(Job job, List<String> brokerNames, Map<String, String> parameters)
         throws BrokerNotFoundException, ParameterValidationException;
 
+    SimulationTask create(Job job, List<String> brokerNames, Map<String, String> parameters, String bootstrapFile, String seedFile)
+        throws BrokerNotFoundException, ParameterValidationException;
 }

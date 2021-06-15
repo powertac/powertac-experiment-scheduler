@@ -1,15 +1,13 @@
 package org.powertac.rachma.powertac.simulation;
 
 import lombok.Getter;
-import org.powertac.rachma.job.Job;
 import org.powertac.rachma.broker.BrokerType;
+import org.powertac.rachma.job.Job;
 import org.powertac.rachma.powertac.server.ServerTask;
 import org.powertac.rachma.resource.WorkDirectory;
 import org.powertac.rachma.task.AbstractTask;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.HashMap;
+import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,21 +19,31 @@ public class SimulationTask extends AbstractTask implements ServerTask {
     @Getter
     private final Map<String, String> parameters;
 
-    public SimulationTask(String id, Job job, Set<BrokerType> brokers) {
-        super(id, job);
-        this.brokers = brokers;
-        this.parameters = new HashMap<>();
-    }
+    @Getter
+    private final String bootstrapFilePath;
+
+    @Getter
+    private final String seedFilePath;
 
     public SimulationTask(String id, Job job, Set<BrokerType> brokers, Map<String, String> parameters) {
         super(id, job);
         this.brokers = brokers;
         this.parameters = parameters;
+        this.bootstrapFilePath = null;
+        this.seedFilePath = null;
+    }
+
+    public SimulationTask(String id, Job job, Set<BrokerType> brokers, Map<String, String> parameters,
+                          String bootstrapFilePath, String seedFilePath) {
+        super(id, job);
+        this.brokers = brokers;
+        this.parameters = parameters;
+        this.bootstrapFilePath = bootstrapFilePath;
+        this.seedFilePath = seedFilePath;
     }
 
     @Override
     public WorkDirectory getWorkDirectory() {
         return WorkDirectory.fromParent(job.getWorkDirectory(), String.format("sim.%s", id));
     }
-
 }

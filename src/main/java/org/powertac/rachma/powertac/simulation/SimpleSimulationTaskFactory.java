@@ -33,13 +33,21 @@ public class SimpleSimulationTaskFactory implements SimulationTaskFactory {
     @Override
     public SimulationTask create(Job job, List<String> brokerNames, Map<String, String> parameters)
             throws BrokerNotFoundException, ParameterValidationException {
+        return create(job, brokerNames, parameters, null, null);
+    }
+
+    @Override
+    public SimulationTask create(Job job, List<String> brokerNames, Map<String, String> parameters, String bootstrapFile, String seedFile)
+            throws BrokerNotFoundException, ParameterValidationException {
         Set<BrokerType> brokerTypes = findBrokerTypesByNames(brokerNames);
         validateServerParameters(parameters);
         return new SimulationTask(
             idProvider.getAnyId(),
             job,
             brokerTypes,
-            parameters);
+            parameters,
+            bootstrapFile,
+            seedFile);
     }
 
     private Set<BrokerType> findBrokerTypesByNames(List<String> brokerNames) throws BrokerNotFoundException {

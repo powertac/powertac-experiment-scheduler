@@ -30,8 +30,14 @@ public class SimulationJobRunnerFactory implements RunnerFactory<SimulationJob, 
 
     private List<Runner> getOrderedTaskRunners(SimulationJob job) throws RunnerCreationFailedException {
         List<Runner> orderedRunners = new ArrayList<>();
-        orderedRunners.add(0, createBootstrapTaskRunner(job));
-        orderedRunners.add(1, createSimulationTaskRunner(job));
+        // FIXME : this is a hack for the moment to allow tasks with existing bootstraps. The whole simulation task
+        //         model must be refactored!
+        int index = 0;
+        if (null == job.getSimulationTask().getBootstrapFilePath()) {
+            orderedRunners.add(index, createBootstrapTaskRunner(job));
+            index++;
+        }
+        orderedRunners.add(index, createSimulationTaskRunner(job));
         return orderedRunners;
     }
 
