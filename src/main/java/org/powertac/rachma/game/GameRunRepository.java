@@ -1,0 +1,12 @@
+package org.powertac.rachma.game;
+
+import java.util.Collection;
+
+public interface GameRunRepository {
+
+    GameRun create(Game game);
+    void update(GameRun run);
+    Collection<GameRun> findActiveByGame(Game game);
+    boolean hasSuccessfulRun(Game game);
+
+}

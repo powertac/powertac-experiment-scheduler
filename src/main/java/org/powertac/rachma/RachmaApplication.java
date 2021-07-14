@@ -1,6 +1,9 @@
 package org.powertac.rachma;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.docker.network.DockerNetworkCleaner;
+import org.powertac.rachma.game.GameScheduler;
 import org.powertac.rachma.job.JobSchedulerInitializer;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
@@ -59,11 +62,20 @@ public class RachmaApplication implements ApplicationRunner, ApplicationContextA
 
     @Override
     public void run(ApplicationArguments args) {
-        final JobSchedulerInitializer schedulerInitializer = context.getBean(JobSchedulerInitializer.class);
-        final DockerNetworkCleaner networkCleaner = context.getBean(DockerNetworkCleaner.class);
-        final ScheduledExecutorService networkCleanupExecutor = Executors.newSingleThreadScheduledExecutor();
-        schedulerInitializer.initialize();
-        networkCleanupExecutor.scheduleAtFixedRate(networkCleaner::removeOrphanedNetworks, 0, 30, TimeUnit.MINUTES);
+        final GameScheduler gameScheduler = context.getBean(GameScheduler.class);
+        final Logger logger = LogManager.getLogger(RachmaApplication.class);
+        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+        executor.scheduleAtFixedRate(runGames(gameScheduler, logger), 1, 1, TimeUnit.SECONDS);
+    }
+
+    private Runnable runGames(GameScheduler scheduler, Logger logger) {
+        return () -> {
+            try {
+                scheduler.runScheduledGames();
+            } catch (InterruptedException e) {
+                logger.error(e);
+            }
+        };
     }
 
 }

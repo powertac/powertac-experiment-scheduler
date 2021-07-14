@@ -5,6 +5,7 @@ import org.powertac.rachma.configuration.SharedPropertiesFileBuilder;
 import org.powertac.rachma.docker.container.DockerContainerSpec;
 import org.powertac.rachma.resource.SharedFile;
 import org.powertac.rachma.resource.WorkDirectory;
+import org.powertac.rachma.task.ContainerSpecificationFactory;
 import org.powertac.rachma.task.Task;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ import java.nio.file.Paths;
 import java.util.Properties;
 
 @Service
-public class BrokerContainerSpecificationFactory {
+public class BrokerContainerSpecificationFactory  {
 
     @Value("${broker.defaultPropertiesFile}")
     private String defaultPropertiesFile;

@@ -8,6 +8,7 @@ public interface Broker {
 
     String getVersion();
 
+    @Deprecated
     Map<String, String> getConfig();
 
 }

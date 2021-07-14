@@ -18,17 +18,16 @@ import java.util.Properties;
 public class BrokerCompatiblePropertiesWriter {
 
     public static void write(String file, Properties properties) throws IOException {
-
-        // create and store properties file
         properties.store(new FileWriter(file), null);
+        replaceQuotedColons(file);
+    }
 
-        // replace quoted colons
+    private static void replaceQuotedColons(String file) throws IOException {
         Path path = Paths.get(file);
         Charset charset = StandardCharsets.ISO_8859_1;
-        String content = new String(Files.readAllBytes(path), charset);
+        String content = Files.readString(path, charset);
         content = content.replaceAll("\\\\:", ":");
         Files.write(path, content.getBytes(charset));
-
     }
 
 }

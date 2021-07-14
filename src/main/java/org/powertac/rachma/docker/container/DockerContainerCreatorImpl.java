@@ -31,30 +31,23 @@ public class DockerContainerCreatorImpl implements DockerContainerCreator {
     }
 
     public DockerContainer createContainer(DockerContainerSpec spec) throws DockerException {
-
         String imageTag = spec.getImage();
         HostConfig hostConfig = createHostConfig(spec.getSharedFiles(), spec.getNetworkConfig());
         CreateContainerCmd createCommand = dockerClient.createContainerCmd(imageTag);
-
         if (null != spec.getName()) {
             createCommand.withName(spec.getName());
         }
-
         if (null != spec.getCommand()) {
             createCommand.withCmd(spec.getCommand().toList());
         }
-
         if (!spec.getNetworkConfig().getExposedPorts().isEmpty()) {
             List<ExposedPort> exposedPorts = getExposedPorts(spec.getNetworkConfig());
             createCommand.withExposedPorts(exposedPorts);
         }
-
         if (!spec.getNetworkConfig().getContainerAliases().isEmpty()) {
             createCommand.withAliases(new ArrayList<>(spec.getNetworkConfig().getContainerAliases()));
         }
-
         CreateContainerResponse containerCreateResponse = createCommand.withHostConfig(hostConfig).exec();
-
         return new DockerContainer(containerCreateResponse.getId(), spec.getName());
     }
 

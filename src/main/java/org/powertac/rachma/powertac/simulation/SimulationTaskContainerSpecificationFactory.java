@@ -37,7 +37,7 @@ public class SimulationTaskContainerSpecificationFactory
     @Value("${simulation.container.defaultMessageBrokerPort}")
     private int defaultMessageBrokerPort;
 
-    @Value("${simualtion.container.aliases}")
+    @Value("${simulation.container.aliases}")
     private String[] serverAliases;
 
     private final BrokerContainerSpecificationFactory brokerSpecificationFactory;
