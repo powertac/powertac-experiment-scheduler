@@ -1,6 +1,5 @@
 package org.powertac.rachma.game;
 
-import org.apache.commons.lang.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -25,12 +24,7 @@ public class LimitedCapacityGameScheduler implements GameScheduler {
     }
 
     @Override
-    public void schedule(Game game) {
-        throw new NotImplementedException("schedule this!");
-    }
-
-    @Override
-    public synchronized void runScheduledGames() {
+    public synchronized void runGames() {
         updateRunningGames();
         if(hasCapacity()) {
             runNext();

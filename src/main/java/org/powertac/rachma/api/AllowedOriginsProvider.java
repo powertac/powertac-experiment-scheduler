@@ -1,6 +1,6 @@
 package org.powertac.rachma.api;
 
-import org.powertac.rachma.RachmaApplication;
+import org.powertac.rachma.ExperimentSchedulerApplication;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ public class AllowedOriginsProvider {
 
         Set<String> allowedOrigins = new HashSet<>();
 
-        if (RachmaApplication.Mode.DEVELOPMENT.equals(RachmaApplication.Mode.from(applicationMode))) {
+        if (ExperimentSchedulerApplication.Mode.DEVELOPMENT.equals(ExperimentSchedulerApplication.Mode.from(applicationMode))) {
             allowedOrigins.add("http://localhost:9000");
         }
 

@@ -2,9 +2,7 @@ package org.powertac.rachma;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.docker.network.DockerNetworkCleaner;
 import org.powertac.rachma.game.GameScheduler;
-import org.powertac.rachma.job.JobSchedulerInitializer;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -23,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 @SpringBootApplication
 @EnableScheduling
 @EnableAspectJAutoProxy
-public class RachmaApplication implements ApplicationRunner, ApplicationContextAware {
+public class ExperimentSchedulerApplication implements ApplicationRunner, ApplicationContextAware {
 
     private ApplicationContext context;
 
@@ -49,7 +47,7 @@ public class RachmaApplication implements ApplicationRunner, ApplicationContextA
     }
 
     public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(RachmaApplication.class);
+        SpringApplication app = new SpringApplication(ExperimentSchedulerApplication.class);
         app.setBannerMode(Banner.Mode.OFF);
         app.setLogStartupInfo(false);
 		app.run(args);
@@ -63,7 +61,7 @@ public class RachmaApplication implements ApplicationRunner, ApplicationContextA
     @Override
     public void run(ApplicationArguments args) {
         final GameScheduler gameScheduler = context.getBean(GameScheduler.class);
-        final Logger logger = LogManager.getLogger(RachmaApplication.class);
+        final Logger logger = LogManager.getLogger(ExperimentSchedulerApplication.class);
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(runGames(gameScheduler, logger), 1, 1, TimeUnit.SECONDS);
     }
@@ -71,7 +69,7 @@ public class RachmaApplication implements ApplicationRunner, ApplicationContextA
     private Runnable runGames(GameScheduler scheduler, Logger logger) {
         return () -> {
             try {
-                scheduler.runScheduledGames();
+                scheduler.runGames();
             } catch (InterruptedException e) {
                 logger.error(e);
             }

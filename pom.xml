@@ -94,7 +94,7 @@
                             <goal>repackage</goal>
                         </goals>
                         <configuration>
-                            <mainClass>org.powertac.rachma.RachmaApplication</mainClass>
+                            <mainClass>org.powertac.rachma.ExperimentSchedulerApplication</mainClass>
                         </configuration>
                     </execution>
                 </executions>
@@ -116,7 +116,7 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>org.powertac.rachma.RachmaApplication</mainClass>
+                    <mainClass>org.powertac.rachma.ExperimentSchedulerApplication</mainClass>
                 </configuration>
             </plugin>
         </plugins>

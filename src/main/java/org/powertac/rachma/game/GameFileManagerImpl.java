@@ -48,6 +48,12 @@ public class GameFileManagerImpl implements GameFileManager {
     }
 
     @Override
+    public void createBootstrap(Game game) throws IOException {
+        Path bootstrapPath = paths.local().game(game).bootstrap();
+        Files.createFile(bootstrapPath);
+    }
+
+    @Override
     public boolean bootstrapExists(Game game) {
         Path bootstrapPath = paths.host().game(game).bootstrap();
         return Files.exists(bootstrapPath);

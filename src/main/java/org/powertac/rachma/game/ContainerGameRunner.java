@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -65,13 +66,6 @@ public class ContainerGameRunner implements GameRunner {
         }
     }
 
-    @Override
-    public void stop(Game game) {
-        for (GameRun run : runs.findActiveByGame(game)) {
-            stop(run);
-        }
-    }
-
     private void prepareGameFiles(GameRun run) throws GameValidationException {
         try {
             run.setPhase(GameRunPhase.PREPARATION);
@@ -105,6 +99,7 @@ public class ContainerGameRunner implements GameRunner {
         if (shouldBootstrap(run)) {
             try {
                 run.setPhase(GameRunPhase.BOOTSTRAP);
+                gameFileManager.createBootstrap(run.getGame());
                 run.setBootstrapContainer(bootstrapContainerCreator.create(run.getGame()));
                 runs.update(run);
                 ContainerExitState exitState = controller.run(run.getBootstrapContainer());
@@ -113,7 +108,7 @@ public class ContainerGameRunner implements GameRunner {
                     runs.update(run);
                     throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId());
                 }
-            } catch (ContainerException| DockerException e) {
+            } catch (IOException| ContainerException| DockerException e) {
                 throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId(), e);
             }
         }
@@ -151,6 +146,7 @@ public class ContainerGameRunner implements GameRunner {
         return brokerContainers;
     }
 
+    // TODO : add interface to stop game run
     private void stop(GameRun run) {
         try {
             if (run.getPhase().equals(GameRunPhase.BOOTSTRAP)) {

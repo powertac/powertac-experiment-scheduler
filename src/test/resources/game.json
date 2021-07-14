@@ -1,0 +1,29 @@
+{
+  "id": "xyz123abc098",
+  "name": "TestGame",
+  "serverParameters": [
+    {"key": "accounting.accountingService.bankInterest", "value": "0.05"},
+    {"key": "common.competition.simulationBaseTime", "value": "2010-06-06"}
+  ],
+  "brokers": [
+    {
+      "name": "AgentUDE",
+      "version": "2015"
+    },
+    {
+      "name": "EWIIS3",
+      "version": "2020.1"
+    },
+    {
+      "name": "CrocodileAgent"
+    }
+  ],
+  "bootstrap": {
+    "role": "BOOTSTRAP",
+    "game": "abcdefg123456"
+  },
+  "seed": {
+    "role": "SEED",
+    "game": "mnb678vcx345"
+  }
+}

@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRepository;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Component
 public class FileDeserializer extends StdNodeBasedDeserializer<File> {
 
     private final GameRepository games;
@@ -28,7 +30,11 @@ public class FileDeserializer extends StdNodeBasedDeserializer<File> {
         if (!root.has("game")) {
             throw new IOException("missing required node 'game'");
         }
-        Game game = games.findById(root.get("game").asText());
+        String gameId = root.get("game").asText();
+        Game game = games.findById(gameId);
+        if (null == game) {
+            throw new IOException(String.format("game '%s' does not exist", gameId));
+        }
         return new File(null, role, game);
     }
 
