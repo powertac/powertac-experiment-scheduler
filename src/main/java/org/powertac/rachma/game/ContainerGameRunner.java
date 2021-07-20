@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,13 +29,14 @@ public class ContainerGameRunner implements GameRunner {
     private final BrokerContainerCreator brokerContainerCreator;
     private final DockerContainerController controller;
     private final DockerNetworkRepository networks;
+    private final GameRunLifecycleManager lifecycle;
 
     @Autowired
     public ContainerGameRunner(GameRunRepository runs, GameFileManager gameFileManager,
                                BootstrapContainerCreator bootstrapContainerCreator,
                                SimulationContainerCreator simulationContainerCreator,
                                BrokerContainerCreator brokerContainerCreator,
-                               DockerContainerController controller, DockerNetworkRepository networks) {
+                               DockerContainerController controller, DockerNetworkRepository networks, GameRunLifecycleManager lifecycle) {
         this.runs = runs;
         this.gameFileManager = gameFileManager;
         this.bootstrapContainerCreator = bootstrapContainerCreator;
@@ -45,31 +44,26 @@ public class ContainerGameRunner implements GameRunner {
         this.brokerContainerCreator = brokerContainerCreator;
         this.controller = controller;
         this.networks = networks;
+        this.lifecycle = lifecycle;
     }
 
     @Override
     public void run(Game game) {
         GameRun run = runs.create(game);
-        run.setStart(Instant.now());
-        runs.update(run);
         try {
             prepareGameFiles(run);
             bootstrap(run);
             simulate(run);
+            lifecycle.done(run);
         } catch (GameRunException|GameValidationException e) {
             // TODO : add game event logging
-            run.setFailed(true);
-        } finally {
-            run.setEnd(Instant.now());
-            run.setPhase(GameRunPhase.DONE);
-            runs.update(run);
+            lifecycle.fail(run);
         }
     }
 
     private void prepareGameFiles(GameRun run) throws GameValidationException {
         try {
-            run.setPhase(GameRunPhase.PREPARATION);
-            runs.update(run);
+            lifecycle.preparation(run);
             gameFileManager.createGameDirectories(run.getGame());
             gameFileManager.createSimulationProperties(run.getGame());
             for (Broker broker : run.getGame().getBrokers()) {
@@ -98,35 +92,30 @@ public class ContainerGameRunner implements GameRunner {
     private void bootstrap(GameRun run) throws GameRunException {
         if (shouldBootstrap(run)) {
             try {
-                run.setPhase(GameRunPhase.BOOTSTRAP);
                 gameFileManager.createBootstrap(run.getGame());
-                run.setBootstrapContainer(bootstrapContainerCreator.create(run.getGame()));
-                runs.update(run);
+                DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame());
+                lifecycle.bootstrap(run, bootstrapContainer);
                 ContainerExitState exitState = controller.run(run.getBootstrapContainer());
                 if (exitState.isErrorState()) {
-                    run.setFailed(true);
-                    runs.update(run);
                     throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId());
                 }
             } catch (IOException| ContainerException| DockerException e) {
                 throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId(), e);
             }
         }
-        run.setPhase(GameRunPhase.READY);
-        runs.update(run);
+        lifecycle.ready(run);
     }
 
     private void simulate(GameRun run) throws GameRunException {
         try {
-            run.setPhase(GameRunPhase.SIMULATION);
-            run.setNetwork(createNetwork(run.getGame()));
-            run.setSimulationContainer(simulationContainerCreator.create(run.getGame(), run.getNetwork()));
-            run.setBrokerContainers(createBrokerContainers(run.getGame(), run.getNetwork()));
-            runs.update(run);
+            DockerNetwork network = createNetwork(run.getGame());
+            DockerContainer serverContainer = simulationContainerCreator.create(run.getGame(), network);
+            Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run.getGame(), network);
+            lifecycle.simulation(run, network, serverContainer, brokerContainers);
             Map<DockerContainer, ContainerExitState> exitStates = controller.run(run.getSimulationContainers());
             for (ContainerExitState exitState : exitStates.values()) {
                 if (exitState.isErrorState()) {
-                    run.setFailed(true);
+                    throw new GameRunException("a simulation container exited with an error code");
                 }
             }
         } catch (ContainerException e) {

@@ -10,18 +10,18 @@ import org.powertac.rachma.docker.exception.KillContainerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.print.Doc;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
-import java.util.stream.Collectors;
 
 @Service
 public class DockerContainerControllerImpl implements DockerContainerController {
 
     private final static int runPoolSize = 10;
     private final static int pollingIntervalMillis = 1000;
+    private final static int killTimeoutMillis = 10000;
 
     private final DockerClient dockerClient;
     private final ExecutorService runPool;
@@ -68,24 +68,11 @@ public class DockerContainerControllerImpl implements DockerContainerController 
 
     @Override
     public Map<DockerContainer, ContainerExitState> run(Set<DockerContainer> containers) throws ContainerException {
-        Map<Future<ContainerExitState>, DockerContainer> exitFutures = new HashMap<>();
-        CompletionService<ContainerExitState> completion = new ExecutorCompletionService<>(runPool);
-        // create and start synchronous runs
-        for (DockerContainer container : containers) {
-            exitFutures.put(completion.submit(createSynchronousRun(container)), container);
-        }
         try {
-            boolean completed = false;
-            Map<DockerContainer, ContainerExitState> exitStates = new HashMap<>();
-            // wait for all runs (futures) to complete
-            while (!completed) {
-                Future<ContainerExitState> future = completion.take();
-                exitStates.put(exitFutures.get(future), future.get());
-                completed = exitStates.size() == exitFutures.size();
-            }
-            return exitStates;
+            CompletionService<ContainerExitState> completionService = new ExecutorCompletionService<>(runPool);
+            Map<Future<ContainerExitState>, DockerContainer> containerMap = startSynchronousSet(completionService, containers);
+            return getContainerExitStates(completionService, containerMap);
         } catch (InterruptedException|ExecutionException e) {
-            // kill all containers if an error occurs
             for (DockerContainer container : containers) {
                 kill(container);
             }
@@ -96,6 +83,34 @@ public class DockerContainerControllerImpl implements DockerContainerController 
     @Override
     public boolean isRunning(DockerContainer container) throws ContainerReflectionException {
         return isRunningState(getState(container));
+    }
+
+    private Map<Future<ContainerExitState>, DockerContainer> startSynchronousSet(CompletionService<ContainerExitState> completionService, Set<DockerContainer> containers) {
+        Map<Future<ContainerExitState>, DockerContainer> exitFutures = new HashMap<>();
+        for (DockerContainer container : containers) {
+            exitFutures.put(completionService.submit(createSynchronousRun(container)), container);
+        }
+        return exitFutures;
+    }
+
+    private Map<DockerContainer, ContainerExitState> getContainerExitStates(CompletionService<ContainerExitState> completionService, Map<Future<ContainerExitState>, DockerContainer> containerMap)
+            throws InterruptedException, ExecutionException {
+        boolean completed = false;
+        Thread killTimer = null;
+        Map<DockerContainer, ContainerExitState> exitStates = new HashMap<>();
+        while (!completed) {
+            Future<ContainerExitState> future = completionService.take();
+            exitStates.put(containerMap.get(future), future.get());
+            // set kill timer once the first container finished its run;
+            // after the timeout all remaining running containers will be shut down (killed)
+            if (null == killTimer) {
+                killTimer = new Thread(getKillTimer(containerMap.values()));
+                killTimer.start();
+            }
+            completed = exitStates.size() == containerMap.size();
+        }
+        killTimer.interrupt();
+        return exitStates;
     }
 
     private Callable<ContainerExitState> createSynchronousRun(DockerContainer container) {
@@ -138,6 +153,21 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             throw new ContainerReflectionException("failed to get container exit state");
         }
         return exitCode.intValue();
+    }
+
+    private Runnable getKillTimer(Collection<DockerContainer> containers) {
+        return () -> {
+            try {
+                Thread.sleep(killTimeoutMillis);
+                for (DockerContainer container : containers) {
+                    kill(container);
+                }
+            } catch (InterruptedException e) {
+                // do nothing
+            } catch (KillContainerException e) {
+                // TODO : log and add all containers to list of possibly orphaned resources
+            }
+        };
     }
 
 }
