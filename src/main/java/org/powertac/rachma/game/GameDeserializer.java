@@ -48,7 +48,7 @@ public class GameDeserializer extends StdNodeBasedDeserializer<Game> {
                 root.get("brokers"),
                 Broker.class,
                 context);
-        }
+    }
         return new HashSet<>();
     }
 

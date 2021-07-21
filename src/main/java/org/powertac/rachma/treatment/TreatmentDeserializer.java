@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import org.powertac.rachma.broker.Broker;
-import org.powertac.rachma.broker.BrokerImpl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -55,7 +54,7 @@ public class TreatmentDeserializer extends StdNodeBasedDeserializer<Treatment> {
     }
 
     private Broker parseBroker(JsonNode brokerNode) {
-        return new BrokerImpl(
+        return new Broker(
             brokerNode.get("name").asText(),
             brokerNode.get("version").asText()
         );

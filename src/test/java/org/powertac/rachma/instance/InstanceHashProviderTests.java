@@ -1,7 +1,6 @@
 package org.powertac.rachma.instance;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.hash.HashProvider;

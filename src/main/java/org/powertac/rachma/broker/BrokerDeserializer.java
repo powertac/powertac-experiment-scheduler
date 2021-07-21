@@ -17,7 +17,8 @@ public class BrokerDeserializer extends StdNodeBasedDeserializer<Broker> {
 
     @Override
     public Broker convert(JsonNode root, DeserializationContext context) throws IOException {
-        return new BrokerImpl(
+        return new Broker(
+            null,
             deserializeName(root),
             deserializeVersion(root),
             deserializeConfig(root));

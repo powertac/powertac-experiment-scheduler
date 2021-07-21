@@ -8,5 +8,6 @@ public interface GameRunRepository {
     void update(GameRun run);
     Collection<GameRun> findActiveByGame(Game game);
     boolean hasSuccessfulRun(Game game);
+    boolean hasActiveRun(Game game);
 
 }

@@ -42,8 +42,7 @@ public class JobChangeMessageAspect {
     private void pushChangedJob(Job job) {
         try {
             template.convertAndSend("/jobs", job);
-        }
-        catch (MessagingException e) {
+        } catch (MessagingException e) {
             logger.error("could not send job update for job with id=" + job.getId(), e);
         }
     }

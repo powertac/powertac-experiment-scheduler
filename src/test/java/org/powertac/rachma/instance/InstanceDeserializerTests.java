@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.powertac.rachma.TestHelper;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerDeserializer;
-import org.powertac.rachma.broker.BrokerImpl;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -35,9 +34,9 @@ class InstanceDeserializerTests {
         Map<String, String> udeConfig = new HashMap<>();
         udeConfig.put("hans", "1234");
         udeConfig.put("other", "55586");
-        Broker ude = new BrokerImpl("AgentUDE", "2015", udeConfig);
-        Broker ewi = new BrokerImpl("EWIIS3", "2020.1");
-        Broker crocodile = new BrokerImpl("CrocodileAgent", "latest");
+        Broker ude = new Broker(null, "AgentUDE", "2015", udeConfig);
+        Broker ewi = new Broker("EWIIS3", "2020.1");
+        Broker crocodile = new Broker("CrocodileAgent", "latest");
 
         Assertions.assertEquals(3, brokers.size());
         Assertions.assertTrue(brokers.contains(ude));

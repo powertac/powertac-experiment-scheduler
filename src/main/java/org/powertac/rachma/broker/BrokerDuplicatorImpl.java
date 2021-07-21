@@ -9,10 +9,11 @@ public class BrokerDuplicatorImpl implements BrokerDuplicator {
 
     @Override
     public Broker createCopy(Broker broker) {
-        return new BrokerImpl(
+        return new Broker(
+            null,
             new String(broker.getName()),
             new String(broker.getVersion()),
-            new HashMap<>(broker.getConfig()));
+            null);
     }
 
 }

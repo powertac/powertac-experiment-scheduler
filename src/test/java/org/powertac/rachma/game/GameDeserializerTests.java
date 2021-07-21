@@ -8,7 +8,6 @@ import org.mockito.Mockito;
 import org.powertac.rachma.TestHelper;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerDeserializer;
-import org.powertac.rachma.broker.BrokerImpl;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileDeserializer;
 import org.powertac.rachma.file.FileRole;
@@ -34,9 +33,9 @@ public class GameDeserializerTests {
 
     @Test
     void brokersDeserializedCorrectlyTest() throws IOException {
-        Broker ude = new BrokerImpl("AgentUDE", "2015");
-        Broker ewi = new BrokerImpl("EWIIS3", "2020.1");
-        Broker crocodile = new BrokerImpl("CrocodileAgent", "latest");
+        Broker ude = new Broker("AgentUDE", "2015");
+        Broker ewi = new Broker("EWIIS3", "2020.1");
+        Broker crocodile = new Broker("CrocodileAgent", "latest");
         Game game = game();
         Assertions.assertEquals(3, game.getBrokers().size());
         Assertions.assertTrue(game.getBrokers().contains(ude));
@@ -98,7 +97,7 @@ public class GameDeserializerTests {
         SimpleModule module = new SimpleModule();
         module.addDeserializer(Game.class, new GameDeserializer());
         module.addDeserializer(Broker.class, new BrokerDeserializer());
-        module.addDeserializer(File.class, new FileDeserializer(gameRepository));
+        module.addDeserializer(File.class, new FileDeserializer());
         mapper.registerModule(module);
         return mapper;
     }

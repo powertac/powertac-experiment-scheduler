@@ -1,5 +1,7 @@
 package org.powertac.rachma.game;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.docker.container.DockerContainer;
 import org.powertac.rachma.docker.network.DockerNetwork;
@@ -13,8 +15,11 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
 
     private final GameRunRepository runs;
 
+    private final Logger logger;
+
     public GameRunLifecycleManagerImpl(GameRunRepository runs) {
         this.runs = runs;
+        logger = LogManager.getLogger(GameRunLifecycleManagerImpl.class);
     }
 
     @Override
@@ -22,6 +27,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
         run.setStart(Instant.now());
         run.setPhase(GameRunPhase.PREPARATION);
         runs.update(run);
+        logger.info(String.format("run[id=%s] is now preparing", run.getId()));
     }
 
     @Override
@@ -29,12 +35,14 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
         run.setPhase(GameRunPhase.BOOTSTRAP);
         run.setBootstrapContainer(container);
         runs.update(run);
+        logger.info(String.format("run[id=%s] is now bootstrapping", run.getId()));
     }
 
     @Override
     public void ready(GameRun run) {
         run.setPhase(GameRunPhase.READY);
         runs.update(run);
+        logger.info(String.format("run[id=%s] is now ready", run.getId()));
     }
 
     @Override
@@ -44,6 +52,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
         run.setSimulationContainer(serverContainer);
         run.setBrokerContainers(brokerContainers);
         runs.update(run);
+        logger.info(String.format("run[id=%s] is now simulating", run.getId()));
     }
 
     @Override
@@ -51,6 +60,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
         run.setEnd(Instant.now());
         run.setPhase(GameRunPhase.DONE);
         runs.update(run);
+        logger.info(String.format("run[id=%s] is done", run.getId()));
     }
 
     @Override
@@ -59,6 +69,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
         run.setFailed(true);
         run.setPhase(GameRunPhase.DONE);
         runs.update(run);
+        logger.error(String.format("run[id=%s] has failed", run.getId()));
     }
 
 }

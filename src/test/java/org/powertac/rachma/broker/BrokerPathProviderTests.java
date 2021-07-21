@@ -84,7 +84,7 @@ public class BrokerPathProviderTests {
     private BrokerPathProvider getProvider(PathContextType type, String root) {
         Game game = Mockito.mock(Game.class);
         Mockito.when(game.getId()).thenReturn("xyz123");
-        Broker broker = new BrokerImpl("BROKER", "latest");
+        Broker broker = new Broker("BROKER", "latest");
         PathContext hostContext = new PathContext(type, root);
         return new BrokerPathProvider(hostContext, game, broker);
     }

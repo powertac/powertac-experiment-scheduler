@@ -3,6 +3,7 @@ package org.powertac.rachma.application;
 import com.github.dockerjava.api.exception.DockerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.powertac.rachma.broker.BrokerSeeder;
 import org.powertac.rachma.docker.image.DockerImageBuilder;
 import org.powertac.rachma.docker.image.DockerImageRepository;
 import org.powertac.rachma.broker.BrokerType;
@@ -26,6 +27,7 @@ public class ApplicationSetup {
     private final DockerImageRepository imageRepository;
     private final BrokerTypeRepository brokerTypeRepository;
     private final WorkDirectoryManager workDirectoryManager;
+    private final BrokerSeeder brokerSeeder;
     private final Logger logger;
     private final ApplicationStatus status;
 
@@ -41,11 +43,12 @@ public class ApplicationSetup {
     @Autowired
     public ApplicationSetup(DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
                             BrokerTypeRepository brokerTypeRepository, ApplicationStatus status,
-                            WorkDirectoryManager workDirectoryManager) {
+                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder) {
         this.dockerImageBuilder = dockerImageBuilder;
         this.imageRepository = imageRepository;
         this.brokerTypeRepository = brokerTypeRepository;
         this.workDirectoryManager = workDirectoryManager;
+        this.brokerSeeder = brokerSeeder;
         this.logger = LogManager.getLogger(ApplicationSetup.class);
         this.status = status;
     }
@@ -59,6 +62,7 @@ public class ApplicationSetup {
             workDirectoryManager.createMainDirectoriesAndCopyResourceFiles();
             pullImage(defaultServerImage);
             buildBrokerImages();
+            brokerSeeder.seedBrokers();
         }
         catch (IOException e) {
             logger.error(e.getMessage());

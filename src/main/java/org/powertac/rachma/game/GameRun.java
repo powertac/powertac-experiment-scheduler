@@ -1,24 +1,31 @@
 package org.powertac.rachma.game;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.docker.container.DockerContainer;
 import org.powertac.rachma.docker.network.DockerNetwork;
 
+import javax.persistence.*;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+@Entity
+@NoArgsConstructor
 public class GameRun {
 
     @Getter
-    private final String id;
+    @Id
+    @Column(length = 36)
+    private String id;
 
     @Getter
-    private final Game game;
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Game game;
 
     @Getter
     @Setter
@@ -38,18 +45,22 @@ public class GameRun {
 
     @Setter
     @Getter
+    @Transient
     private DockerContainer bootstrapContainer;
 
     @Setter
     @Getter
+    @Transient
     private DockerNetwork network;
 
     @Setter
     @Getter
+    @Transient
     private DockerContainer simulationContainer;
 
     @Getter
     @Setter
+    @Transient
     private Map<Broker, DockerContainer> brokerContainers;
 
     public GameRun(String id, Game game) {

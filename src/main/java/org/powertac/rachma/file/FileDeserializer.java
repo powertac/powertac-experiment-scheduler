@@ -12,11 +12,8 @@ import java.io.IOException;
 @Component
 public class FileDeserializer extends StdNodeBasedDeserializer<File> {
 
-    private final GameRepository games;
-
-    public FileDeserializer(GameRepository games) {
+    public FileDeserializer() {
         super(File.class);
-        this.games = games;
     }
 
     @Override
@@ -30,11 +27,8 @@ public class FileDeserializer extends StdNodeBasedDeserializer<File> {
         if (!root.has("game")) {
             throw new IOException("missing required node 'game'");
         }
-        String gameId = root.get("game").asText();
-        Game game = games.findById(gameId);
-        if (null == game) {
-            throw new IOException(String.format("game '%s' does not exist", gameId));
-        }
+        Game game = new Game();
+        game.setId(root.get("game").asText());
         return new File(null, role, game);
     }
 

@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import java.util.concurrent.Executors;
@@ -19,8 +20,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication
-@EnableScheduling
 @EnableAspectJAutoProxy
+@EnableJpaRepositories
 public class ExperimentSchedulerApplication implements ApplicationRunner, ApplicationContextAware {
 
     private ApplicationContext context;

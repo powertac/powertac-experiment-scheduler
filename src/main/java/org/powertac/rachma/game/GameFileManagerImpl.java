@@ -8,6 +8,10 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 public class GameFileManagerImpl implements GameFileManager {
@@ -18,6 +22,20 @@ public class GameFileManagerImpl implements GameFileManager {
     public GameFileManagerImpl(PathProvider paths, GamePropertiesProvider properties) {
         this.paths = paths;
         this.properties = properties;
+    }
+
+    @Override
+    public void removeExisting(Game game) throws IOException {
+        Path gameDirectory = paths.local().game(game).dir();
+        if (!Files.exists(gameDirectory)) {
+            return;
+        }
+        List<Path> files = Files.walk(gameDirectory)
+            .sorted(Comparator.reverseOrder()) // the order is important here; files must be removed before removing their parent directory
+            .collect(Collectors.toList());
+        for (Path file : files) {
+            Files.deleteIfExists(file);
+        }
     }
 
     @Override

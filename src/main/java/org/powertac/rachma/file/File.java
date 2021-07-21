@@ -2,18 +2,29 @@ package org.powertac.rachma.file;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.powertac.rachma.game.Game;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.ManyToOne;
+
+@Entity
+@NoArgsConstructor
 @AllArgsConstructor
 public class File {
 
+    @Id
     @Getter
-    private final String id;
+    @Column(length = 36)
+    private String id;
 
     @Getter
-    private final FileRole role;
+    private FileRole role;
 
     @Getter
-    private final Game game;
+    @ManyToOne
+    private Game game;
 
 }

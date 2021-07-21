@@ -3,10 +3,9 @@ package org.powertac.rachma.docker.container;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.DockerException;
-import org.powertac.rachma.docker.exception.ContainerException;
-import org.powertac.rachma.docker.exception.ContainerReflectionException;
-import org.powertac.rachma.docker.exception.ContainerStartException;
-import org.powertac.rachma.docker.exception.KillContainerException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.powertac.rachma.docker.exception.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,19 +22,22 @@ public class DockerContainerControllerImpl implements DockerContainerController 
     private final static int pollingIntervalMillis = 1000;
     private final static int killTimeoutMillis = 10000;
 
-    private final DockerClient dockerClient;
+    private final DockerClient docker;
+
     private final ExecutorService runPool;
+    private final Logger logger;
 
     @Autowired
-    public DockerContainerControllerImpl(DockerClient dockerClient) {
-        this.dockerClient = dockerClient;
+    public DockerContainerControllerImpl(DockerClient docker) {
+        this.docker = docker;
         runPool = Executors.newFixedThreadPool(runPoolSize);
+        logger = LogManager.getLogger(DockerContainerControllerImpl.class);
     }
 
     @Override
     public void start(DockerContainer container) throws ContainerStartException {
         try {
-            dockerClient.startContainerCmd(container.getId()).exec();
+            docker.startContainerCmd(container.getId()).exec();
         }
         catch (DockerException e) {
             throw new ContainerStartException("could not start container with name=" + container.getName());
@@ -45,7 +47,7 @@ public class DockerContainerControllerImpl implements DockerContainerController 
     @Override
     public void kill(DockerContainer container) throws KillContainerException {
         try {
-            dockerClient.killContainerCmd(container.getId()).exec();
+            docker.killContainerCmd(container.getId()).exec();
         }
         catch (DockerException e) {
             // TODO : kill should always return without exception; should an exception occur it should be logged and
@@ -63,6 +65,8 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             // TODO : check if container should be kept or any run data should be persisted
             kill(container);
             throw new ContainerException("container run failed", e);
+        } finally {
+            remove(container);
         }
     }
 
@@ -76,13 +80,25 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             for (DockerContainer container : containers) {
                 kill(container);
             }
-            throw new ContainerException("container run failed", e);
+            throw new ContainerException("synchronous container run failed", e);
+        } finally {
+            for (DockerContainer container : containers) {
+                remove(container);
+            }
         }
     }
 
     @Override
     public boolean isRunning(DockerContainer container) throws ContainerReflectionException {
         return isRunningState(getState(container));
+    }
+
+    private void remove(DockerContainer container) throws ContainerRemovalException {
+        try {
+            docker.removeContainerCmd(container.getId()).exec();
+        } catch (DockerException e) {
+            throw new ContainerRemovalException(String.format("failed to remove container[id=%s]", container.getId()), e);
+        }
     }
 
     private Map<Future<ContainerExitState>, DockerContainer> startSynchronousSet(CompletionService<ContainerExitState> completionService, Set<DockerContainer> containers) {
@@ -104,6 +120,7 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             // set kill timer once the first container finished its run;
             // after the timeout all remaining running containers will be shut down (killed)
             if (null == killTimer) {
+                // FIXME : kill server as well !!!
                 killTimer = new Thread(getKillTimer(containerMap.values()));
                 killTimer.start();
             }
@@ -119,6 +136,10 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             while (true) {
                 InspectContainerResponse.ContainerState state = getState(container);
                 if (!isRunningState(state)) {
+                    int exitCode = getExitCode(state);
+                    if (exitCode != 0) {
+                        logger.error(String.format("container exited with non-null code %s", exitCode));
+                    }
                     return new ContainerExitState(getExitCode(state));
                 }
                 Thread.sleep(pollingIntervalMillis);
@@ -128,7 +149,7 @@ public class DockerContainerControllerImpl implements DockerContainerController 
 
     private InspectContainerResponse.ContainerState getState(DockerContainer container) throws ContainerReflectionException {
         try {
-            InspectContainerResponse inspection = dockerClient.inspectContainerCmd(container.getId()).exec();
+            InspectContainerResponse inspection = docker.inspectContainerCmd(container.getId()).exec();
             InspectContainerResponse.ContainerState state = inspection.getState();
             if (null == state) {
                 throw new ContainerReflectionException("failed to get state of container with id=" + container.getId());
@@ -160,12 +181,14 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             try {
                 Thread.sleep(killTimeoutMillis);
                 for (DockerContainer container : containers) {
-                    kill(container);
+                    try {
+                        kill(container);
+                    } catch (KillContainerException e) {
+                        logger.error(String.format("failed to kill container[id=%s]", container.getId()), e);
+                    }
                 }
             } catch (InterruptedException e) {
-                // do nothing
-            } catch (KillContainerException e) {
-                // TODO : log and add all containers to list of possibly orphaned resources
+                logger.error("kill timer was interrupted; this may lead to an inconsistent application state", e);
             }
         };
     }
