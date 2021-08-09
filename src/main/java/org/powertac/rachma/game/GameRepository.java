@@ -6,6 +6,6 @@ public interface GameRepository {
 
     Collection<Game> findAll();
     Game findById(String id);
-    Game findOneQueued();
+    Game findFirstQueued();
     void save(Game game);
 }

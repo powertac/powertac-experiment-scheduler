@@ -4,6 +4,7 @@ import org.powertac.rachma.api.stomp.StompMessageBroker;
 import org.powertac.rachma.persistence.JpaGameRepository;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -12,12 +13,10 @@ import java.util.UUID;
 @Component
 public class PersistentGameRepository implements GameRepository {
 
-    private final GameRunRepository runs;
     private final JpaGameRepository games;
     private final StompMessageBroker<Game> messages;
 
-    public PersistentGameRepository(GameRunRepository runs, JpaGameRepository games, StompMessageBroker<Game> messages) {
-        this.runs = runs;
+    public PersistentGameRepository(JpaGameRepository games, StompMessageBroker<Game> messages) {
         this.games = games;
         this.messages = messages;
     }
@@ -35,13 +34,8 @@ public class PersistentGameRepository implements GameRepository {
     }
 
     @Override
-    public Game findOneQueued() {
-        for (Game game : games.findAll()) {
-            if (!runs.hasSuccessfulRun(game) && !runs.hasActiveRun(game)) {
-                return game;
-            }
-        }
-        return null;
+    public Game findFirstQueued() {
+        return games.findFirstQueued();
     }
 
     @Override

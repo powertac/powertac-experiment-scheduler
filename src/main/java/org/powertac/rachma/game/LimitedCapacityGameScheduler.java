@@ -10,15 +10,15 @@ public class LimitedCapacityGameScheduler implements GameScheduler {
 
     private final static int maximumCapacity = 1;
 
-    private final GameRepository games;
     private final GameRunner runner;
+    private final GameSchedule schedule;
 
     private final ExecutorService gamePool;
     private final Map<Game, Future<Game>> running;
 
-    public LimitedCapacityGameScheduler(GameRepository games, GameRunner runner) {
-        this.games = games;
+    public LimitedCapacityGameScheduler(GameRunner runner, GameSchedule schedule) {
         this.runner = runner;
+        this.schedule = schedule;
         gamePool = Executors.newFixedThreadPool(maximumCapacity);
         running = new ConcurrentHashMap<>();
     }
@@ -27,7 +27,10 @@ public class LimitedCapacityGameScheduler implements GameScheduler {
     public synchronized void runGames() {
         updateRunningGames();
         if(hasCapacity()) {
-            runNext();
+            Game next = schedule.next();
+            if (null != next) {
+                running.put(next, gamePool.submit(createRun(next)));
+            }
         }
     }
 
@@ -41,13 +44,6 @@ public class LimitedCapacityGameScheduler implements GameScheduler {
 
     private boolean hasCapacity() {
         return running.size() < maximumCapacity;
-    }
-
-    private void runNext() {
-        Game game = games.findOneQueued();
-        if (null != game) {
-            running.put(game, gamePool.submit(createRun(game)));
-        }
     }
 
     private Callable<Game> createRun(Game game) {

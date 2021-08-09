@@ -9,6 +9,7 @@ import org.powertac.rachma.file.File;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,5 +49,9 @@ public class Game {
 
     @Getter
     private Instant createdAt;
+
+    @Getter
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<GameRun> runs;
 
 }

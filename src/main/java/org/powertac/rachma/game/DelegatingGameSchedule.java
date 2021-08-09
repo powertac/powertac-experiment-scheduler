@@ -13,11 +13,17 @@ public class DelegatingGameSchedule implements GameSchedule {
 
     @Override
     public Game next() {
+        for (GameSchedule schedule : schedules) {
+            Game next = schedule.next();
+            if (null != next) {
+                return next;
+            }
+        }
         return null;
     }
 
     public void register(GameSchedule schedule) {
-
+        schedules.add(schedule);
     }
 
 }
