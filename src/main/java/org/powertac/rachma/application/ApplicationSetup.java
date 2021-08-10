@@ -8,6 +8,7 @@ import org.powertac.rachma.docker.image.DockerImageBuilder;
 import org.powertac.rachma.docker.image.DockerImageRepository;
 import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.broker.BrokerTypeRepository;
+import org.powertac.rachma.persistence.SchemaViewSeeder;
 import org.powertac.rachma.resource.WorkDirectoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,27 +29,23 @@ public class ApplicationSetup {
     private final BrokerTypeRepository brokerTypeRepository;
     private final WorkDirectoryManager workDirectoryManager;
     private final BrokerSeeder brokerSeeder;
+    private final SchemaViewSeeder viewSeeder;
     private final Logger logger;
     private final ApplicationStatus status;
 
     @Value("${server.defaultImage}")
     private String defaultServerImage;
 
-    @Value("${directory.local.brokers}")
-    private String brokerDirectory;
-
-    @Value("${broker.policy.descriptorFileName}")
-    private String brokerDescriptorFilename;
-
     @Autowired
     public ApplicationSetup(DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
                             BrokerTypeRepository brokerTypeRepository, ApplicationStatus status,
-                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder) {
+                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder, SchemaViewSeeder viewSeeder) {
         this.dockerImageBuilder = dockerImageBuilder;
         this.imageRepository = imageRepository;
         this.brokerTypeRepository = brokerTypeRepository;
         this.workDirectoryManager = workDirectoryManager;
         this.brokerSeeder = brokerSeeder;
+        this.viewSeeder = viewSeeder;
         this.logger = LogManager.getLogger(ApplicationSetup.class);
         this.status = status;
     }
@@ -63,6 +60,7 @@ public class ApplicationSetup {
             pullImage(defaultServerImage);
             buildBrokerImages();
             brokerSeeder.seedBrokers();
+            viewSeeder.seedViews();
         }
         catch (IOException e) {
             logger.error(e.getMessage());

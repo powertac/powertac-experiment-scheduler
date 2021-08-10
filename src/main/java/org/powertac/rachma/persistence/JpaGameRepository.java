@@ -7,7 +7,7 @@ import org.springframework.data.repository.CrudRepository;
 public interface JpaGameRepository extends CrudRepository<Game, String> {
 
     @Query(
-        value = "SELECT game.* FROM game INNER JOIN game_run ON game.id = game_run.game_id WHERE game_run.phase = 1 ORDER BY game.created_at LIMIT 1",
+        value = "SELECT game.* FROM game LEFT OUTER JOIN game_run_stats grs on game.id = grs.game_id where grs.run_count IS NULL OR (grs.run_count < 5 AND grs.success != 1) order by created_at LIMIT 1",
         nativeQuery = true)
     Game findFirstQueued();
 

@@ -4,7 +4,6 @@ import org.powertac.rachma.api.stomp.StompMessageBroker;
 import org.powertac.rachma.persistence.JpaGameRepository;
 import org.springframework.stereotype.Component;
 
-import javax.persistence.EntityManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
