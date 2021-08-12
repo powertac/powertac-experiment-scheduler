@@ -3,9 +3,10 @@ package org.powertac.rachma.powertac.broker;
 import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.configuration.SharedPropertiesFileBuilder;
 import org.powertac.rachma.docker.container.DockerContainerSpec;
+import org.powertac.rachma.resource.SharedDirectory;
+import org.powertac.rachma.resource.SharedDirectoryImpl;
 import org.powertac.rachma.resource.SharedFile;
 import org.powertac.rachma.resource.WorkDirectory;
-import org.powertac.rachma.task.ContainerSpecificationFactory;
 import org.powertac.rachma.task.Task;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class BrokerContainerSpecificationFactory  {
         return DockerContainerSpec.builder()
             .image(brokerType.getImage())
             .file(sharedPropertiesFile)
+            .directory(getLogDir(task, brokerType))
             .name(getContainerName(task, brokerType))
             .network(getNetworkName(task))
             .command(command)
@@ -44,6 +46,13 @@ public class BrokerContainerSpecificationFactory  {
             .properties(getDefaultProperties())
             .property("samplebroker.core.powerTacBroker.username", brokerType.getName())
             .writeAndBuild();
+    }
+
+    private SharedDirectory getLogDir(Task task, BrokerType brokerType) {
+        return new SharedDirectoryImpl(
+            String.format("%s/brokers/%s/logs/", task.getJob().getWorkDirectory().getLocalDirectory(), brokerType.getName()),
+            String.format("%s/brokers/%s/logs/", task.getJob().getWorkDirectory().getHostDirectory(), brokerType.getName()),
+            "/var/log/powertac-broker");
     }
 
     private BrokerDockerContainerCommand createCommand(SharedFile propertiesFile) {

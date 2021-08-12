@@ -1,5 +1,7 @@
 package org.powertac.rachma.powertac.simulation;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.configuration.ConfigurationParameter;
 import org.powertac.rachma.configuration.exception.ParameterValidationException;
@@ -37,7 +39,7 @@ public class SimulationJobFactory implements JobFactory<SimulationJob> {
     }
 
     public SimulationJob create(String name, List<String> brokerNames, Set<ConfigurationParameter> simulationParameters)
-            throws BrokerNotFoundException, ParameterValidationException, IOException {
+        throws BrokerNotFoundException, ParameterValidationException, IOException {
         return create(idProvider.getAnyId(), name, brokerNames, simulationParameters);
     }
 
@@ -68,13 +70,13 @@ public class SimulationJobFactory implements JobFactory<SimulationJob> {
         job.setId(id);
         job.setName(name);
         job.setWorkDirectory(workDirectoryManager.create(job));
-        job.setBootstrapTask(createBootstrapTask(job));
+        job.setBootstrapTask(createBootstrapTask(job, simulationParameters));
         job.setSimulationTask(simulationTaskFactory.create(job, brokerNames, parseConfigMap(simulationParameters), bootstrapFile, seedFile));
         return job;
     }
 
-    private BootstrapTask createBootstrapTask(Job job) {
-        return new BootstrapTask(IdGenerator.generateId(), job);
+    private BootstrapTask createBootstrapTask(Job job, Set<ConfigurationParameter> simulationParameters) {
+        return new BootstrapTask(IdGenerator.generateId(), job, parseConfigMap(simulationParameters));
     }
 
     private Map<String, String> parseConfigMap(Set<ConfigurationParameter> parameters) {
