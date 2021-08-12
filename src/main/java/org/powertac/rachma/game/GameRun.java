@@ -1,5 +1,8 @@
 package org.powertac.rachma.game;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -16,6 +19,7 @@ import java.util.Set;
 
 @Entity
 @NoArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class GameRun {
 
     @Getter
@@ -46,21 +50,25 @@ public class GameRun {
     @Setter
     @Getter
     @Transient
+    @JsonIgnore
     private DockerContainer bootstrapContainer;
 
     @Setter
     @Getter
     @Transient
+    @JsonIgnore
     private DockerNetwork network;
 
     @Setter
     @Getter
     @Transient
+    @JsonIgnore
     private DockerContainer simulationContainer;
 
     @Getter
     @Setter
     @Transient
+    @JsonIgnore
     private Map<Broker, DockerContainer> brokerContainers;
 
     public GameRun(String id, Game game) {
@@ -70,10 +78,7 @@ public class GameRun {
         this.brokerContainers = new HashMap<>();
     }
 
-    public boolean hasFailed() {
-        return failed;
-    }
-
+    @JsonIgnore
     public Set<DockerContainer> getSimulationContainers() {
         Set<DockerContainer> containers = new HashSet<>();
         containers.add(simulationContainer);

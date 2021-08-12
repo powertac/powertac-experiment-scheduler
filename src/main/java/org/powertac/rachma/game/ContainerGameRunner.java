@@ -99,6 +99,7 @@ public class ContainerGameRunner implements GameRunner {
     private void bootstrap(GameRun run) throws GameRunException {
         if (shouldBootstrap(run)) {
             try {
+                // TODO : remove existing container if necessary
                 gameFileManager.createBootstrap(run.getGame());
                 DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame());
                 lifecycle.bootstrap(run, bootstrapContainer);
@@ -115,6 +116,7 @@ public class ContainerGameRunner implements GameRunner {
 
     private void simulate(GameRun run) throws GameRunException {
         try {
+            // TODO : remove existing containers if necessary
             DockerNetwork network = createNetwork(run.getGame());
             DockerContainer serverContainer = simulationContainerCreator.create(run.getGame(), network);
             Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run.getGame(), network);
