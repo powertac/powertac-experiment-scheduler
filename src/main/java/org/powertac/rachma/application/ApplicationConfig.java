@@ -10,7 +10,6 @@ import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileDeserializer;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameDeserializer;
-import org.powertac.rachma.game.GameSerializer;
 import org.powertac.rachma.instance.Instance;
 import org.powertac.rachma.instance.InstanceDeserializer;
 import org.powertac.rachma.instance.ServerParameters;
@@ -71,7 +70,6 @@ public class ApplicationConfig implements ApplicationContextAware {
         module.addSerializer(ServerParameters.class, new ServerParametersSerializer());
         module.addDeserializer(org.powertac.rachma.broker.Broker.class, new org.powertac.rachma.broker.BrokerDeserializer());
         module.addDeserializer(Game.class, new GameDeserializer());
-        //module.addSerializer(Game.class, new GameSerializer());
         module.addDeserializer(File.class, applicationContext.getBean(FileDeserializer.class));
     }
 

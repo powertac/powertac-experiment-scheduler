@@ -2,12 +2,14 @@ package org.powertac.rachma.game;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.file.File;
+import org.powertac.rachma.serialization.InstantToNumberSerializer;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -51,6 +53,7 @@ public class Game {
     private File seed;
 
     @Getter
+    @JsonSerialize(using = InstantToNumberSerializer.class)
     private Instant createdAt;
 
     @Getter

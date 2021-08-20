@@ -3,12 +3,14 @@ package org.powertac.rachma.game;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.docker.container.DockerContainer;
 import org.powertac.rachma.docker.network.DockerNetwork;
+import org.powertac.rachma.serialization.InstantToNumberSerializer;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -33,10 +35,12 @@ public class GameRun {
 
     @Getter
     @Setter
+    @JsonSerialize(using = InstantToNumberSerializer.class)
     private Instant start;
 
     @Getter
     @Setter
+    @JsonSerialize(using = InstantToNumberSerializer.class)
     private Instant end;
 
     @Setter
