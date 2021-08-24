@@ -40,7 +40,8 @@ public class ContainerGameRunner implements GameRunner {
                                BootstrapContainerCreator bootstrapContainerCreator,
                                SimulationContainerCreator simulationContainerCreator,
                                BrokerContainerCreator brokerContainerCreator,
-                               DockerContainerController controller, DockerNetworkRepository networks, GameRunLifecycleManager lifecycle) {
+                               DockerContainerController controller, DockerNetworkRepository networks,
+                               GameRunLifecycleManager lifecycle) {
         this.runs = runs;
         this.gameFileManager = gameFileManager;
         this.bootstrapContainerCreator = bootstrapContainerCreator;
@@ -99,8 +100,8 @@ public class ContainerGameRunner implements GameRunner {
     private void bootstrap(GameRun run) throws GameRunException {
         if (shouldBootstrap(run)) {
             try {
-                // TODO : remove existing container if necessary
                 gameFileManager.createBootstrap(run.getGame());
+                removeBootstrapContainerIfExists(run.getGame());
                 DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame());
                 lifecycle.bootstrap(run, bootstrapContainer);
                 ContainerExitState exitState = controller.run(run.getBootstrapContainer());
@@ -112,6 +113,11 @@ public class ContainerGameRunner implements GameRunner {
             }
         }
         lifecycle.ready(run);
+    }
+
+    private void removeBootstrapContainerIfExists(Game game) throws DockerException {
+        String bootstrapContainerName = bootstrapContainerCreator.getBootstrapContainerName(game);
+        controller.remove(bootstrapContainerName);
     }
 
     private void simulate(GameRun run) throws GameRunException {

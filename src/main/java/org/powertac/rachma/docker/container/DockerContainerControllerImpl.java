@@ -3,6 +3,7 @@ package org.powertac.rachma.docker.container;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.DockerException;
+import com.github.dockerjava.api.exception.NotFoundException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.docker.exception.*;
@@ -93,11 +94,23 @@ public class DockerContainerControllerImpl implements DockerContainerController 
         return isRunningState(getState(container));
     }
 
-    private void remove(DockerContainer container) throws ContainerRemovalException {
+    @Override
+    public void remove(DockerContainer container) throws DockerException {
+        docker.removeContainerCmd(container.getId()).exec();
+    }
+
+    @Override
+    public void remove(String name) throws DockerException {
+        docker.removeContainerCmd(name).exec();
+    }
+
+    @Override
+    public boolean exists(String name) throws DockerException {
         try {
-            docker.removeContainerCmd(container.getId()).exec();
-        } catch (DockerException e) {
-            throw new ContainerRemovalException(String.format("failed to remove container[id=%s]", container.getId()), e);
+            docker.inspectContainerCmd(name).exec();
+            return true;
+        } catch (NotFoundException e) {
+            return false;
         }
     }
 

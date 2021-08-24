@@ -38,7 +38,7 @@ public class BootstrapContainerCreatorImpl implements BootstrapContainerCreator 
     @Override
     public DockerContainer create(Game game) throws DockerException {
         CreateContainerCmd create = docker.createContainerCmd(defaultImageTag);
-        String name = getName(game);
+        String name = getBootstrapContainerName(game);
         create.withName(name);
         create.withCmd(getCommand(game));
         create.withHostConfig(getHostConfig(game));
@@ -46,7 +46,8 @@ public class BootstrapContainerCreatorImpl implements BootstrapContainerCreator 
         return new DockerContainer(response.getId(), name);
     }
 
-    private String getName(Game game) {
+    @Override
+    public String getBootstrapContainerName(Game game) {
         return String.format("boot.%s", game.getId());
     }
 
