@@ -34,6 +34,16 @@ public class GameController {
         return ResponseEntity.ok().body(games);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Game> getGame(@PathVariable("id") String id) {
+        Game game = this.games.findById(id);
+        if (null != game) {
+            return ResponseEntity.ok().body(game);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @PostMapping("/")
     public ResponseEntity<?> queueInstance(@RequestBody Game game) {
         try {
