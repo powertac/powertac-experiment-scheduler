@@ -5,17 +5,17 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
-abstract public class AbstractStompMessageBroker<T> implements StompMessageBroker<T> {
+abstract public class AbstractEntityPublisher<T> implements EntityPublisher<T> {
 
     private final SimpMessagingTemplate template;
     private final String destination;
 
     private final Logger logger;
 
-    protected AbstractStompMessageBroker(SimpMessagingTemplate template, String destination) {
+    protected AbstractEntityPublisher(SimpMessagingTemplate template, String destination) {
         this.template = template;
         this.destination = destination;
-        logger = LogManager.getLogger(AbstractStompMessageBroker.class);
+        logger = LogManager.getLogger(AbstractEntityPublisher.class);
     }
 
     @Override

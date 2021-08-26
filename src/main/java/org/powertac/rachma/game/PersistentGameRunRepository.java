@@ -10,22 +10,26 @@ import java.util.UUID;
 public class PersistentGameRunRepository implements GameRunRepository {
 
     private final JpaGameRunRepository runs;
+    private final GameRepository games;
 
-    public PersistentGameRunRepository(JpaGameRunRepository runs) {
+    public PersistentGameRunRepository(JpaGameRunRepository runs, GameRepository games) {
         this.runs = runs;
+        this.games = games;
     }
 
     @Override
     public GameRun create(Game game) {
         String id = UUID.randomUUID().toString();
         GameRun run = new GameRun(id, game);
-        runs.save(run);
+        game.getRuns().add(run);
+        this.save(run);
         return run;
     }
 
     @Override
-    public void update(GameRun run) {
+    public void save(GameRun run) {
         runs.save(run);
+        games.save(run.getGame());
     }
 
     @Override

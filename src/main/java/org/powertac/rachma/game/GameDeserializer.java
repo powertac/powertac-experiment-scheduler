@@ -9,10 +9,7 @@ import org.powertac.rachma.serialization.DeserializationHelper;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class GameDeserializer extends StdNodeBasedDeserializer<Game> {
 
@@ -28,7 +25,7 @@ public class GameDeserializer extends StdNodeBasedDeserializer<Game> {
         Map<String, String> serverParameters = parseServerParameters(root);
         File bootstrap = root.has("bootstrap") ? parseFile(root.get("bootstrap"), context) : null;
         File seed = root.has("seed") ? parseFile(root.get("seed"), context) : null;
-        return new Game(id, name, brokers, serverParameters, bootstrap, seed, Instant.now(), null);
+        return new Game(id, name, brokers, serverParameters, bootstrap, seed, Instant.now(), new ArrayList<>());
     }
 
     private Map<String, String> parseServerParameters(JsonNode root) {

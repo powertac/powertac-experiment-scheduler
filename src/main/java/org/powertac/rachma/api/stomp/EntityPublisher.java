@@ -1,6 +1,6 @@
 package org.powertac.rachma.api.stomp;
 
-public interface StompMessageBroker<T> {
+public interface EntityPublisher<T> {
 
     void publish(T entity);
 

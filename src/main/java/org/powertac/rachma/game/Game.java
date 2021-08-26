@@ -13,6 +13,7 @@ import org.powertac.rachma.serialization.InstantToNumberSerializer;
 
 import javax.persistence.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +59,6 @@ public class Game {
 
     @Getter
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
-    private List<GameRun> runs;
+    private List<GameRun> runs = new ArrayList<>();
 
 }

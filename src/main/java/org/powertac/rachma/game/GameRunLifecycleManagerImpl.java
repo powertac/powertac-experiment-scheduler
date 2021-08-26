@@ -26,7 +26,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
     public void preparation(GameRun run) {
         run.setStart(Instant.now());
         run.setPhase(GameRunPhase.PREPARATION);
-        runs.update(run);
+        runs.save(run);
         logger.info(String.format("run[id=%s] is now preparing", run.getId()));
     }
 
@@ -34,14 +34,14 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
     public void bootstrap(GameRun run, DockerContainer container) {
         run.setPhase(GameRunPhase.BOOTSTRAP);
         run.setBootstrapContainer(container);
-        runs.update(run);
+        runs.save(run);
         logger.info(String.format("run[id=%s] is now bootstrapping", run.getId()));
     }
 
     @Override
     public void ready(GameRun run) {
         run.setPhase(GameRunPhase.READY);
-        runs.update(run);
+        runs.save(run);
         logger.info(String.format("run[id=%s] is now ready", run.getId()));
     }
 
@@ -51,7 +51,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
         run.setNetwork(network);
         run.setSimulationContainer(serverContainer);
         run.setBrokerContainers(brokerContainers);
-        runs.update(run);
+        runs.save(run);
         logger.info(String.format("run[id=%s] is now simulating", run.getId()));
     }
 
@@ -59,7 +59,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
     public void done(GameRun run) {
         run.setEnd(Instant.now());
         run.setPhase(GameRunPhase.DONE);
-        runs.update(run);
+        runs.save(run);
         logger.info(String.format("run[id=%s] is done", run.getId()));
     }
 
@@ -68,7 +68,7 @@ public class GameRunLifecycleManagerImpl implements GameRunLifecycleManager {
         run.setEnd(Instant.now());
         run.setFailed(true);
         run.setPhase(GameRunPhase.DONE);
-        runs.update(run);
+        runs.save(run);
         logger.error(String.format("run[id=%s] has failed", run.getId()));
     }
 

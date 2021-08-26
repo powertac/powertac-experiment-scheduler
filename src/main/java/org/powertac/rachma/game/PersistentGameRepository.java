@@ -1,6 +1,6 @@
 package org.powertac.rachma.game;
 
-import org.powertac.rachma.api.stomp.StompMessageBroker;
+import org.powertac.rachma.api.stomp.EntityPublisher;
 import org.powertac.rachma.persistence.JpaGameRepository;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +13,11 @@ import java.util.UUID;
 public class PersistentGameRepository implements GameRepository {
 
     private final JpaGameRepository games;
-    private final StompMessageBroker<Game> messages;
+    private final EntityPublisher<Game> publisher;
 
-    public PersistentGameRepository(JpaGameRepository games, StompMessageBroker<Game> messages) {
+    public PersistentGameRepository(JpaGameRepository games, EntityPublisher<Game> publisher) {
         this.games = games;
-        this.messages = messages;
+        this.publisher = publisher;
     }
 
     @Override
@@ -43,7 +43,7 @@ public class PersistentGameRepository implements GameRepository {
             game.setId(UUID.randomUUID().toString());
         }
         games.save(game);
-        messages.publish(game);
+        publisher.publish(game);
     }
 
 }
