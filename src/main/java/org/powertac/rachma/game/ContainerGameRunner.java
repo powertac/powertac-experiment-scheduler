@@ -117,7 +117,9 @@ public class ContainerGameRunner implements GameRunner {
 
     private void removeBootstrapContainerIfExists(Game game) throws DockerException {
         String bootstrapContainerName = bootstrapContainerCreator.getBootstrapContainerName(game);
-        controller.remove(bootstrapContainerName);
+        if (controller.exists(bootstrapContainerName)) {
+            controller.remove(bootstrapContainerName);
+        }
     }
 
     private void simulate(GameRun run) throws GameRunException {
