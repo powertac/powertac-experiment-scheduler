@@ -137,6 +137,10 @@ public class ContainerGameRunner implements GameRunner {
             }
         } catch (ContainerException e) {
             throw new GameRunException("simulation run failed due to container error", e);
+        } finally {
+            if (null != run.getNetwork()) {
+                networks.removeNetwork(run.getNetwork());
+            }
         }
     }
 
