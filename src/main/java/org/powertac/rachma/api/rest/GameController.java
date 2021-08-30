@@ -2,17 +2,12 @@ package org.powertac.rachma.api.rest;
 
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerRepository;
-import org.powertac.rachma.game.Game;
-import org.powertac.rachma.game.GameRepository;
-import org.powertac.rachma.game.GameValidationException;
-import org.powertac.rachma.game.GameValidator;
+import org.powertac.rachma.file.FileRole;
+import org.powertac.rachma.game.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/games")
@@ -21,11 +16,13 @@ public class GameController {
     private final BrokerRepository brokers;
     private final GameRepository games;
     private final GameValidator validator;
+    private final GameFileManager files;
 
-    public GameController(BrokerRepository brokers, GameRepository games, GameValidator validator) {
+    public GameController(BrokerRepository brokers, GameRepository games, GameValidator validator, GameFileManager files) {
         this.brokers = brokers;
         this.games = games;
         this.validator = validator;
+        this.files = files;
     }
 
     @GetMapping("/")
@@ -39,6 +36,16 @@ public class GameController {
         Game game = this.games.findById(id);
         if (null != game) {
             return ResponseEntity.ok().body(game);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/files")
+    public ResponseEntity<Map<FileRole, String>> getGameFiles(@PathVariable("id") String id) {
+        Game game = this.games.findById(id);
+        if (null != game) {
+            return ResponseEntity.ok().body(files.getFiles(game));
         } else {
             return ResponseEntity.notFound().build();
         }

@@ -41,11 +41,11 @@ public class GamePathProvider {
     }
 
     public Path stateLog() {
-        return Paths.get(logs().toString(), String.format("%s.state", game.getId()));
+        return Paths.get(logs().toString(), String.format("powertac-sim-0.state"));
     }
 
     public Path traceLog() {
-        return Paths.get(logs().toString(), String.format("%s.trace", game.getId()));
+        return Paths.get(logs().toString(), String.format("powertac-sim-0.trace"));
     }
 
     public Path properties() {

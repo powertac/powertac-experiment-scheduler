@@ -47,7 +47,6 @@ public class GameRun {
     @Getter
     private GameRunPhase phase;
 
-    @Getter
     @Setter
     private boolean failed;
 
@@ -88,6 +87,10 @@ public class GameRun {
         containers.add(simulationContainer);
         containers.addAll(brokerContainers.values());
         return containers;
+    }
+
+    public boolean hasFailed() {
+        return this.failed;
     }
 
 }

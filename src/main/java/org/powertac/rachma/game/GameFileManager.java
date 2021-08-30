@@ -1,8 +1,10 @@
 package org.powertac.rachma.game;
 
 import org.powertac.rachma.broker.Broker;
+import org.powertac.rachma.file.FileRole;
 
 import java.io.IOException;
+import java.util.Map;
 
 public interface GameFileManager {
 
@@ -13,4 +15,6 @@ public interface GameFileManager {
     void createBootstrap(Game game) throws IOException;
     boolean bootstrapExists(Game game);
     boolean seedExists(Game game);
+    Map<FileRole, String> getFiles(Game game);
+
 }

@@ -8,8 +8,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.Setter;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileDeserializer;
-import org.powertac.rachma.game.Game;
-import org.powertac.rachma.game.GameDeserializer;
+import org.powertac.rachma.game.*;
 import org.powertac.rachma.instance.Instance;
 import org.powertac.rachma.instance.InstanceDeserializer;
 import org.powertac.rachma.instance.ServerParameters;
@@ -54,6 +53,7 @@ public class ApplicationConfig implements ApplicationContextAware {
 
     private Module createSerializationModule() {
         SimpleModule module = new SimpleModule();
+        registerGameSerialization(module);
         registerJobSerialization(module);
         registerBrokerSerialization(module);
         return module;
@@ -69,13 +69,18 @@ public class ApplicationConfig implements ApplicationContextAware {
         module.addSerializer(Treatment.class, new TreatmentSerializer());
         module.addSerializer(ServerParameters.class, new ServerParametersSerializer());
         module.addDeserializer(org.powertac.rachma.broker.Broker.class, new org.powertac.rachma.broker.BrokerDeserializer());
-        module.addDeserializer(Game.class, new GameDeserializer());
         module.addDeserializer(File.class, applicationContext.getBean(FileDeserializer.class));
     }
 
     private void registerBrokerSerialization(SimpleModule module) {
         module.addSerializer(Broker.class, new BrokerSerializer());
         module.addDeserializer(Broker.class, new BrokerDeserializer());
+    }
+
+    private void registerGameSerialization(SimpleModule module) {
+        module.addSerializer(Game.class, new GameSerializer(applicationContext.getBean(GameFileManager.class)));
+        module.addDeserializer(Game.class, new GameDeserializer());
+        module.addSerializer(GameRun.class, new GameRunSerializer());
     }
 
 }

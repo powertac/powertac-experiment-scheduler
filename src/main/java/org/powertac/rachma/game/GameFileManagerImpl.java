@@ -1,6 +1,7 @@
 package org.powertac.rachma.game;
 
 import org.powertac.rachma.broker.Broker;
+import org.powertac.rachma.file.FileRole;
 import org.powertac.rachma.file.PathProvider;
 import org.powertac.rachma.util.BrokerCompatiblePropertiesWriter;
 import org.springframework.stereotype.Component;
@@ -9,8 +10,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -84,6 +86,27 @@ public class GameFileManagerImpl implements GameFileManager {
             return false;
         }
         return Files.exists(seedPath);
+    }
+
+    @Override
+    public Map<FileRole, String> getFiles(Game game) {
+        Map<FileRole, String> files = new HashMap<>();
+        if (Files.exists(paths.local().game(game).properties())) {
+            files.put(FileRole.PROPERTIES, paths.host().game(game).properties().toString());
+        }
+        if (Files.exists(paths.local().game(game).bootstrap())) {
+            files.put(FileRole.BOOTSTRAP, paths.host().game(game).bootstrap().toString());
+        }
+        if (null != game.getSeed() && Files.exists(paths.local().game(game).seed())) {
+            files.put(FileRole.SEED, paths.host().game(game).seed().toString());
+        }
+        if (Files.exists(paths.local().game(game).stateLog())) {
+            files.put(FileRole.STATE_LOG, paths.host().game(game).stateLog().toString());
+        }
+        if (Files.exists(paths.local().game(game).traceLog())) {
+            files.put(FileRole.TRACE_LOG, paths.host().game(game).traceLog().toString());
+        }
+        return files;
     }
 
 }
