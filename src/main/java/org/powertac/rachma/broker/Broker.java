@@ -29,6 +29,7 @@ public class Broker {
 
     @Getter
     @Transient
+    @Deprecated
     private Map<String, String> config;
 
     public Broker(String name, String version) {

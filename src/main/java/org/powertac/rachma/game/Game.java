@@ -46,11 +46,11 @@ public class Game {
     private Map<String, String> serverParameters;
 
     @Getter
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private File bootstrap;
 
     @Getter
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private File seed;
 
     @Getter

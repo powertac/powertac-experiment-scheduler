@@ -29,22 +29,11 @@ public class GameValidatorImpl implements GameValidator {
 
     @Override
     public void validate(Game game) throws GameValidationException {
-        validateId(game.getId());
         validateName(game.getName());
         validateBrokers(game.getBrokers());
         validateServerParameters(game.getServerParameters());
         validateBootstrap(game.getBootstrap());
         validateSeed(game.getSeed());
-    }
-
-    private void validateId(String id) throws GameValidationException {
-        if (null == id) {
-            return;
-        }
-        Game existingGame = games.findById(id);
-        if (null == existingGame) {
-            throw new GameValidationException(String.format("game with id='%s' does not exist", id));
-        }
     }
 
     private void validateName(String name) throws GameValidationException {
@@ -86,6 +75,7 @@ public class GameValidatorImpl implements GameValidator {
                 "game '%s' referenced in bootstrap file does not exist",
                 bootstrap.getGame().getId()));
         }
+        // TODO : check for file existence
     }
 
     private void validateSeed(File seed) throws GameValidationException {
@@ -100,6 +90,7 @@ public class GameValidatorImpl implements GameValidator {
                 "game '%s' referenced in seed file does not exist",
                 seed.getGame().getId()));
         }
+        // TODO : check for file existence
     }
 
 }
