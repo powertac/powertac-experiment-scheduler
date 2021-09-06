@@ -17,9 +17,11 @@ import org.powertac.rachma.server.SimulationContainerCreator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ContainerGameRunner implements GameRunner {
@@ -33,6 +35,7 @@ public class ContainerGameRunner implements GameRunner {
     private final DockerNetworkRepository networks;
     private final GameRunLifecycleManager lifecycle;
 
+    private final Map<Game, GameRun> activeRuns;
     private final Logger logger;
 
     @Autowired
@@ -50,6 +53,7 @@ public class ContainerGameRunner implements GameRunner {
         this.controller = controller;
         this.networks = networks;
         this.lifecycle = lifecycle;
+        this.activeRuns = new ConcurrentHashMap<>();
         logger = LogManager.getLogger(ContainerGameRunner.class);
     }
 
@@ -57,6 +61,7 @@ public class ContainerGameRunner implements GameRunner {
     public void run(Game game) {
         logger.info(String.format("running game[id=%s]", game.getId()));
         GameRun run = runs.create(game);
+        activeRuns.put(game, run);
         try {
             prepareGameFiles(run);
             bootstrap(run);
@@ -66,6 +71,16 @@ public class ContainerGameRunner implements GameRunner {
         } catch (Exception e) {
             lifecycle.fail(run);
             logger.error(String.format("run for game[id=%s] failed", game.getId()), e);
+        } finally {
+            activeRuns.remove(game);
+        }
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        for (GameRun run : activeRuns.values()) {
+            stop(run);
+            activeRuns.remove(run.getGame());
         }
     }
 
@@ -156,24 +171,18 @@ public class ContainerGameRunner implements GameRunner {
         return brokerContainers;
     }
 
-    // TODO : add interface to stop game run
-    private void stop(GameRun run) {
+    private synchronized void stop(GameRun run) {
         try {
             if (run.getPhase().equals(GameRunPhase.BOOTSTRAP)) {
-                controller.kill(run.getBootstrapContainer());
-                return;
-            }
-            if (run.getPhase().equals(GameRunPhase.SIMULATION)) {
-                controller.kill(run.getSimulationContainer());
-                for (DockerContainer brokerContainer : run.getBrokerContainers().values()) {
-                    controller.kill(brokerContainer);
+                controller.forceRemove(run.getBootstrapContainer());
+            } else if (run.getPhase().equals(GameRunPhase.SIMULATION)) {
+                for (DockerContainer container : run.getSimulationContainers()) {
+                    controller.forceRemove(container);
+                    networks.removeNetwork(run.getNetwork());
                 }
             }
-        } catch (KillContainerException e) {
-            // TODO : add to list of orphaned resources and log
         } finally {
-            run.setFailed(true);
-            run.setPhase(GameRunPhase.DONE);
+            lifecycle.fail(run);
         }
     }
 

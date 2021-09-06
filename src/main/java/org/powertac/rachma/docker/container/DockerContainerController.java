@@ -17,6 +17,7 @@ public interface DockerContainerController {
     Map<DockerContainer, ContainerExitState> run(Set<DockerContainer> containers) throws ContainerException;
     boolean isRunning(DockerContainer container) throws ContainerReflectionException;
     void remove(DockerContainer container) throws DockerException;
+    void forceRemove(DockerContainer container) throws DockerException;
     void remove(String name) throws DockerException;
     boolean exists(String name) throws DockerException;
 

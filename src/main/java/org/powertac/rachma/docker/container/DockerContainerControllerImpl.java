@@ -96,12 +96,17 @@ public class DockerContainerControllerImpl implements DockerContainerController 
 
     @Override
     public void remove(DockerContainer container) throws DockerException {
-        docker.removeContainerCmd(container.getId()).exec();
+        remove(container.getId(), false);
+    }
+
+    @Override
+    public void forceRemove(DockerContainer container) throws DockerException {
+        remove(container.getId(), true);
     }
 
     @Override
     public void remove(String name) throws DockerException {
-        docker.removeContainerCmd(name).exec();
+        remove(name, false);
     }
 
     @Override
@@ -204,6 +209,13 @@ public class DockerContainerControllerImpl implements DockerContainerController 
                 logger.error("kill timer was interrupted; this may lead to an inconsistent application state", e);
             }
         };
+    }
+
+    private void remove(String containerReference, boolean withForce) throws DockerException {
+        docker.removeContainerCmd(containerReference)
+            .withForce(withForce)
+            .withRemoveVolumes(true)
+            .exec();
     }
 
 }
