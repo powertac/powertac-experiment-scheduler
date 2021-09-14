@@ -1,4 +1,4 @@
 package org.powertac.rachma.task;
 
-// TODO : this might not necessarily be necessary
+@Deprecated
 public interface ContainerTask extends Task {}

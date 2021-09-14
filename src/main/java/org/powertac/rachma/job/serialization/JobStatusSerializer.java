@@ -8,6 +8,7 @@ import org.powertac.rachma.job.JobStatus;
 import java.io.IOException;
 import java.math.BigDecimal;
 
+@Deprecated
 public class JobStatusSerializer extends StdSerializer<JobStatus> {
 
     public JobStatusSerializer() {

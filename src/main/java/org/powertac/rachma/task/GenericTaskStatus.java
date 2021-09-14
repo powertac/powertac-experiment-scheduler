@@ -7,6 +7,7 @@ import java.time.Duration;
 import java.time.Instant;
 
 @NoArgsConstructor
+@Deprecated
 public class GenericTaskStatus implements TaskStatus {
 
     @Getter

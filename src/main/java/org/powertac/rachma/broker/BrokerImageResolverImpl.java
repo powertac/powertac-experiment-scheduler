@@ -1,6 +1,6 @@
 package org.powertac.rachma.broker;
 
-import org.powertac.rachma.powertac.broker.exception.BrokerNotFoundException;
+import org.powertac.rachma.powertac.broker.BrokerNotFoundException;
 import org.springframework.stereotype.Component;
 
 @Component

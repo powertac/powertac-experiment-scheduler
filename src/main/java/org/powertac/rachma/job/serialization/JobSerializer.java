@@ -7,20 +7,17 @@ import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.job.Job;
 import org.powertac.rachma.powertac.broker.Broker;
 import org.powertac.rachma.powertac.broker.BrokerImpl;
-import org.powertac.rachma.powertac.simulation.SimulationJob;
+import org.powertac.rachma.job.SimulationJob;
 import org.powertac.rachma.util.IdGenerator;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Deprecated
 public class JobSerializer extends StdSerializer<Job> {
 
     public JobSerializer() {
@@ -38,7 +35,6 @@ public class JobSerializer extends StdSerializer<Job> {
             }
             serializerProvider.defaultSerializeField("status", job.getStatus(), jsonGenerator);
             writeFilesField(jsonGenerator, job.getFiles());
-            serializerProvider.defaultSerializeField("experiment", job.getExperiment(), jsonGenerator);
             jsonGenerator.writeEndObject();
         }
     }

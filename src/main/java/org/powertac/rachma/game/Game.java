@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.file.File;
-import org.powertac.rachma.serialization.InstantToNumberSerializer;
+import org.powertac.rachma.util.InstantToNumberSerializer;
 
 import javax.persistence.*;
 import java.time.Instant;

@@ -8,9 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.broker.Broker;
-import org.powertac.rachma.docker.container.DockerContainer;
-import org.powertac.rachma.docker.network.DockerNetwork;
-import org.powertac.rachma.serialization.InstantToNumberSerializer;
+import org.powertac.rachma.docker.DockerContainer;
+import org.powertac.rachma.docker.DockerNetwork;
+import org.powertac.rachma.util.InstantToNumberSerializer;
 
 import javax.persistence.*;
 import java.time.Instant;

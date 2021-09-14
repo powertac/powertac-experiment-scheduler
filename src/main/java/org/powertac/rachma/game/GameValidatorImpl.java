@@ -2,10 +2,10 @@ package org.powertac.rachma.game;
 
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerTypeRepository;
-import org.powertac.rachma.configuration.exception.ParameterValidationException;
+import org.powertac.rachma.validation.ParameterValidationException;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRole;
-import org.powertac.rachma.powertac.simulation.SimulationParameterValidator;
+import org.powertac.rachma.validation.SimulationParameterValidator;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;

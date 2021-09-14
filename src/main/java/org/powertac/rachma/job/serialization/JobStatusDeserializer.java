@@ -10,6 +10,7 @@ import org.powertac.rachma.job.JobStatusImpl;
 import java.io.IOException;
 import java.time.Instant;
 
+@Deprecated
 public class JobStatusDeserializer extends StdNodeBasedDeserializer<JobStatus> {
 
     public JobStatusDeserializer() {

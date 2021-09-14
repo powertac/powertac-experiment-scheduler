@@ -6,6 +6,7 @@ import org.powertac.rachma.job.Job;
 import org.powertac.rachma.resource.WorkDirectory;
 import org.springframework.data.annotation.Transient;
 
+@Deprecated
 abstract public class AbstractTask implements Task {
 
     @Getter

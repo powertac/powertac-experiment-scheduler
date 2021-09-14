@@ -3,6 +3,7 @@ package org.powertac.rachma.powertac.broker;
 import lombok.Getter;
 import org.powertac.rachma.broker.BrokerType;
 
+@Deprecated
 public class BrokerImpl implements Broker {
 
     @Getter

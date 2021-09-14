@@ -5,13 +5,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerContainerCreator;
-import org.powertac.rachma.docker.container.ContainerExitState;
-import org.powertac.rachma.docker.container.DockerContainer;
-import org.powertac.rachma.docker.container.DockerContainerController;
+import org.powertac.rachma.docker.DockerContainerExitState;
+import org.powertac.rachma.docker.DockerContainer;
+import org.powertac.rachma.docker.DockerContainerController;
 import org.powertac.rachma.docker.exception.ContainerException;
-import org.powertac.rachma.docker.exception.KillContainerException;
-import org.powertac.rachma.docker.network.DockerNetwork;
-import org.powertac.rachma.docker.network.DockerNetworkRepository;
+import org.powertac.rachma.docker.DockerNetwork;
+import org.powertac.rachma.docker.DockerNetworkRepository;
 import org.powertac.rachma.server.BootstrapContainerCreator;
 import org.powertac.rachma.server.SimulationContainerCreator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +118,7 @@ public class ContainerGameRunner implements GameRunner {
                 removeBootstrapContainerIfExists(run.getGame());
                 DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame());
                 lifecycle.bootstrap(run, bootstrapContainer);
-                ContainerExitState exitState = controller.run(run.getBootstrapContainer());
+                DockerContainerExitState exitState = controller.run(run.getBootstrapContainer());
                 if (exitState.isErrorState()) {
                     throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId());
                 }
@@ -144,8 +143,8 @@ public class ContainerGameRunner implements GameRunner {
             DockerContainer serverContainer = simulationContainerCreator.create(run.getGame(), network);
             Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run.getGame(), network);
             lifecycle.simulation(run, network, serverContainer, brokerContainers);
-            Map<DockerContainer, ContainerExitState> exitStates = controller.run(run.getSimulationContainers());
-            for (ContainerExitState exitState : exitStates.values()) {
+            Map<DockerContainer, DockerContainerExitState> exitStates = controller.run(run.getSimulationContainers());
+            for (DockerContainerExitState exitState : exitStates.values()) {
                 if (exitState.isErrorState()) {
                     throw new GameRunException("a simulation container exited with an error code");
                 }

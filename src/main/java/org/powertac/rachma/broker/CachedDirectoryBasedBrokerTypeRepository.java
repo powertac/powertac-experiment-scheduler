@@ -1,7 +1,7 @@
 package org.powertac.rachma.broker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.powertac.rachma.powertac.broker.exception.BrokerNotFoundException;
+import org.powertac.rachma.powertac.broker.BrokerNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

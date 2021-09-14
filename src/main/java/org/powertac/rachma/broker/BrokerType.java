@@ -3,7 +3,7 @@ package org.powertac.rachma.broker;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.powertac.rachma.powertac.broker.serialization.BrokerTypeSerializer;
+import org.powertac.rachma.powertac.broker.BrokerTypeSerializer;
 
 @JsonSerialize(using = BrokerTypeSerializer.class)
 @JsonDeserialize(using = BrokerTypeDeserializer.class)

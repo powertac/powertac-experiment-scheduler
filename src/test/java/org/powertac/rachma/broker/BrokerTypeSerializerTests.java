@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.powertac.rachma.powertac.broker.serialization.BrokerTypeSerializer;
+import org.powertac.rachma.powertac.broker.BrokerTypeSerializer;
 
 class BrokerTypeSerializerTests {
 

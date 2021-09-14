@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import org.powertac.rachma.job.Job;
 import org.powertac.rachma.job.JobStatus;
-import org.powertac.rachma.powertac.bootstrap.BootstrapTask;
+import org.powertac.rachma.job.BootstrapTask;
 import org.powertac.rachma.powertac.broker.Broker;
 import org.powertac.rachma.broker.BrokerType;
-import org.powertac.rachma.powertac.simulation.SimulationJob;
-import org.powertac.rachma.powertac.simulation.SimulationTask;
+import org.powertac.rachma.job.SimulationJob;
+import org.powertac.rachma.job.SimulationTask;
 import org.powertac.rachma.resource.WorkDirectoryManager;
 import org.powertac.rachma.util.DeserializationHelper;
 import org.powertac.rachma.util.IdGenerator;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.*;
 
 @Service
+@Deprecated
 public class JobDeserializer extends StdNodeBasedDeserializer<Job> {
 
     private final WorkDirectoryManager workDirectoryManager;

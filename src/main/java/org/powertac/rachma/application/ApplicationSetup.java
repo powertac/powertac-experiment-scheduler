@@ -4,8 +4,8 @@ import com.github.dockerjava.api.exception.DockerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.BrokerSeeder;
-import org.powertac.rachma.docker.image.DockerImageBuilder;
-import org.powertac.rachma.docker.image.DockerImageRepository;
+import org.powertac.rachma.docker.DockerImageBuilder;
+import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.broker.BrokerTypeRepository;
 import org.powertac.rachma.persistence.MigrationRunner;
@@ -64,7 +64,7 @@ public class ApplicationSetup {
             buildBrokerImages();
             brokerSeeder.seedBrokers();
             viewSeeder.seedViews();
-            migrationRunner.runMigrations();
+            //migrationRunner.runMigrations();
         }
         catch (IOException e) {
             logger.error(e.getMessage());

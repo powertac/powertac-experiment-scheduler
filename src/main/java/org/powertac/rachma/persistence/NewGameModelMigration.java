@@ -13,7 +13,7 @@ import org.powertac.rachma.game.*;
 import org.powertac.rachma.job.Job;
 import org.powertac.rachma.job.JobRepository;
 import org.powertac.rachma.job.JobState;
-import org.powertac.rachma.powertac.simulation.SimulationJob;
+import org.powertac.rachma.job.SimulationJob;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

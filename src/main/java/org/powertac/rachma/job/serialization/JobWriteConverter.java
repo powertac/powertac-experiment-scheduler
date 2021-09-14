@@ -11,6 +11,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Service;
 
 @Service
+@Deprecated
 public class JobWriteConverter implements Converter<Job, Document> {
 
     private final ObjectMapper mapper;

@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 abstract public class AbstractJob implements Job {
 
     @Getter

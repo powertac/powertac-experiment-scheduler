@@ -6,7 +6,7 @@ import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
-import org.powertac.rachma.docker.container.DockerContainer;
+import org.powertac.rachma.docker.DockerContainer;
 import org.powertac.rachma.file.PathProvider;
 import org.powertac.rachma.game.Game;
 import org.springframework.beans.factory.annotation.Autowired;

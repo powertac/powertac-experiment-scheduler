@@ -3,8 +3,8 @@ package org.powertac.rachma.game;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.Broker;
-import org.powertac.rachma.docker.container.DockerContainer;
-import org.powertac.rachma.docker.network.DockerNetwork;
+import org.powertac.rachma.docker.DockerContainer;
+import org.powertac.rachma.docker.DockerNetwork;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;

@@ -12,6 +12,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonSerialize(using = JobStatusSerializer.class)
+@Deprecated
 public class JobStatusImpl implements JobStatus {
 
     @Getter

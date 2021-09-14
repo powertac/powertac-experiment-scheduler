@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
+@Deprecated
 public interface JobRepository {
 
     Job find(String id) throws JobNotFoundException;

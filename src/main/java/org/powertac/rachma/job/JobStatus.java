@@ -2,6 +2,7 @@ package org.powertac.rachma.job;
 
 import java.time.Instant;
 
+@Deprecated
 public interface JobStatus {
 
     Instant getStart();

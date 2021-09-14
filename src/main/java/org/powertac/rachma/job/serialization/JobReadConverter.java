@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
+@Deprecated
 public class JobReadConverter implements Converter<Document, Job> {
 
     private final ObjectMapper mapper;

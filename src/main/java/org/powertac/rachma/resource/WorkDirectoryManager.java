@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Component
+@Deprecated
 public class WorkDirectoryManager {
 
     @Value("${directory.local.base}")
