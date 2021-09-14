@@ -8,6 +8,7 @@ import org.powertac.rachma.docker.image.DockerImageBuilder;
 import org.powertac.rachma.docker.image.DockerImageRepository;
 import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.broker.BrokerTypeRepository;
+import org.powertac.rachma.persistence.MigrationRunner;
 import org.powertac.rachma.persistence.SchemaViewSeeder;
 import org.powertac.rachma.resource.WorkDirectoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ public class ApplicationSetup {
     private final WorkDirectoryManager workDirectoryManager;
     private final BrokerSeeder brokerSeeder;
     private final SchemaViewSeeder viewSeeder;
+    private final MigrationRunner migrationRunner;
     private final Logger logger;
     private final ApplicationStatus status;
 
@@ -39,13 +41,14 @@ public class ApplicationSetup {
     @Autowired
     public ApplicationSetup(DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
                             BrokerTypeRepository brokerTypeRepository, ApplicationStatus status,
-                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder, SchemaViewSeeder viewSeeder) {
+                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder, SchemaViewSeeder viewSeeder, MigrationRunner migrationRunner) {
         this.dockerImageBuilder = dockerImageBuilder;
         this.imageRepository = imageRepository;
         this.brokerTypeRepository = brokerTypeRepository;
         this.workDirectoryManager = workDirectoryManager;
         this.brokerSeeder = brokerSeeder;
         this.viewSeeder = viewSeeder;
+        this.migrationRunner = migrationRunner;
         this.logger = LogManager.getLogger(ApplicationSetup.class);
         this.status = status;
     }
@@ -61,6 +64,7 @@ public class ApplicationSetup {
             buildBrokerImages();
             brokerSeeder.seedBrokers();
             viewSeeder.seedViews();
+            migrationRunner.runMigrations();
         }
         catch (IOException e) {
             logger.error(e.getMessage());

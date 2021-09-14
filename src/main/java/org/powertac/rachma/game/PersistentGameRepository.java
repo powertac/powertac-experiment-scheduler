@@ -33,6 +33,11 @@ public class PersistentGameRepository implements GameRepository {
     }
 
     @Override
+    public Game findOneByName(String name) {
+        return games.findOneByName(name).orElse(null);
+    }
+
+    @Override
     public Game findFirstQueued() {
         return games.findFirstQueued();
     }
@@ -44,6 +49,16 @@ public class PersistentGameRepository implements GameRepository {
         }
         games.save(game);
         publisher.publish(game);
+    }
+
+    @Override
+    public boolean exists(String id) {
+        return games.existsById(id);
+    }
+
+    @Override
+    public void delete(Game game) {
+        games.delete(game);
     }
 
 }

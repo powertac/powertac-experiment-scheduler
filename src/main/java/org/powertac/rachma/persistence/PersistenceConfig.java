@@ -10,6 +10,7 @@ import org.powertac.rachma.job.serialization.JobWriteConverter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.data.mongodb.config.AbstractMongoConfiguration;
@@ -75,6 +76,13 @@ public class PersistenceConfig extends AbstractMongoConfiguration implements App
         MappingMongoConverter mongoConverter = super.mappingMongoConverter();
         mongoConverter.setMapKeyDotReplacement("_");
         return mongoConverter;
+    }
+
+    @Bean
+    public MigrationRunner migrationRunner() {
+        MigrationRunner runner = applicationContext.getBean(MigrationRunnerImpl.class);
+        runner.registerMigration(applicationContext.getBean(NewGameModelMigration.class));
+        return runner;
     }
 
     private List<Converter<?,?>> getConverters() {

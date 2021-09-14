@@ -26,6 +26,7 @@ public class GameSerializer extends StdSerializer<Game> {
         gen.writeStringField("id", game.getId());
         gen.writeStringField("name", game.getName());
         gen.writeNumberField("createdAt", game.getCreatedAt().toEpochMilli());
+        gen.writeBooleanField("cancelled", game.isCancelled());
         provider.defaultSerializeField("bootstrap", game.getBootstrap(), gen);
         provider.defaultSerializeField("seed", game.getSeed(), gen);
         writeBrokersField(game.getBrokers(), gen, provider);

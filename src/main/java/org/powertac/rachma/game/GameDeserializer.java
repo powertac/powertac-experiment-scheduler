@@ -25,7 +25,8 @@ public class GameDeserializer extends StdNodeBasedDeserializer<Game> {
         Map<String, String> serverParameters = parseServerParameters(root);
         File bootstrap = root.has("bootstrap") ? parseFile(root.get("bootstrap"), context) : null;
         File seed = root.has("seed") ? parseFile(root.get("seed"), context) : null;
-        return new Game(id, name, brokers, serverParameters, bootstrap, seed, Instant.now(), new ArrayList<>());
+        boolean cancelled = root.has("cancelled") && root.get("cancelled").asBoolean();
+        return new Game(id, name, brokers, serverParameters, bootstrap, seed, Instant.now(), new ArrayList<>(), cancelled);
     }
 
     private Map<String, String> parseServerParameters(JsonNode root) {

@@ -46,10 +46,12 @@ public class Game {
     private Map<String, String> serverParameters;
 
     @Getter
+    @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private File bootstrap;
 
     @Getter
+    @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private File seed;
 
@@ -58,7 +60,12 @@ public class Game {
     private Instant createdAt;
 
     @Getter
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "game")
+    @Setter
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "game", cascade = CascadeType.ALL)
     private List<GameRun> runs = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private boolean cancelled = false;
 
 }

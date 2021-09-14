@@ -34,7 +34,8 @@ public class GameFactoryImpl implements GameFactory {
             getFile(spec.getBaseGameId(), FileRole.BOOTSTRAP),
             getFile(spec.getBaseGameId(), FileRole.SEED),
             Instant.now(),
-            new ArrayList<>());
+            new ArrayList<>(),
+            false);
     }
 
     // TODO : should throw not found exception
