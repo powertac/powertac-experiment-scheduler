@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 
 import java.io.IOException;
 
+@Deprecated
 public class BrokerTypeDeserializer extends StdNodeBasedDeserializer<BrokerType> {
 
     public BrokerTypeDeserializer() {

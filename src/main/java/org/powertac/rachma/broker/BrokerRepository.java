@@ -7,7 +7,8 @@ public interface BrokerRepository {
     Collection<Broker> findAll();
     Broker findById(String id);
     Broker findByName(String name);
+    Broker findByNameAndVersion(String name, String version);
     boolean exists(String name, String version);
-    void save(Broker broker);
+    void save(Broker broker) throws BrokerConflictException;
 
 }

@@ -3,14 +3,11 @@ package org.powertac.rachma.broker;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Transient;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,6 +15,8 @@ import java.util.Objects;
 public class Broker {
 
     @Id
+    @Getter
+    @Setter
     @Column(length = 36)
     private String id;
 
@@ -28,14 +27,18 @@ public class Broker {
     private String version;
 
     @Getter
-    @Transient
-    @Deprecated
-    private Map<String, String> config;
+    @Setter
+    private String imageTag;
+
+    @Getter
+    @Setter
+    private boolean enabled;
 
     public Broker(String name, String version) {
         this.name = name;
         this.version = version;
-        this.config = new HashMap<>();
+        this.enabled = false;
+        this.imageTag = "";
     }
 
     @Override
@@ -43,13 +46,21 @@ public class Broker {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Broker broker = (Broker) o;
-        if (id != null ? !id.equals(broker.id) : broker.id != null) return false;
+        if (isEnabled() != broker.isEnabled()) return false;
+        if (getId() != null ? !getId().equals(broker.getId()) : broker.getId() != null) return false;
         if (!getName().equals(broker.getName())) return false;
-        return getVersion().equals(broker.getVersion());
+        if (!getVersion().equals(broker.getVersion())) return false;
+        return getImageTag() != null ? getImageTag().equals(broker.getImageTag()) : broker.getImageTag() == null;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getName(), getVersion(), getConfig());
+        int result = getId() != null ? getId().hashCode() : 0;
+        result = 31 * result + getName().hashCode();
+        result = 31 * result + getVersion().hashCode();
+        result = 31 * result + (getImageTag() != null ? getImageTag().hashCode() : 0);
+        result = 31 * result + (isEnabled() ? 1 : 0);
+        return result;
     }
+
 }

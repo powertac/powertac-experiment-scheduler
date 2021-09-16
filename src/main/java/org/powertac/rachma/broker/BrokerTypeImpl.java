@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @AllArgsConstructor
+@Deprecated
 public class BrokerTypeImpl implements BrokerType {
 
     @Getter

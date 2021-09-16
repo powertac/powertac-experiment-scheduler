@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Service
+@Deprecated
 public class CachedDirectoryBasedBrokerTypeRepository implements BrokerTypeRepository {
 
     @Value("${directory.local.brokers}")

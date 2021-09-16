@@ -28,7 +28,7 @@ public class EndpointConfig  implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/jobs", "/brokers", "/games");
+        registry.enableSimpleBroker("/brokers", "/games");
         registry.setApplicationDestinationPrefixes("/requests");
     }
 

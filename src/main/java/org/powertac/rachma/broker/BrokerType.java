@@ -7,6 +7,7 @@ import org.powertac.rachma.powertac.broker.BrokerTypeSerializer;
 
 @JsonSerialize(using = BrokerTypeSerializer.class)
 @JsonDeserialize(using = BrokerTypeDeserializer.class)
+@Deprecated
 public interface BrokerType {
 
     String getName();

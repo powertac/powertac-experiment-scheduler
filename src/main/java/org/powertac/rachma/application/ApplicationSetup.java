@@ -90,6 +90,7 @@ public class ApplicationSetup {
         }
     }
 
+    // TODO : create component - BrokerInitializer
     private void buildBrokerImages() {
         for (BrokerType type : brokerTypeRepository.findAll().values()) {
             if (type.isEnabled() && !imageRepository.exists(type.getImage())) {
