@@ -41,7 +41,8 @@ public class ApplicationSetup {
     @Autowired
     public ApplicationSetup(DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
                             BrokerTypeRepository brokerTypeRepository, ApplicationStatus status,
-                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder, SchemaViewSeeder viewSeeder, MigrationRunner migrationRunner) {
+                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder,
+                            SchemaViewSeeder viewSeeder, MigrationRunner migrationRunner) {
         this.dockerImageBuilder = dockerImageBuilder;
         this.imageRepository = imageRepository;
         this.brokerTypeRepository = brokerTypeRepository;
@@ -64,7 +65,7 @@ public class ApplicationSetup {
             buildBrokerImages();
             brokerSeeder.seedBrokers();
             viewSeeder.seedViews();
-            //migrationRunner.runMigrations();
+            migrationRunner.runMigrations();
         }
         catch (IOException e) {
             logger.error(e.getMessage());

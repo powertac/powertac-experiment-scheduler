@@ -28,20 +28,24 @@ public class MigrationRunnerImpl implements MigrationRunner {
     @Override
     public void runMigrations() {
         for(Migration migration : migrations) {
-            if (!migrationStatusRepository.existsAllByNameAndSuccessTrue(migration.getName())) {
+            if (shouldRun(migration)) {
                 logger.info(String.format("starting migration '%s'", migration.getName()));
                 runMigration(migration);
             }
         }
     }
 
+    private boolean shouldRun(Migration migration) {
+        return !migrationStatusRepository.existsAllByNameAndSuccessTrue(migration.getName())
+            && migration.shouldRun();
+    }
+
     private void runMigration(Migration migration) {
         MigrationStatus status = MigrationStatus.start(migration);
         try {
             migration.rollback();
-            // TODO : this is just one time thing
-            // migration.run();
-            // status.completeNow();
+            migration.run();
+            status.completeNow();
         } catch (MigrationException e) {
             try {
                 migration.rollback();

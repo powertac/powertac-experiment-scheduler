@@ -9,6 +9,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
@@ -20,7 +22,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {
+    MongoAutoConfiguration.class,
+    MongoDataAutoConfiguration.class
+})
 @EnableAspectJAutoProxy
 @EnableJpaRepositories
 public class ExperimentSchedulerApplication implements ApplicationRunner, ApplicationContextAware {

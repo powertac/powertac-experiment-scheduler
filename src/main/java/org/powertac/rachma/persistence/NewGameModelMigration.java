@@ -1,11 +1,14 @@
 package org.powertac.rachma.persistence;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.Broker;
+import org.powertac.rachma.broker.BrokerConflictException;
 import org.powertac.rachma.broker.BrokerRepository;
 import org.powertac.rachma.broker.BrokerType;
+import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRole;
 import org.powertac.rachma.file.PathProvider;
@@ -15,16 +18,23 @@ import org.powertac.rachma.job.JobRepository;
 import org.powertac.rachma.job.JobState;
 import org.powertac.rachma.job.SimulationJob;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
+@ConditionalOnProperty(value = "persistence.legacy.enable-mongo", havingValue = "true")
 public class NewGameModelMigration implements Migration {
+
+    @Value("${persistence.migration.new-model-migration.enabled}")
+    private boolean enabled;
 
     @Value("${directory.local.base}")
     private String baseDir;
@@ -37,15 +47,20 @@ public class NewGameModelMigration implements Migration {
     private final BrokerRepository brokerRepository;
     private final PathProvider paths;
     private final Map<Game, SimulationJob> jobsByGame;
+    private final DockerImageRepository imageRepository;
+    private final ObjectMapper mapper;
     private final Logger logger;
     private final boolean dryRun;
 
-
-    public NewGameModelMigration(GameRepository gameRepository, JobRepository jobRepository, BrokerRepository brokerRepository, PathProvider paths) {
+    public NewGameModelMigration(GameRepository gameRepository, JobRepository jobRepository,
+                                 BrokerRepository brokerRepository, PathProvider paths,
+                                 DockerImageRepository imageRepository, ObjectMapper mapper) {
         this.gameRepository = gameRepository;
         this.jobRepository = jobRepository;
         this.brokerRepository = brokerRepository;
         this.paths = paths;
+        this.imageRepository = imageRepository;
+        this.mapper = mapper;
         this.jobsByGame = new HashMap<>();
         this.logger = LogManager.getLogger(NewGameModelMigration.class);
         this.dryRun = false;
@@ -58,16 +73,10 @@ public class NewGameModelMigration implements Migration {
 
     @Override
     public void run() throws MigrationException {
-        try {
-            buildGames();
-            saveIdMap();
-            resolveFileRelations();
-            saveGames();
-            moveFiles();
-        } catch (MigrationException e) {
-            rollback();
-            throw e;
-        }
+        buildGames();
+        resolveFileRelations();
+        saveIdMap();
+        persistChanges();
     }
 
     @Override
@@ -79,6 +88,7 @@ public class NewGameModelMigration implements Migration {
                     logger.warn(String.format("cannot find game for job with name '%s'", job.getName()));
                     continue;
                 }
+                // TODO : check if those are the correct paths
                 GamePathProvider gamePaths = paths.local().game(game);
                 moveFileIfExists(gamePaths.bootstrap(), jobBootstrapPath(job.getId()));
                 moveFileIfExists(gamePaths.properties(), jobSimulationPropertiesPath(job.getId()));
@@ -90,6 +100,11 @@ public class NewGameModelMigration implements Migration {
         } catch (IOException e) {
             throw new MigrationException("file operation error during rollback", e);
         }
+    }
+
+    @Override
+    public boolean shouldRun() {
+        return enabled;
     }
 
     private void buildGames() throws MigrationException {
@@ -116,13 +131,25 @@ public class NewGameModelMigration implements Migration {
     private Set<Broker> brokerTypesToBrokers(Collection<BrokerType> types) throws MigrationException {
         Set<Broker> brokers = new HashSet<>();
         for (BrokerType type : types) {
-            Broker broker = brokerRepository.findByName(type.getName());
-            if (null == broker) {
-                throw new MigrationException(String.format("could not find broker '%s'", type.getName()));
+            try {
+                Broker broker = brokerRepository.findByNameAndVersion(type.getName(), "latest");
+                brokers.add(null == broker ? createBrokerFromType(type) : broker);
+            } catch (BrokerConflictException e) {
+                throw new MigrationException(String.format("failed to create new broker '%s' due to conflict with existing one", type.getName()), e);
             }
-            brokers.add(broker);
         }
         return brokers;
+    }
+
+    private Broker createBrokerFromType(BrokerType type) throws BrokerConflictException {
+        Broker broker = new Broker(
+            null,
+            type.getName(),
+            "latest",
+            type.getImage(),
+            imageRepository.exists(type.getImage()));
+        brokerRepository.save(broker);
+        return broker;
     }
 
     private List<GameRun> createRuns(SimulationJob job, Game game) {
@@ -135,13 +162,14 @@ public class NewGameModelMigration implements Migration {
                 run.setFailed(false);
                 break;
             case FAILED:
-            case RUNNING: // set running games to be failed as well since they should not be running at this point anyway
+            case RUNNING: // set running games to be failed as well since they should not be running at this point
                 run.setPhase(GameRunPhase.DONE);
                 run.setFailed(true);
                 break;
             case CREATED:
             case QUEUED:
             default:
+                // return no game runs if the job is either queued or created
                 return new ArrayList<>();
         }
         return Stream.of(run).collect(Collectors.toList());
@@ -176,6 +204,22 @@ public class NewGameModelMigration implements Migration {
             }
         }
         throw new MigrationException(String.format("cannot resolve file '%s' for path %s", role, filePath));
+    }
+
+    private void persistChanges() throws MigrationException {
+        for (Game game : jobsByGame.keySet()) {
+            SimulationJob job = jobsByGame.get(game);
+            try {
+                GamePathProvider gamePaths = paths.local().game(game);
+                moveFile(jobPath(job.getId()), gamePaths.dir());
+                moveFileIfExists(jobBootstrapPath(job.getId()), gamePaths.bootstrap());
+                moveFileIfExists(jobSimulationPropertiesPath(job.getId()), gamePaths.properties());
+                gameRepository.save(game);
+            } catch (IOException|RuntimeException e) {
+                logger.error(e);
+                saveFailed(job, game);
+            }
+        }
     }
 
     private void moveFiles() throws MigrationException {
@@ -230,11 +274,15 @@ public class NewGameModelMigration implements Migration {
         return Paths.get(jobPath(jobId).toString(), String.format("%s.simulation.properties", jobId));
     }
 
-    private void saveGames() {
-        for (Game game : jobsByGame.keySet()) {
-            if (!dryRun) {
-                gameRepository.save(game);
-            }
+    private void saveFailed(SimulationJob simulationJob, Game newGame) {
+        try {
+            Object failedMigration = new Object() {
+                @Getter private final SimulationJob job = simulationJob;
+                @Getter private final Game game = newGame;
+            };
+            mapper.writeValueAsString(failedMigration);
+        } catch (IOException e) {
+            logger.error(String.format("could not save failed migration file for job[%s] and game[%s]", simulationJob.getId(), newGame.getId()), e);
         }
     }
 

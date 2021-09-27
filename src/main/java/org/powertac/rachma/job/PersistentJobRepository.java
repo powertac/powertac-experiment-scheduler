@@ -1,6 +1,7 @@
 package org.powertac.rachma.job;
 
 import org.powertac.rachma.job.exception.JobNotFoundException;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -11,8 +12,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-@Component
 @Deprecated
+@Component
+@ConditionalOnProperty(value = "persistence.legacy.enable-mongo", havingValue = "true")
 public class PersistentJobRepository implements JobRepository {
 
     private final MongoRepository<Job, String> mongoRepository;
