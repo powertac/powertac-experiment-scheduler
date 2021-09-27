@@ -82,7 +82,7 @@ public class GamePathProviderTests {
     void hostStateLogPathTest() {
         GamePathProvider paths = getProvider(PathContextType.HOST, "/host/path/to/");
         Assertions.assertEquals(
-            "/host/path/to/games/def556/log/def556.state",
+            "/host/path/to/games/def556/log/powertac-sim-0.state",
             paths.stateLog().toString());
     }
 
@@ -90,7 +90,7 @@ public class GamePathProviderTests {
     void localStateLogPathTest() {
         GamePathProvider paths = getProvider(PathContextType.LOCAL, "/local/path/to/");
         Assertions.assertEquals(
-            "/local/path/to/games/def556/log/def556.state",
+            "/local/path/to/games/def556/log/powertac-sim-0.state",
             paths.stateLog().toString());
     }
 
@@ -98,7 +98,7 @@ public class GamePathProviderTests {
     void containerStateLogPathTest() {
         GamePathProvider paths = getProvider(PathContextType.CONTAINER, "/powertac/");
         Assertions.assertEquals(
-            "/powertac-server/log/def556.state",
+            "/powertac-server/log/powertac-sim-0.state",
             paths.stateLog().toString());
     }
 
@@ -106,7 +106,7 @@ public class GamePathProviderTests {
     void hostTraceLogPathTest() {
         GamePathProvider paths = getProvider(PathContextType.HOST, "/host/path/to/");
         Assertions.assertEquals(
-            "/host/path/to/games/def556/log/def556.trace",
+            "/host/path/to/games/def556/log/powertac-sim-0.trace",
             paths.traceLog().toString());
     }
 
@@ -114,7 +114,7 @@ public class GamePathProviderTests {
     void localTraceLogPathTest() {
         GamePathProvider paths = getProvider(PathContextType.LOCAL, "/local/path/to/");
         Assertions.assertEquals(
-            "/local/path/to/games/def556/log/def556.trace",
+            "/local/path/to/games/def556/log/powertac-sim-0.trace",
             paths.traceLog().toString());
     }
 
@@ -122,7 +122,7 @@ public class GamePathProviderTests {
     void containerTraceLogPathTest() {
         GamePathProvider paths = getProvider(PathContextType.CONTAINER, "/powertac/");
         Assertions.assertEquals(
-            "/powertac-server/log/def556.trace",
+            "/powertac-server/log/powertac-sim-0.trace",
             paths.traceLog().toString());
     }
 
@@ -232,7 +232,7 @@ public class GamePathProviderTests {
         File seed = new File("bbbbbb", FileRole.SEED, otherGame);
         GamePathProvider paths = getProvider(PathContextType.HOST, "/host/path/to/", null, seed);
         Assertions.assertEquals(
-            "/host/path/to/games/seed777/log/seed777.state",
+            "/host/path/to/games/seed777/log/powertac-sim-0.state",
             paths.seed().toString());
     }
 
@@ -243,7 +243,7 @@ public class GamePathProviderTests {
         File seed = new File("bbbbbb", FileRole.SEED, otherGame);
         GamePathProvider paths = getProvider(PathContextType.LOCAL, "/local/path/to/", null, seed);
         Assertions.assertEquals(
-            "/local/path/to/games/seed777/log/seed777.state",
+            "/local/path/to/games/seed777/log/powertac-sim-0.state",
             paths.seed().toString());
     }
 
