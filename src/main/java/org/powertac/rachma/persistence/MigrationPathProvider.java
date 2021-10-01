@@ -16,7 +16,7 @@ public class MigrationPathProvider {
         this.migration = migration;
     }
 
-    public Path migrationDir() {
+    public Path dir() {
         if (context.getContextType().equals(PathContextType.CONTAINER)) {
             return null;
         }

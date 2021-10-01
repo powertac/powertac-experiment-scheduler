@@ -2,6 +2,8 @@ package org.powertac.rachma;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.powertac.rachma.application.ApplicationSetup;
+import org.powertac.rachma.application.LockException;
 import org.powertac.rachma.game.GameScheduler;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
@@ -67,6 +69,12 @@ public class ExperimentSchedulerApplication implements ApplicationRunner, Applic
 
     @Override
     public void run(ApplicationArguments args) {
+        final ApplicationSetup setup = context.getBean(ApplicationSetup.class);
+        try {
+            setup.start();
+        } catch (LockException e) {
+            LogManager.getLogger(ExperimentSchedulerApplication.class).error("setup is already running", e);
+        }
         final GameScheduler gameScheduler = context.getBean(GameScheduler.class);
         final Logger logger = LogManager.getLogger(ExperimentSchedulerApplication.class);
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();

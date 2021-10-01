@@ -14,10 +14,13 @@ import org.powertac.rachma.resource.WorkDirectoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.ContextStartedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -54,7 +57,6 @@ public class ApplicationSetup {
         this.status = status;
     }
 
-    @EventListener(ContextRefreshedEvent.class)
     public void start() throws LockException {
         if (!status.getSetupStatus().getCurrentStep().equals(ApplicationSetupStatus.Step.IDLE)) {
             throw new LockException("application setup is already running");
@@ -94,15 +96,14 @@ public class ApplicationSetup {
     // TODO : create component - BrokerInitializer
     private void buildBrokerImages() {
         for (BrokerType type : brokerTypeRepository.findAll().values()) {
-            if (type.isEnabled() && !imageRepository.exists(type.getImage())) {
+            if (shouldBuild(type)) {
                 try {
                     logger.info(String.format("building image for broker '%s' ...", type.getName()));
                     dockerImageBuilder.buildImage(
                         getDockerfilePath(type),
                         getDefaultImageTags(type));
                     logger.info(String.format("image build successful for broker '%s'", type.getName()));
-                }
-                catch (DockerException e) {
+                } catch (DockerException e) {
                     logger.error(String.format("could not build image for broker '%s'", type.getName()));
                     status.setInconsistent(e);
                 }
@@ -112,6 +113,12 @@ public class ApplicationSetup {
 
     private String getDockerfilePath(BrokerType type) {
         return String.format("%s/Dockerfile", type.getPath());
+    }
+
+    private boolean shouldBuild(BrokerType type) {
+        return type.isEnabled()
+            && !imageRepository.exists(type.getImage())
+            && Files.exists(Paths.get(getDockerfilePath(type)));
     }
 
     private Set<String> getDefaultImageTags(BrokerType type) {

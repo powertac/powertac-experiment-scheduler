@@ -16,7 +16,7 @@ public class MigrationPathProviderTests {
         Migration migration = Mockito.mock(Migration.class);
         Mockito.when(migration.getName()).thenReturn("sample-migration");
         MigrationPathProvider provider = new MigrationPathProvider(context, migration);
-        Assertions.assertEquals(Paths.get("/path/to/local/migrations/sample-migration"), provider.migrationDir());
+        Assertions.assertEquals(Paths.get("/path/to/local/migrations/sample-migration"), provider.dir());
     }
 
     @Test
@@ -25,7 +25,7 @@ public class MigrationPathProviderTests {
         Migration migration = Mockito.mock(Migration.class);
         Mockito.when(migration.getName()).thenReturn("host-sample-migration");
         MigrationPathProvider provider = new MigrationPathProvider(context, migration);
-        Assertions.assertEquals(Paths.get("/path/to/host/migrations/host-sample-migration"), provider.migrationDir());
+        Assertions.assertEquals(Paths.get("/path/to/host/migrations/host-sample-migration"), provider.dir());
     }
 
     @Test
@@ -34,7 +34,7 @@ public class MigrationPathProviderTests {
         Migration migration = Mockito.mock(Migration.class);
         Mockito.when(migration.getName()).thenReturn("not-in-container-migration");
         MigrationPathProvider provider = new MigrationPathProvider(context, migration);
-        Assertions.assertNull(provider.migrationDir());
+        Assertions.assertNull(provider.dir());
     }
 
 }

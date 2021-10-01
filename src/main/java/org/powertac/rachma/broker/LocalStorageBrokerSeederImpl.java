@@ -29,7 +29,12 @@ public class LocalStorageBrokerSeederImpl implements BrokerSeeder {
                 Broker broker = brokers.findByNameAndVersion(type.getName(), "latest");
                 if (null == broker) {
                     String id = UUID.randomUUID().toString();
-                    broker = new Broker(id, type.getName(), "latest", type.getImage(), true);
+                    broker = new Broker(
+                        id,
+                        type.getName(),
+                        "latest",
+                        type.getImage(),
+                        images.exists(type.getImage()));
                 } else if (null == broker.getImageTag()) {
                     broker.setImageTag(type.getImage());
                     broker.setEnabled(images.exists(type.getImage()));

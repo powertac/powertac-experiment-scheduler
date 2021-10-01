@@ -29,7 +29,6 @@ public class MigrationRunnerImpl implements MigrationRunner {
     public void runMigrations() {
         for(Migration migration : migrations) {
             if (shouldRun(migration)) {
-                logger.info(String.format("starting migration '%s'", migration.getName()));
                 runMigration(migration);
             }
         }
@@ -43,16 +42,17 @@ public class MigrationRunnerImpl implements MigrationRunner {
     private void runMigration(Migration migration) {
         MigrationStatus status = MigrationStatus.start(migration);
         try {
-            migration.rollback();
+            logger.info(String.format("starting migration '%s'", migration.getName()));
             migration.run();
             status.completeNow();
+            logger.info(String.format("successfully finished migration '%s'", migration.getName()));
         } catch (MigrationException e) {
+            logger.error(String.format("migration '%s' failed", migration.getName()), e);
             try {
                 migration.rollback();
                 status.failNow();
-                logger.error(String.format("migration '%s' failed", migration.getName()), e);
             } catch (MigrationException r) {
-                logger.error(String.format("migration rollback for '%s' failed; manual intervention required", migration.getName()), e);
+                logger.error(String.format("migration rollback for '%s' failed; manual intervention is required", migration.getName()), e);
             }
         } finally {
             migrationStatusRepository.save(status);
