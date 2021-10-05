@@ -140,5 +140,5 @@ To remove a broker from the set of available brokers you can either remove the b
 
 ## Known issues
 
-- The UI currenctly doesn't react correctly to some changes to experiments and game statuses. Reloading the page should do the trick.
+- The UI currently doesn't react correctly to some changes to experiments and game statuses. Reloading the page should do the trick.
 - In some cases when a game's containers have been created but not started and the orchestrator shuts down, the created containers are not removed and the orchestrator will throw an error due to this conflict. When this happens, shut down the orchestrator, remove the containers manually (`docker rm`) and restart the orchestrator.

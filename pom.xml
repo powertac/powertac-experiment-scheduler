@@ -6,8 +6,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.powertac</groupId>
-    <artifactId>rachma</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <artifactId>experiment-scheduler</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
 
     <parent>
         <groupId>org.springframework.boot</groupId>

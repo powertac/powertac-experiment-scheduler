@@ -15,6 +15,7 @@ buildNumber.properties
 .mvn/timing.properties
 .mvn/wrapper/maven-wrapper.jar
 
-### PowerTAC
-workdir
-*.properties
+### development
+/application.properties
+/dev
+
