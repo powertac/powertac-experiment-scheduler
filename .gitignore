@@ -16,5 +16,5 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 ### PowerTAC
-workdir
-*.properties
+/application.properties
+/dev

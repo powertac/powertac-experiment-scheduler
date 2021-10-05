@@ -8,14 +8,11 @@ import org.powertac.rachma.docker.DockerImageBuilder;
 import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.broker.BrokerTypeRepository;
+import org.powertac.rachma.file.PathProvider;
 import org.powertac.rachma.persistence.MigrationRunner;
 import org.powertac.rachma.persistence.SchemaViewSeeder;
-import org.powertac.rachma.resource.WorkDirectoryManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.context.event.ContextStartedEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -28,10 +25,10 @@ import java.util.stream.Stream;
 @Component
 public class ApplicationSetup {
 
+    private final PathProvider paths;
     private final DockerImageBuilder dockerImageBuilder;
     private final DockerImageRepository imageRepository;
     private final BrokerTypeRepository brokerTypeRepository;
-    private final WorkDirectoryManager workDirectoryManager;
     private final BrokerSeeder brokerSeeder;
     private final SchemaViewSeeder viewSeeder;
     private final MigrationRunner migrationRunner;
@@ -42,14 +39,13 @@ public class ApplicationSetup {
     private String defaultServerImage;
 
     @Autowired
-    public ApplicationSetup(DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
+    public ApplicationSetup(PathProvider paths, DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
                             BrokerTypeRepository brokerTypeRepository, ApplicationStatus status,
-                            WorkDirectoryManager workDirectoryManager, BrokerSeeder brokerSeeder,
-                            SchemaViewSeeder viewSeeder, MigrationRunner migrationRunner) {
+                            BrokerSeeder brokerSeeder, SchemaViewSeeder viewSeeder, MigrationRunner migrationRunner) {
+        this.paths = paths;
         this.dockerImageBuilder = dockerImageBuilder;
         this.imageRepository = imageRepository;
         this.brokerTypeRepository = brokerTypeRepository;
-        this.workDirectoryManager = workDirectoryManager;
         this.brokerSeeder = brokerSeeder;
         this.viewSeeder = viewSeeder;
         this.migrationRunner = migrationRunner;
@@ -57,26 +53,26 @@ public class ApplicationSetup {
         this.status = status;
     }
 
-    public void start() throws LockException {
+    public void start() throws LockException, IOException {
         if (!status.getSetupStatus().getCurrentStep().equals(ApplicationSetupStatus.Step.IDLE)) {
             throw new LockException("application setup is already running");
         }
-        try {
-            workDirectoryManager.createMainDirectoriesAndCopyResourceFiles();
-            pullImage(defaultServerImage);
-            buildBrokerImages();
-            brokerSeeder.seedBrokers();
-            viewSeeder.seedViews();
-            migrationRunner.runMigrations();
-        }
-        catch (IOException e) {
-            logger.error(e.getMessage());
-            logger.error("error during setup lead to an inconsistent application state");
-            status.setInconsistent(e);
-        }
-        finally {
-            status.getSetupStatus().setCurrentStep(ApplicationSetupStatus.Step.IDLE);
-        }
+        createDirectories();
+        prepareDockerImages();
+        brokerSeeder.seedBrokers();
+        viewSeeder.seedViews();
+        migrationRunner.runMigrations();
+        status.setRunning();
+    }
+
+    private void createDirectories() throws IOException {
+        Files.createDirectories(paths.local().brokersDir());
+        Files.createDirectories(paths.local().gamesDir());
+    }
+
+    private void prepareDockerImages() {
+        pullImage(defaultServerImage);
+        buildBrokerImages();
     }
 
     private void pullImage(String tag) {

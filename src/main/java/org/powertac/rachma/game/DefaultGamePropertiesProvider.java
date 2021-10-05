@@ -1,27 +1,17 @@
 package org.powertac.rachma.game;
 
 import org.powertac.rachma.broker.Broker;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Properties;
 
 @Component
 public class DefaultGamePropertiesProvider implements GamePropertiesProvider {
 
-    @Value("${server.simulation.defaultPropertiesFile}")
-    private String defaultServerPropertiesFile;
-
-    @Value("${broker.defaultPropertiesFile}")
-    private String defaultBrokerPropertiesFile;
-
     @Override
-    public Properties getServerProperties(Game game) throws IOException {
+    public Properties getServerProperties(Game game) {
         Properties properties = getDefaultServerProperties();
         for (Map.Entry<String, String> parameter : game.getServerParameters().entrySet()) {
             properties.setProperty(parameter.getKey(), parameter.getValue());
@@ -30,24 +20,26 @@ public class DefaultGamePropertiesProvider implements GamePropertiesProvider {
     }
 
     @Override
-    public Properties getBrokerProperties(Game game, Broker broker) throws IOException {
+    public Properties getBrokerProperties(Game game, Broker broker) {
         Properties properties = getDefaultBrokerProperties();
         properties.setProperty("samplebroker.core.powerTacBroker.username", broker.getName());
         return properties;
     }
 
-    private Properties getDefaultServerProperties() throws IOException {
-        return readPropertiesFile(Paths.get(defaultServerPropertiesFile));
+    private Properties getDefaultServerProperties() {
+        Properties defaultProperties = new Properties();
+        defaultProperties.put("server.mode", "research");
+        defaultProperties.put("server.competitionControlService.brokerPauseAllowed", true);
+        defaultProperties.put("server.competitionControlService.loginTimeout", 60000);
+        defaultProperties.put("server.jmsManagementService.jmsBrokerUrl", "tcp://0.0.0.0:61616");
+        return defaultProperties;
     }
 
-    private Properties getDefaultBrokerProperties() throws IOException {
-        return readPropertiesFile(Paths.get(defaultBrokerPropertiesFile));
-    }
-
-    private Properties readPropertiesFile(Path path) throws IOException {
-        Properties properties = new Properties();
-        properties.load(Files.newInputStream(path));
-        return properties;
+    private Properties getDefaultBrokerProperties() {
+        Properties defaultProperties = new Properties();
+        defaultProperties.put("samplebroker.core.jmsManagementService.jmsBrokerUrl", "tcp://powertac-server:61616");
+        defaultProperties.put("samplebroker.core.powerTacBroker.retryTimeLimit", 60000);
+        return defaultProperties;
     }
 
 }
