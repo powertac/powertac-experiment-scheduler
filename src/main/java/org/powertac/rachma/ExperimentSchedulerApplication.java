@@ -20,6 +20,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
+import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -74,6 +75,8 @@ public class ExperimentSchedulerApplication implements ApplicationRunner, Applic
             setup.start();
         } catch (LockException e) {
             LogManager.getLogger(ExperimentSchedulerApplication.class).error("setup is already running", e);
+        } catch (IOException e) {
+            LogManager.getLogger(ExperimentSchedulerApplication.class).error("application setup failed", e);
         }
         final GameScheduler gameScheduler = context.getBean(GameScheduler.class);
         final Logger logger = LogManager.getLogger(ExperimentSchedulerApplication.class);

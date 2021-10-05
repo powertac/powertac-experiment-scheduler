@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.BufferedReader;
@@ -12,16 +13,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
-@RestController("configuration")
-public class GameConfigurationController {
+@RestController
+@RequestMapping("game-parameters")
+public class GameParameterController {
 
     private final ObjectMapper mapper;
 
-    public GameConfigurationController(ObjectMapper mapper) {
+    public GameParameterController(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
-    @GetMapping("/supported-params")
+    @GetMapping("/")
     public ResponseEntity<List<String>> getSupportedParams() {
         try {
             return ResponseEntity.ok(getParams());
@@ -33,6 +35,9 @@ public class GameConfigurationController {
 
     private List<String> getParams() throws IOException {
         InputStream paramFileStream = getClass().getClassLoader().getResourceAsStream("editable-server-properties.names.json");
+        if (null == paramFileStream) {
+            throw new IOException("cannot open file stream for editable server properties");
+        }
         BufferedReader paramFileReader = new BufferedReader(new InputStreamReader(paramFileStream));
         StringBuilder content = new StringBuilder();
         String line;
