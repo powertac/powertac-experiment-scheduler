@@ -58,7 +58,7 @@ public class SerializationConfig implements ApplicationContextAware {
     }
 
     private void registerDeserializers(SimpleModule module) {
-        module.addDeserializer(Broker.class, new BrokerDeserializer());
+        // module.addDeserializer(Broker.class, new BrokerDeserializer());
         module.addDeserializer(File.class, applicationContext.getBean(FileDeserializer.class));
         module.addDeserializer(Game.class, new GameDeserializer());
     }

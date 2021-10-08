@@ -18,7 +18,7 @@ public class BrokerDeserializer extends StdNodeBasedDeserializer<Broker> {
     @Override
     public Broker convert(JsonNode root, DeserializationContext context) throws IOException {
         return new Broker(
-            null,
+            root.has("id") ? root.get("id").asText() : null,
             deserializeName(root),
             deserializeVersion(root),
             deserializeImageTag(root),

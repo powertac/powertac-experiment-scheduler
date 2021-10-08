@@ -149,7 +149,7 @@ public class ContainerGameRunner implements GameRunner {
                     throw new GameRunException("a simulation container exited with an error code");
                 }
             }
-        } catch (ContainerException e) {
+        } catch (ContainerException| DockerException e) {
             throw new GameRunException("simulation run failed due to container error", e);
         } finally {
             if (null != run.getNetwork()) {
@@ -162,7 +162,7 @@ public class ContainerGameRunner implements GameRunner {
         return networks.createNetwork(String.format("ptac.%s", game.getId()));
     }
 
-    private Map<Broker, DockerContainer> createBrokerContainers(Game game, DockerNetwork network) {
+    private Map<Broker, DockerContainer> createBrokerContainers(Game game, DockerNetwork network) throws DockerException {
         Map<Broker, DockerContainer> brokerContainers = new HashMap<>();
         for (Broker broker : game.getBrokers()) {
             brokerContainers.put(broker, brokerContainerCreator.create(game, broker, network));

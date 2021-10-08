@@ -8,13 +8,13 @@ import java.util.Collection;
 
 @RestController
 @RequestMapping("/games")
-public class GameController {
+public class GameRestController {
 
     private final GameRepository games;
     private final GameFactory gameFactory;
     private final GameValidator validator;
 
-    public GameController(GameRepository games, GameFactory gameFactory, GameValidator validator) {
+    public GameRestController(GameRepository games, GameFactory gameFactory, GameValidator validator) {
         this.games = games;
         this.gameFactory = gameFactory;
         this.validator = validator;

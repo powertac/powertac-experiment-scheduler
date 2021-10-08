@@ -1,7 +1,7 @@
 package org.powertac.rachma.game;
 
 import org.powertac.rachma.broker.Broker;
-import org.powertac.rachma.broker.BrokerTypeRepository;
+import org.powertac.rachma.broker.BrokerRepository;
 import org.powertac.rachma.validation.ParameterValidationException;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRole;
@@ -18,12 +18,12 @@ public class GameValidatorImpl implements GameValidator {
     private final static Pattern namePattern = Pattern.compile("^[a-zA-Z0-9\\-_.\\s]{5,255}$");
 
     private final GameRepository games;
-    private final BrokerTypeRepository brokerTypes;
+    private final BrokerRepository brokerRepository;
     private final SimulationParameterValidator parameterValidator;
 
-    public GameValidatorImpl(GameRepository games, BrokerTypeRepository brokerTypes, SimulationParameterValidator parameterValidator) {
+    public GameValidatorImpl(GameRepository games, BrokerRepository brokerRepository, SimulationParameterValidator parameterValidator) {
         this.games = games;
-        this.brokerTypes = brokerTypes;
+        this.brokerRepository = brokerRepository;
         this.parameterValidator = parameterValidator;
     }
 
@@ -47,7 +47,7 @@ public class GameValidatorImpl implements GameValidator {
             throw new GameValidationException("game must have at least one broker assigned");
         }
         for (Broker broker : brokers) {
-            if (!brokerTypes.has(broker.getName())) {
+            if (!brokerRepository.exists(broker.getName(), broker.getVersion())) {
                 throw new GameValidationException(String.format("broker '%s' does not exist", broker.getName()));
             }
         }

@@ -21,22 +21,19 @@ import java.util.List;
 public class BrokerContainerCreatorImpl implements BrokerContainerCreator {
 
     private final DockerClient docker;
-    private final BrokerImageResolver imageResolver;
     private final PathProvider paths;
     private final BrokerBindFactory bindFactory;
 
     @Autowired
-    public BrokerContainerCreatorImpl(DockerClient docker, BrokerImageResolver imageResolver, PathProvider paths,
-                                      BrokerBindFactory bindFactory) {
+    public BrokerContainerCreatorImpl(DockerClient docker, PathProvider paths, BrokerBindFactory bindFactory) {
         this.docker = docker;
-        this.imageResolver = imageResolver;
         this.paths = paths;
         this.bindFactory = bindFactory;
     }
 
     @Override
     public DockerContainer create(Game game, Broker broker, DockerNetwork network) throws DockerException {
-        CreateContainerCmd create = docker.createContainerCmd(imageResolver.getImageTag(broker));
+        CreateContainerCmd create = docker.createContainerCmd(broker.getImageTag());
         String name = getName(game, broker);
         create.withName(name);
         create.withCmd(getCommand(game, broker));

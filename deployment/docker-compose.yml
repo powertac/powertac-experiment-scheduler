@@ -35,6 +35,6 @@ services:
     healthcheck:
       test: "/usr/bin/mysql -uroot -p${MYSQL_PASSWORD} --execute \"USE powertac_experiment_scheduler;\""
       start_period: 1m
-      interval: 30s
+      interval: 15s
       timeout: 1s
-      retries: 5
+      retries: 10

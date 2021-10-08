@@ -3,7 +3,7 @@ package org.powertac.rachma.game;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.powertac.rachma.broker.BrokerSpec;
+import org.powertac.rachma.broker.Broker;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +19,7 @@ public class GameSpec {
     private String baseGameId;
 
     @Getter
-    private Set<BrokerSpec> brokers;
+    private Set<Broker> brokers;
 
     @Getter
     private Map<String, String> serverParameters;
