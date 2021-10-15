@@ -28,6 +28,10 @@ public class ContextPathProvider {
         return new GamePathProvider(context, game);
     }
 
+    public GameRunPathProvider run(GameRun run) {
+        return new GameRunPathProvider(context, run);
+    }
+
     public Path gamesDir() {
         return Paths.get(context.getRoot(), "games");
     }

@@ -68,7 +68,7 @@ public class ContainerGameRunner implements GameRunner {
             lifecycle.done(run);
             logger.info(String.format("run for game[id=%s] completed successfully", game.getId()));
         } catch (Exception e) {
-            lifecycle.fail(run);
+            lifecycle.fail(run, e);
             logger.error(String.format("run for game[id=%s] failed", game.getId()), e);
         } finally {
             activeRuns.remove(game);

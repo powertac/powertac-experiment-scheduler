@@ -15,11 +15,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("game-parameters")
-public class GameParameterController {
+public class GameParameterRestController {
 
     private final ObjectMapper mapper;
 
-    public GameParameterController(ObjectMapper mapper) {
+    public GameParameterRestController(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 

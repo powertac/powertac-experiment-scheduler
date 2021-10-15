@@ -14,5 +14,6 @@ public interface GameRunLifecycleManager {
     void simulation(GameRun run, DockerNetwork network, DockerContainer serverContainer, Map<Broker, DockerContainer> broker);
     void done(GameRun run);
     void fail(GameRun run);
+    void fail(GameRun run, Throwable error);
 
 }
