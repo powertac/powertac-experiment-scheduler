@@ -88,14 +88,15 @@ The orchestrator requires access to the Docker daemon. Therefore the user that w
 permissions. Please refer to the Docker documentation for details:
 https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user.
 
-## Running the scheduler
+### Running the scheduler
 Start the orchestrator by running the Maven `exec` command. The orchestrator will listen by default to port 8080.
 
 ```bash
 $ mvn exec:java
 ```
 
-If the orchestrator is started for the first time it will download the server images and build the broker images. Therefore it will take some time until the service is available.
+If the orchestrator is started for the first time it will download the server images and build the broker images.
+Therefore it will take some time until the service is available.
 
 Once the orchestrator is ready you can start the web ui by running the `npm run` command:
 
@@ -103,13 +104,23 @@ Once the orchestrator is ready you can start the web ui by running the `npm run`
 $ npm run dev
 ```
 
-The web UI will be reachable by default via http://localhost:9000. You can run the web UI on a different port by using the following command, where `<PORT>` represents the desired port:
+The web UI will be reachable by default via http://localhost:9000. You can run the web UI on a different port by using
+the following command, where `<PORT>` represents the desired port:
 
 ```bash
 $ npm run serve -- --port <PORT> --mode development
 ```
 
+## Adding brokers
+
+Once you have created broker Docker images you can add them by using the "Brokers" navigation option in the UI. You can
+find and build a basic set of brokers by cloning and following the instructions provided by the
+[powertac/broker-images](https://github.com/powertac/broker-images) repository.
+
 ## Known issues
 
-- The UI currently doesn't react correctly to some changes to experiments and game statuses. Reloading the page should do the trick.
-- In some cases when a game's containers have been created but not started and the orchestrator shuts down, the created containers are not removed and the orchestrator will throw an error due to this conflict. When this happens, shut down the orchestrator, remove the containers manually (`docker rm`) and restart the orchestrator.
+- The UI currently doesn't react correctly to some changes to experiments and game statuses. Reloading the page should 
+do the trick.
+- In some cases when a game's containers have been created but not started and the orchestrator shuts down, the created
+containers are not removed and the orchestrator will throw an error due to this conflict. When this happens, shut down
+the orchestrator, remove the containers manually (`docker rm`) and restart the orchestrator.
