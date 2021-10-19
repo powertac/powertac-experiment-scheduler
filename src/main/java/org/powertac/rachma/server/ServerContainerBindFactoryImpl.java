@@ -45,4 +45,17 @@ public class ServerContainerBindFactoryImpl extends AbstractBindFactory implemen
             paths.container().game(game).seed());
     }
 
+    @Override
+    public Bind createStateLogBind(Game game) {
+        return bind(
+            paths.host().game(game).stateLog(),
+            paths.container().game(game).stateLog());
+    }
+
+    @Override
+    public Bind createTraceLogBind(Game game) {
+        return bind(
+            paths.host().game(game).traceLog(),
+            paths.container().game(game).traceLog());
+    }
 }

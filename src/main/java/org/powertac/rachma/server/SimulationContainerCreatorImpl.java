@@ -86,7 +86,8 @@ public class SimulationContainerCreatorImpl implements SimulationContainerCreato
         List<Bind> binds = new ArrayList<>();
         binds.add(bindFactory.createSimulationPropertiesBind(game));
         binds.add(bindFactory.createBootstrapBind(game));
-        binds.add(bindFactory.createLogDirBind(game));
+        binds.add(bindFactory.createStateLogBind(game));
+        binds.add(bindFactory.createTraceLogBind(game));
         if (useSeed(game)) {
             binds.add(bindFactory.createSeedBind(game));
         }

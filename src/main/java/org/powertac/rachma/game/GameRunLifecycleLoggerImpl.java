@@ -48,7 +48,7 @@ public class GameRunLifecycleLoggerImpl implements GameRunLifecycleLogger {
         return String.format("[%s] %s - %s", date, level, message);
     }
 
-    private void appendToLog(GameRun run, String message) {
+    private synchronized void appendToLog(GameRun run, String message) {
         Path logPath = paths.local().run(run).log();
         try {
             Path gameDirPath = paths.local().game(run.getGame()).dir();
