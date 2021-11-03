@@ -1,11 +1,14 @@
 package org.powertac.rachma.game;
 
+import org.powertac.rachma.broker.Broker;
+import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRole;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -22,7 +25,7 @@ public class GameFactoryImpl implements GameFactory {
         return new Game(
             UUID.randomUUID().toString(),
             spec.getName(),
-            spec.getBrokers(),
+            createBrokerSet(spec.getBrokers()),
             spec.getServerParameters(),
             getFile(spec.getBaseGameId(), FileRole.BOOTSTRAP),
             getFile(spec.getBaseGameId(), FileRole.SEED),
@@ -41,6 +44,11 @@ public class GameFactoryImpl implements GameFactory {
         return new File(UUID.randomUUID().toString(), role, baseGame);
     }
 
-
+    // TODO : use broker set repo
+    private BrokerSet createBrokerSet(Set<Broker> brokers) {
+        return new BrokerSet(
+            UUID.randomUUID().toString(),
+            brokers);
+    }
 
 }

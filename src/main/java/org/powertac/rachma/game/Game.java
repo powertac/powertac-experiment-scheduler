@@ -8,8 +8,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.broker.Broker;
+import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.util.InstantToNumberSerializer;
+import org.powertac.rachma.weather.WeatherConfiguration;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -35,8 +37,8 @@ public class Game {
 
     @Getter
     @Setter
-    @ManyToMany(fetch = FetchType.EAGER)
-    private Set<Broker> brokers;
+    @ManyToOne
+    private BrokerSet brokerSet;
 
     @Getter
     @ElementCollection(fetch = FetchType.EAGER)
@@ -67,5 +69,14 @@ public class Game {
     @Getter
     @Setter
     private boolean cancelled = false;
+
+    @Getter
+    @Setter
+    @ManyToOne
+    private WeatherConfiguration weatherConfiguration;
+
+    public Set<Broker> getBrokers() {
+        return brokerSet.getBrokers();
+    }
 
 }

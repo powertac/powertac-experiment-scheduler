@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdNodeBasedDeserializer;
 import org.powertac.rachma.broker.Broker;
+import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.serialization.DeserializationHelper;
 
@@ -21,7 +22,7 @@ public class GameDeserializer extends StdNodeBasedDeserializer<Game> {
     public Game convert(JsonNode root, DeserializationContext context) throws IOException {
         String id = root.has("id") ? root.get("id").asText() : null;
         String name = root.get("name").asText();
-        Set<Broker> brokers = parseBrokers(root, context);
+        BrokerSet brokers = parseBrokers(root, context);
         Map<String, String> serverParameters = parseServerParameters(root);
         File bootstrap = root.has("bootstrap") ? parseFile(root.get("bootstrap"), context) : null;
         File seed = root.has("seed") ? parseFile(root.get("seed"), context) : null;
@@ -40,14 +41,13 @@ public class GameDeserializer extends StdNodeBasedDeserializer<Game> {
         return serverParameters;
     }
 
-    private Set<Broker> parseBrokers(JsonNode root, DeserializationContext context) throws IOException {
-        if (root.has("brokers")) {
-            return DeserializationHelper.deserializeSet(
-                root.get("brokers"),
-                Broker.class,
-                context);
-    }
-        return new HashSet<>();
+    private BrokerSet parseBrokers(JsonNode root, DeserializationContext context) throws IOException {
+        Set<Broker> brokers = root.has("brokers")
+            ? DeserializationHelper.deserializeSet(root.get("brokers"), Broker.class, context)
+            : new HashSet<>();
+        return new BrokerSet(
+            UUID.randomUUID().toString(),
+            brokers);
     }
 
     private File parseFile(JsonNode fileNode, DeserializationContext context) throws IOException {

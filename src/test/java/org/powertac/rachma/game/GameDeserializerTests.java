@@ -3,7 +3,6 @@ package org.powertac.rachma.game;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.powertac.rachma.TestHelper;
 import org.powertac.rachma.broker.Broker;

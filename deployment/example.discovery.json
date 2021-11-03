@@ -1,3 +1,4 @@
 {
-  "orchestrator": "http://127.0.0.1:8080"
+  "orchestrator": "http://127.0.0.1:8080",
+  "weather-server": "http://127.0.0.1:8070"
 }

@@ -2,10 +2,7 @@ package org.powertac.rachma.persistence;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.broker.Broker;
-import org.powertac.rachma.broker.BrokerConflictException;
-import org.powertac.rachma.broker.BrokerRepository;
-import org.powertac.rachma.broker.BrokerType;
+import org.powertac.rachma.broker.*;
 import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRepository;
@@ -116,7 +113,7 @@ public class NewGameModelMigration implements Migration {
             getCancelledStatus(job));
     }
 
-    private Set<Broker> getBrokersForBrokerTypes(Collection<BrokerType> types) throws MigrationException {
+    private BrokerSet getBrokersForBrokerTypes(Collection<BrokerType> types) throws MigrationException {
         Set<Broker> brokers = new HashSet<>();
         for (BrokerType type : types) {
             try {
@@ -126,7 +123,9 @@ public class NewGameModelMigration implements Migration {
                 throw new MigrationException(String.format("failed to create new broker '%s' due to conflict with existing one", type.getName()), e);
             }
         }
-        return brokers;
+        return new BrokerSet(
+            UUID.randomUUID().toString(),
+            brokers);
     }
 
     private Broker createBrokerFromType(BrokerType type) throws BrokerConflictException {
