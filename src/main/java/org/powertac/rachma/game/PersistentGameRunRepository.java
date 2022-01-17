@@ -3,22 +3,23 @@ package org.powertac.rachma.game;
 import org.powertac.rachma.persistence.JpaGameRunRepository;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.UUID;
 
 @Component
 public class PersistentGameRunRepository implements GameRunRepository {
 
-    private final JpaGameRunRepository runs;
+    private final JpaGameRunRepository crudRepository;
     private final GameRepository games;
 
-    public PersistentGameRunRepository(JpaGameRunRepository runs, GameRepository games) {
-        this.runs = runs;
+    public PersistentGameRunRepository(JpaGameRunRepository crudRepository, GameRepository games) {
+        this.crudRepository = crudRepository;
         this.games = games;
     }
 
     @Override
     public GameRun find(String id) {
-        return runs.findById(id).orElse(null);
+        return crudRepository.findById(id).orElse(null);
     }
 
     @Override
@@ -32,8 +33,12 @@ public class PersistentGameRunRepository implements GameRunRepository {
 
     @Override
     public void save(GameRun run) {
-        runs.save(run);
+        crudRepository.save(run);
         games.save(run.getGame());
+    }
+
+    public void delete(Collection<GameRun> runs) {
+        crudRepository.deleteAll(runs);
     }
 
 }

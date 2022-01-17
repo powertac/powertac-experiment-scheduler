@@ -1,7 +1,6 @@
 package org.powertac.rachma.broker;
 
 import org.powertac.rachma.api.stomp.EntityPublisher;
-import org.powertac.rachma.persistence.JpaBrokerRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -12,10 +11,10 @@ import java.util.UUID;
 @Component
 public class PersistentBrokerRepository implements BrokerRepository {
 
-    private final JpaBrokerRepository brokers;
+    private final BrokerCrudRepository brokers;
     private final EntityPublisher<Broker> publisher;
 
-    public PersistentBrokerRepository(JpaBrokerRepository brokers, EntityPublisher<Broker> publisher) {
+    public PersistentBrokerRepository(BrokerCrudRepository brokers, EntityPublisher<Broker> publisher) {
         this.brokers = brokers;
         this.publisher = publisher;
     }
@@ -28,18 +27,13 @@ public class PersistentBrokerRepository implements BrokerRepository {
     }
 
     @Override
-    public Broker findById(String id) {
-        return brokers.findById(id).orElse(null);
-    }
-
-    @Override
-    public Broker findByName(String name) {
-        return brokers.findOneByName(name);
-    }
-
-    @Override
     public Broker findByNameAndVersion(String name, String version) {
         return brokers.findByNameAndVersion(name, version);
+    }
+
+    @Override
+    public boolean exists(String id) {
+        return brokers.existsById(id);
     }
 
     @Override

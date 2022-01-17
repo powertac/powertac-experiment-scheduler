@@ -93,4 +93,10 @@ public class GameRun {
         return this.failed;
     }
 
+    @Transient
+    public boolean isRunning() {
+        return !phase.equals(GameRunPhase.NONE)
+            && !phase.equals(GameRunPhase.DONE);
+    }
+
 }

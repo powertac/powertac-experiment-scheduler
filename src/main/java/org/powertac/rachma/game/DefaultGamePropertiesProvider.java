@@ -1,19 +1,37 @@
 package org.powertac.rachma.game;
 
 import org.powertac.rachma.broker.Broker;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 
 @Component
 public class DefaultGamePropertiesProvider implements GamePropertiesProvider {
+
+    @Value("${application.weatherserver.url}")
+    private String defaultWeatherServerUrl;
+
+    private final DateTimeFormatter baseTimeFormatter;
+
+    public DefaultGamePropertiesProvider() {
+        this.baseTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
+    }
 
     @Override
     public Properties getServerProperties(Game game) {
         Properties properties = getDefaultServerProperties();
         for (Map.Entry<String, String> parameter : game.getServerParameters().entrySet()) {
             properties.setProperty(parameter.getKey(), parameter.getValue());
+        }
+        if (null != game.getWeatherConfiguration()) {
+            String baseTime = baseTimeFormatter.format(game.getWeatherConfiguration().getStartTime());
+            properties.setProperty("common.competition.simulationBaseTime", baseTime);
+            properties.setProperty("server.weatherService.weatherLocation", game.getWeatherConfiguration().getLocation());
         }
         return properties;
     }
@@ -31,6 +49,7 @@ public class DefaultGamePropertiesProvider implements GamePropertiesProvider {
         defaultProperties.put("server.competitionControlService.brokerPauseAllowed", "true");
         defaultProperties.put("server.competitionControlService.loginTimeout", "60000");
         defaultProperties.put("server.jmsManagementService.jmsBrokerUrl", "tcp://0.0.0.0:61616");
+        defaultProperties.put("server.weatherService.serverUrl", defaultWeatherServerUrl);
         return defaultProperties;
     }
 

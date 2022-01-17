@@ -1,0 +1,50 @@
+{
+  "name": "Spec Test",
+  "commonParameters": {
+    "some.parameter": "some value",
+    "some.number": "5"
+  },
+  "brokerSets": [
+    {
+      "id": "c5851f63-8b47-4aed-8e4f-65b33d7b7b49",
+      "brokers": [
+        {
+          "id": "de041ebe-d323-4ecb-ad0a-6b212237c871",
+          "name": "Sample Broker",
+          "version": "latest",
+          "imageTag": "samplebroker:latest",
+          "enabled": true
+        },
+        {
+          "id": "91e6afb1-2998-4d2c-a6ed-3312193d6a9b",
+          "name": "Another Broker",
+          "version": "latest",
+          "imageTag": "another:latest",
+          "enabled": true
+        }
+      ]
+    },
+    {
+      "id": "d530b3f8-1194-48e1-8faf-f8ed65000edf",
+      "brokers": [
+        {
+          "id": "de041ebe-d323-4ecb-ad0a-6b212237c871",
+          "name": "Sample Broker",
+          "version": "latest",
+          "imageTag": "samplebroker:latest",
+          "enabled": true
+        }
+      ]
+    }
+  ],
+  "weatherConfigurations": [
+    {
+      "location": "rotterdam",
+      "startTime": "2011-12-01T00:00:00+00:00"
+    },
+    {
+      "location": "cheyenne",
+      "startTime": "2013-01-01T00:00:00+00:00"
+    }
+  ]
+}

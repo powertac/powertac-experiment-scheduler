@@ -53,4 +53,14 @@ public class Broker {
         return getImageTag() != null ? getImageTag().equals(broker.getImageTag()) : broker.getImageTag() == null;
     }
 
+    @Override
+    public int hashCode() {
+        int result = getId().hashCode();
+        result = 31 * result + getName().hashCode();
+        result = 31 * result + getVersion().hashCode();
+        result = 31 * result + getImageTag().hashCode();
+        result = 31 * result + (isEnabled() ? 1 : 0);
+        return result;
+    }
+
 }

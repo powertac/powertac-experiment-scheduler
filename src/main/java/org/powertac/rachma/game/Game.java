@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
@@ -15,10 +16,7 @@ import org.powertac.rachma.weather.WeatherConfiguration;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @NoArgsConstructor
@@ -37,7 +35,7 @@ public class Game {
 
     @Getter
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private BrokerSet brokerSet;
 
     @Getter
@@ -75,8 +73,61 @@ public class Game {
     @ManyToOne
     private WeatherConfiguration weatherConfiguration;
 
+    @Getter
+    @Setter
+    @ManyToOne(fetch = FetchType.EAGER)
+    private Baseline baseline;
+
+    public Game(String id, String name, BrokerSet brokers, Map<String, String> serverParameters, File bootstrap, File seed, Instant createdAt) {
+        this(id,
+            name,
+            brokers,
+            serverParameters,
+            bootstrap,
+            seed,
+            createdAt,
+            new ArrayList<>(),
+            false,
+            null,
+            null);
+    }
+
+    public Game(String id, String name, BrokerSet brokers, Map<String, String> serverParameters, File bootstrap, File seed, Instant createdAt, boolean cancelled) {
+        this(id,
+            name,
+            brokers,
+            serverParameters,
+            bootstrap,
+            seed,
+            createdAt,
+            new ArrayList<>(),
+            cancelled,
+            null,
+            null);
+    }
+
+    public Game(String id, String name, BrokerSet brokers, Map<String, String> serverParameters, Instant createdAt, boolean cancelled) {
+        this(id,
+            name,
+            brokers,
+            serverParameters,
+            null,
+            null,
+            createdAt,
+            new ArrayList<>(),
+            cancelled,
+            null,
+            null);
+    }
+
     public Set<Broker> getBrokers() {
         return brokerSet.getBrokers();
+    }
+
+    @Transient
+    public boolean isRunning() {
+        return runs.stream().map(GameRun::isRunning)
+            .reduce(false, (oneIsRunning, currentOneIsRunning) -> oneIsRunning || currentOneIsRunning);
     }
 
 }

@@ -89,6 +89,7 @@ public class ContainerGameRunner implements GameRunner {
             gameFileManager.removeExisting(run.getGame());
             gameFileManager.createGameDirectories(run.getGame());
             gameFileManager.createSimulationProperties(run.getGame());
+            gameFileManager.createLogs(run.getGame());
             for (Broker broker : run.getGame().getBrokers()) {
                 gameFileManager.createBrokerProperties(run.getGame(), broker);
             }
@@ -138,7 +139,7 @@ public class ContainerGameRunner implements GameRunner {
 
     private void simulate(GameRun run) throws GameRunException {
         try {
-            // TODO : remove existing containers if necessary
+            // TODO : stop and remove existing containers if necessary
             DockerNetwork network = createNetwork(run.getGame());
             DockerContainer serverContainer = simulationContainerCreator.create(run.getGame(), network);
             Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run.getGame(), network);

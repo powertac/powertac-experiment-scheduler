@@ -106,10 +106,7 @@ public class NewGameModelMigration implements Migration {
             job.getName(),
             getBrokersForBrokerTypes(job.getSimulationTask().getBrokers()),
             job.getSimulationTask().getParameters(),
-            null,
-            null,
             job.getStatus().getStart(),
-            null,
             getCancelledStatus(job));
     }
 

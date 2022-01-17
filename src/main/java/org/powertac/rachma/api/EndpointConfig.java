@@ -28,7 +28,7 @@ public class EndpointConfig  implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/brokers", "/games");
+        registry.enableSimpleBroker("/baselines", "/brokers", "/games");
         registry.setApplicationDestinationPrefixes("/requests");
     }
 
@@ -38,7 +38,7 @@ public class EndpointConfig  implements WebSocketMessageBrokerConfigurer {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                    .allowedMethods("GET", "POST")
+                    .allowedMethods("GET", "POST", "DELETE")
                     .allowedOrigins(getAllowedOrigins());
             }
         };

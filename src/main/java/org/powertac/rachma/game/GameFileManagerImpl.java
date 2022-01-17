@@ -60,6 +60,14 @@ public class GameFileManagerImpl implements GameFileManager {
     }
 
     @Override
+    public void createLogs(Game game) throws IOException {
+        Path stateLogPath = paths.local().game(game).stateLog();
+        Files.createFile(stateLogPath);
+        Path traceLogPath = paths.local().game(game).traceLog();
+        Files.createFile(traceLogPath);
+    }
+
+    @Override
     public void createBrokerProperties(Game game, Broker broker) throws IOException {
         Path propertiesPath = paths.local().game(game).broker(broker).properties();
         BrokerCompatiblePropertiesWriter.write(

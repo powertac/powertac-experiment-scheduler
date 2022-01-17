@@ -3,6 +3,7 @@ package org.powertac.rachma.game;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.powertac.rachma.baseline.BaselineRepository;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.file.FileRole;
 
@@ -33,6 +34,10 @@ public class GameSerializer extends StdSerializer<Game> {
         writeServerParametersField(game.getServerParameters(), gen);
         writeRunField(game.getRuns(), gen, provider);
         writeFilesField(fileManager.getFiles(game), gen);
+        if (null != game.getBaseline()) {
+            gen.writeStringField("baseline", game.getBaseline().getId());
+        }
+        provider.defaultSerializeField("weather", game.getWeatherConfiguration(), gen);
         gen.writeEndObject();
     }
 

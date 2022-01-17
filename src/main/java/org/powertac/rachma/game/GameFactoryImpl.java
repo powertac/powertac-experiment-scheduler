@@ -1,13 +1,16 @@
 package org.powertac.rachma.game;
 
+import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRole;
+import org.powertac.rachma.weather.WeatherConfiguration;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,9 +32,23 @@ public class GameFactoryImpl implements GameFactory {
             spec.getServerParameters(),
             getFile(spec.getBaseGameId(), FileRole.BOOTSTRAP),
             getFile(spec.getBaseGameId(), FileRole.SEED),
+            Instant.now());
+    }
+
+    @Override
+    public Game createGame(String name, BrokerSet brokers, WeatherConfiguration weather, Map<String, String> parameters, Baseline baseline) {
+        return new Game(
+            UUID.randomUUID().toString(),
+            name,
+            brokers,
+            parameters,
+            null,
+            null,
             Instant.now(),
             new ArrayList<>(),
-            false);
+            false,
+            weather,
+            baseline);
     }
 
     // TODO : use file repository
