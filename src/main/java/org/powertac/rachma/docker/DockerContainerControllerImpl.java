@@ -105,8 +105,8 @@ public class DockerContainerControllerImpl implements DockerContainerController 
     }
 
     @Override
-    public void remove(String name) throws DockerException {
-        remove(name, false);
+    public void forceRemove(String name) throws DockerException {
+        remove(name, true);
     }
 
     @Override

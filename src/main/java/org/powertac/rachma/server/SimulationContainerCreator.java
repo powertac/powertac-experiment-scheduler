@@ -8,5 +8,6 @@ import org.powertac.rachma.game.Game;
 public interface SimulationContainerCreator {
 
     DockerContainer create(Game game, DockerNetwork network) throws DockerException;
+    String getSimulationContainerName(Game game);
 
 }

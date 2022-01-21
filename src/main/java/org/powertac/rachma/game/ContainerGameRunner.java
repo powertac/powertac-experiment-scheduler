@@ -133,13 +133,13 @@ public class ContainerGameRunner implements GameRunner {
     private void removeBootstrapContainerIfExists(Game game) throws DockerException {
         String bootstrapContainerName = bootstrapContainerCreator.getBootstrapContainerName(game);
         if (controller.exists(bootstrapContainerName)) {
-            controller.remove(bootstrapContainerName);
+            controller.forceRemove(bootstrapContainerName);
         }
     }
 
     private void simulate(GameRun run) throws GameRunException {
         try {
-            // TODO : stop and remove existing containers if necessary
+            removeExistingDockerResources(run.getGame());
             DockerNetwork network = createNetwork(run.getGame());
             DockerContainer serverContainer = simulationContainerCreator.create(run.getGame(), network);
             Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run.getGame(), network);
@@ -160,7 +160,11 @@ public class ContainerGameRunner implements GameRunner {
     }
 
     private DockerNetwork createNetwork(Game game) {
-        return networks.createNetwork(String.format("ptac.%s", game.getId()));
+        return networks.createNetwork(getNetworkName(game));
+    }
+
+    private String getNetworkName(Game game) {
+        return String.format("ptac.%s", game.getId());
     }
 
     private Map<Broker, DockerContainer> createBrokerContainers(Game game, DockerNetwork network) throws DockerException {
@@ -184,6 +188,33 @@ public class ContainerGameRunner implements GameRunner {
         } finally {
             lifecycle.fail(run);
         }
+    }
+
+    private void removeExistingDockerResources(Game game) {
+        removeSimulationContainerIfExists(game);
+        removeExistingBrokerContainers(game);
+        removeNetworkIfExists(game);
+    }
+
+    private void removeSimulationContainerIfExists(Game game) {
+        String simulationContainerName = simulationContainerCreator.getSimulationContainerName(game);
+        if (controller.exists(simulationContainerName)) {
+            controller.forceRemove(simulationContainerName);
+        }
+    }
+
+    private void removeExistingBrokerContainers(Game game) {
+        for (Broker broker : game.getBrokers()) {
+            String brokerContainerName = brokerContainerCreator.getBrokerContainerName(game, broker);
+            if (controller.exists(brokerContainerName)) {
+                controller.forceRemove(brokerContainerName);
+            }
+        }
+    }
+
+    private void removeNetworkIfExists(Game game) {
+        String networkName = getNetworkName(game);
+        networks.removeNetworkIfExists(networkName);
     }
 
 }

@@ -34,7 +34,7 @@ public class BrokerContainerCreatorImpl implements BrokerContainerCreator {
     @Override
     public DockerContainer create(Game game, Broker broker, DockerNetwork network) throws DockerException {
         CreateContainerCmd create = docker.createContainerCmd(broker.getImageTag());
-        String name = getName(game, broker);
+        String name = getBrokerContainerName(game, broker);
         create.withName(name);
         create.withCmd(getCommand(game, broker));
         create.withHostConfig(getHostConfig(game, broker, network));
@@ -42,7 +42,8 @@ public class BrokerContainerCreatorImpl implements BrokerContainerCreator {
         return new DockerContainer(response.getId(), name);
     }
 
-    private String getName(Game game, Broker broker) {
+    @Override
+    public String getBrokerContainerName(Game game, Broker broker) {
         return String.format("%s.%s", broker.getName(), game.getId());
     }
 

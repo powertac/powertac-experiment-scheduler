@@ -10,5 +10,6 @@ public interface DockerNetworkRepository {
     Set<DockerNetwork> findAll() throws DockerException;
     DockerNetwork createNetwork(String name) throws DockerException;
     void removeNetwork(DockerNetwork network) throws DockerException;
+    void removeNetworkIfExists(String name) throws DockerException;
 
 }

@@ -47,9 +47,10 @@ public class SimulationContainerCreatorImpl implements SimulationContainerCreato
         this.paths = paths;
     }
 
+    @Override
     public DockerContainer create(Game game, DockerNetwork network) throws DockerException {
         CreateContainerCmd create = docker.createContainerCmd(defaultImageTag);
-        String name = getName(game);
+        String name = getSimulationContainerName(game);
         create.withName(name);
         create.withCmd(getCommand(game));
         create.withExposedPorts(new ExposedPort(defaultMessageBrokerPort, InternetProtocol.TCP));
@@ -59,7 +60,8 @@ public class SimulationContainerCreatorImpl implements SimulationContainerCreato
         return new DockerContainer(response.getId(), name);
     }
 
-    private String getName(Game game) {
+    @Override
+    public String getSimulationContainerName(Game game) {
         return String.format("sim.%s", game.getId());
     }
 

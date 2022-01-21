@@ -18,7 +18,7 @@ public interface DockerContainerController {
     boolean isRunning(DockerContainer container) throws ContainerReflectionException;
     void remove(DockerContainer container) throws DockerException;
     void forceRemove(DockerContainer container) throws DockerException;
-    void remove(String name) throws DockerException;
+    void forceRemove(String name) throws DockerException;
     boolean exists(String name) throws DockerException;
 
 }

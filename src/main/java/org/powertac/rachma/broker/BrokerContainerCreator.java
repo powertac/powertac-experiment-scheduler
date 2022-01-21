@@ -8,5 +8,6 @@ import org.powertac.rachma.game.Game;
 public interface BrokerContainerCreator {
 
     DockerContainer create(Game game, Broker broker, DockerNetwork network) throws DockerException;
+    String getBrokerContainerName(Game game, Broker broker);
 
 }
