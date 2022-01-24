@@ -14,15 +14,12 @@ import org.powertac.rachma.util.InstantToNumberSerializer;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @NoArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property="id")
-public class GameRun {
+public class GameRun implements Comparable<GameRun> {
 
     @Getter
     @Id
@@ -99,4 +96,12 @@ public class GameRun {
             && !phase.equals(GameRunPhase.DONE);
     }
 
+    @Override
+    public int compareTo(GameRun run) {
+        if (this.start.equals(run.getStart())) {
+            return 0;
+        } else {
+            return Comparator.comparing(GameRun::getStart).compare(this, run);
+        }
+    }
 }

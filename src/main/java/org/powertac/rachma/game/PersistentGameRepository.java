@@ -4,10 +4,8 @@ import org.powertac.rachma.api.stomp.EntityPublisher;
 import org.powertac.rachma.persistence.JpaGameRepository;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class PersistentGameRepository implements GameRepository {
@@ -24,12 +22,17 @@ public class PersistentGameRepository implements GameRepository {
     public Collection<Game> findAll() {
         List<Game> gameList = new ArrayList<>();
         games.findAll().forEach(gameList::add);
+        gameList.forEach(this::removeDuplicateGameRuns);
         return gameList;
     }
 
     @Override
     public Game findById(String id) {
-        return games.findById(id).orElse(null);
+        Game game = games.findById(id).orElse(null);
+        if (null != game) {
+            removeDuplicateGameRuns(game);
+        }
+        return game;
     }
 
     @Override
@@ -59,6 +62,13 @@ public class PersistentGameRepository implements GameRepository {
     @Override
     public void delete(Game game) {
         games.delete(game);
+    }
+
+    private void removeDuplicateGameRuns(Game game) {
+        game.setRuns(new HashSet<>(game.getRuns()).stream()
+            .sorted(Comparator.comparing(GameRun::getStart))
+            .sorted(Collections.reverseOrder())
+            .collect(Collectors.toList()));
     }
 
 }
