@@ -2,7 +2,7 @@ package org.powertac.rachma.game;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.file.PathProvider;
+import org.powertac.rachma.paths.PathProvider;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;

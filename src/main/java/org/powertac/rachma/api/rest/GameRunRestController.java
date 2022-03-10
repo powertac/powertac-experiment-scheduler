@@ -3,7 +3,7 @@ package org.powertac.rachma.api.rest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.file.PathProvider;
+import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.game.GameRun;
 import org.powertac.rachma.game.GameRunRepository;
 import org.springframework.http.ResponseEntity;

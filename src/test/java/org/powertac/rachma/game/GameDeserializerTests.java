@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.Mockito;
-import org.powertac.rachma.TestHelper;
+import testutils.TestHelper;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerDeserializer;
 import org.powertac.rachma.file.File;

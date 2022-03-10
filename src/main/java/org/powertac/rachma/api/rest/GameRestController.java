@@ -34,13 +34,14 @@ public class GameRestController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<?> queueInstance(@RequestBody GameSpec spec) {
+    public ResponseEntity<?> createGame(@RequestBody GameSpec spec) {
         try {
             Game game = gameFactory.createFromSpec(spec);
             validator.validate(game);
+            createGameFileScaffold(game);
             games.save(game);
             return ResponseEntity.ok().build();
-        } catch (GameValidationException e) {
+        } catch (IOException|GameValidationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -64,6 +65,8 @@ public class GameRestController {
         } else if (game.isRunning()) {
             return ResponseEntity.badRequest().build();
         } else {
+            // TODO : this doesn't work in conjunction with run logs in UI
+            // TODO : workaround -> tell in UI that runs will be removed
             gameRuns.delete(game.getRuns());
             game.setRuns(new ArrayList<>());
             this.games.save(game);
@@ -85,12 +88,21 @@ public class GameRestController {
                     // TODO : add message
                     return ResponseEntity.badRequest().build();
                 }
-                gameFileManager.removeExisting(game);
+                gameFileManager.removeAllGameFiles(game);
                 games.delete(game);
                 return ResponseEntity.ok().build();
             } catch (IOException e) {
                 return ResponseEntity.status(500).build();
             }
+        }
+    }
+
+    private void createGameFileScaffold(Game game) throws IOException {
+        try {
+          gameFileManager.createScaffold(game);
+        } catch (IOException e) {
+            gameFileManager.removeAllGameFiles(game);
+            throw e;
         }
     }
 

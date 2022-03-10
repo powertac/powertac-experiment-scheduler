@@ -1,0 +1,31 @@
+```
+<GAME_ID>.tar.gz
+	- analysis
+		- ...
+		- <GAME_ID>.<ANALYZER_ID>.<FORMAT_EXTENSION>
+		- ...
+	- boot
+		- <GAME_ID>.state
+		- <GAME_ID>.trace
+		- (init.state)
+		- (init.trace)
+	- runs
+		- ...
+		- <RUN_ID>
+			- server
+				- <GAME_ID>.state
+				- <GAME_ID>.trace
+				- (init.state)
+				- (init.trace)
+			- ...
+			- <BROKER_ID>
+				- ...
+			- ...
+		- ...
+	- <GAME_ID>.bootstrap.xml
+	- <GAME_ID>.game.json
+	- <GAME_ID>.server.properties
+	- ...
+	- <GAME_ID>.<BROKER_ID>.properties
+	- ...
+```

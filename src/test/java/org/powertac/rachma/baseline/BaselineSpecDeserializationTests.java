@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.powertac.rachma.TestHelper;
+import testutils.TestHelper;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.weather.WeatherConfiguration;
 

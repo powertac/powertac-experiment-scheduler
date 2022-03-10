@@ -11,8 +11,9 @@ import com.github.dockerjava.api.model.InternetProtocol;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.docker.DockerContainer;
 import org.powertac.rachma.docker.DockerNetwork;
-import org.powertac.rachma.file.PathProvider;
+import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.game.Game;
+import org.powertac.rachma.game.GameRun;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,14 +49,14 @@ public class SimulationContainerCreatorImpl implements SimulationContainerCreato
     }
 
     @Override
-    public DockerContainer create(Game game, DockerNetwork network) throws DockerException {
+    public DockerContainer create(GameRun run, DockerNetwork network) throws DockerException {
         CreateContainerCmd create = docker.createContainerCmd(defaultImageTag);
-        String name = getSimulationContainerName(game);
-        create.withName(name);
-        create.withCmd(getCommand(game));
-        create.withExposedPorts(new ExposedPort(defaultMessageBrokerPort, InternetProtocol.TCP));
-        create.withAliases(serverAlias);
-        create.withHostConfig(getHostConfig(game, network));
+        String name = getSimulationContainerName(run.getGame());
+        create.withName(name)
+            .withCmd(getCommand(run.getGame()))
+            .withExposedPorts(new ExposedPort(defaultMessageBrokerPort, InternetProtocol.TCP))
+            .withAliases(serverAlias)
+            .withHostConfig(getHostConfig(run, network));
         CreateContainerResponse response = create.exec();
         return new DockerContainer(response.getId(), name);
     }
@@ -69,29 +70,29 @@ public class SimulationContainerCreatorImpl implements SimulationContainerCreato
         Set<String> brokerNames = game.getBrokers().stream()
             .map(Broker::getName)
             .collect(Collectors.toSet());
-        Path seedFilePath = useSeed(game) ? paths.container().game(game).seed() : null;
+        Path seedFilePath = useSeed(game) ? paths.container().server().game(game).seed() : null;
         return commandCreator.createSimulationCommand(
-            paths.container().game(game).properties().toString(),
-            paths.container().game(game).bootstrap().toString(),
+            paths.container().server().game(game).properties().toString(),
+            paths.container().server().game(game).bootstrap().toString(),
             seedFilePath != null ? seedFilePath.toString() : null,
             brokerNames);
     }
 
-    private HostConfig getHostConfig(Game game, DockerNetwork network) {
+    private HostConfig getHostConfig(GameRun run, DockerNetwork network) {
         HostConfig config = new HostConfig();
-        config.withBinds(getBinds(game));
+        config.withBinds(getBinds(run));
         config.withNetworkMode(network.getId());
         return config;
     }
 
-    private List<Bind> getBinds(Game game) {
+    private List<Bind> getBinds(GameRun run) {
         List<Bind> binds = new ArrayList<>();
-        binds.add(bindFactory.createSimulationPropertiesBind(game));
-        binds.add(bindFactory.createBootstrapBind(game));
-        binds.add(bindFactory.createStateLogBind(game));
-        binds.add(bindFactory.createTraceLogBind(game));
-        if (useSeed(game)) {
-            binds.add(bindFactory.createSeedBind(game));
+        binds.add(bindFactory.createSimulationPropertiesBind(run.getGame()));
+        binds.add(bindFactory.createBootstrapBind(run.getGame()));
+        binds.add(bindFactory.createStateLogBind(run));
+        binds.add(bindFactory.createTraceLogBind(run));
+        if (useSeed(run.getGame())) {
+            binds.add(bindFactory.createSeedBind(run.getGame()));
         }
         return binds;
     }

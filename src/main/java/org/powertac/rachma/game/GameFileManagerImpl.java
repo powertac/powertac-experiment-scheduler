@@ -2,7 +2,8 @@ package org.powertac.rachma.game;
 
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.file.FileRole;
-import org.powertac.rachma.file.PathProvider;
+import org.powertac.rachma.file.FileWriter;
+import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.util.BrokerCompatiblePropertiesWriter;
 import org.springframework.stereotype.Component;
 
@@ -19,81 +20,55 @@ import java.util.stream.Collectors;
 public class GameFileManagerImpl implements GameFileManager {
 
     private final PathProvider paths;
+    private final FileWriter fileWriter;
     private final GamePropertiesProvider properties;
 
-    public GameFileManagerImpl(PathProvider paths, GamePropertiesProvider properties) {
+    public GameFileManagerImpl(PathProvider paths, FileWriter fileWriter, GamePropertiesProvider properties) {
         this.paths = paths;
+        this.fileWriter = fileWriter;
         this.properties = properties;
     }
 
     @Override
-    public void removeExisting(Game game) throws IOException {
-        Path gameDirectory = paths.local().game(game).dir();
-        if (!Files.exists(gameDirectory)) {
-            return;
-        }
-        List<Path> files = Files.walk(gameDirectory)
-            .sorted(Comparator.reverseOrder()) // the order is important here; files must be removed before removing their parent directory
-            .collect(Collectors.toList());
-        for (Path file : files) {
-            Files.deleteIfExists(file);
-        }
-    }
-
-    @Override
-    public void createGameDirectories(Game game) throws IOException {
-        GamePathProvider gamePaths = paths.local().game(game);
-        Files.createDirectories(gamePaths.dir());
-        Files.createDirectories(gamePaths.brokers());
-        Files.createDirectories(gamePaths.logs());
+    public void createScaffold(Game game) throws IOException {
+        createGameDirectory(game);
+        createServerProperties(game);
         for (Broker broker : game.getBrokers()) {
-            Files.createDirectories(gamePaths.broker(broker).dir());
+            createBrokerProperties(game, broker);
         }
     }
 
     @Override
-    public void createSimulationProperties(Game game) throws IOException {
-        Path propertiesPath = paths.local().game(game).properties();
-        BrokerCompatiblePropertiesWriter.write(
-            propertiesPath.toString(),
-            properties.getServerProperties(game));
+    public void removeAllGameFiles(Game game) throws IOException {
+        Path gameDirectory = paths.local().game(game).dir();
+        if (Files.exists(gameDirectory)) {
+            List<Path> files = Files.walk(gameDirectory)
+                // the order is important here; files must be removed before removing their parent directory
+                .sorted(Comparator.reverseOrder())
+                .collect(Collectors.toList());
+            for (Path file : files) {
+                Files.deleteIfExists(file);
+            }
+        }
     }
 
     @Override
-    public void createLogs(Game game) throws IOException {
-        Path stateLogPath = paths.local().game(game).stateLog();
-        Files.createFile(stateLogPath);
-        Path traceLogPath = paths.local().game(game).traceLog();
-        Files.createFile(traceLogPath);
-    }
-
-    @Override
-    public void createBrokerProperties(Game game, Broker broker) throws IOException {
-        Path propertiesPath = paths.local().game(game).broker(broker).properties();
-        BrokerCompatiblePropertiesWriter.write(
-            propertiesPath.toString(),
-            properties.getBrokerProperties(game, broker));
+    public void createRunScaffold(GameRun run) throws IOException {
+        fileWriter.createDirectoryIfNotExists(paths.local().game(run.getGame()).runs());
+        fileWriter.createDirectoryIfNotExists(paths.local().run(run).dir());
+        fileWriter.createFileIfNotExists(paths.local().run(run).log());
     }
 
     @Override
     public void createBootstrap(Game game) throws IOException {
         Path bootstrapPath = paths.local().game(game).bootstrap();
-        Files.createFile(bootstrapPath);
+        fileWriter.createFileIfNotExists(bootstrapPath);
     }
 
     @Override
-    public boolean bootstrapExists(Game game) {
-        Path bootstrapPath = paths.host().game(game).bootstrap();
-        return Files.exists(bootstrapPath);
-    }
-
-    @Override
-    public boolean seedExists(Game game) {
-        Path seedPath = paths.host().game(game).seed();
-        if (null == seedPath) {
-            return false;
-        }
-        return Files.exists(seedPath);
+    public void removeBootstrap(Game game) throws IOException {
+        Path bootstrapPath = paths.local().game(game).bootstrap();
+        Files.deleteIfExists(bootstrapPath);
     }
 
     @Override
@@ -108,13 +83,25 @@ public class GameFileManagerImpl implements GameFileManager {
         if (null != game.getSeed() && Files.exists(paths.local().game(game).seed())) {
             files.put(FileRole.SEED, paths.host().game(game).seed().toString());
         }
-        if (Files.exists(paths.local().game(game).stateLog())) {
-            files.put(FileRole.STATE_LOG, paths.host().game(game).stateLog().toString());
-        }
-        if (Files.exists(paths.local().game(game).traceLog())) {
-            files.put(FileRole.TRACE_LOG, paths.host().game(game).traceLog().toString());
-        }
         return files;
+    }
+
+    private void createGameDirectory(Game game) throws IOException {
+        fileWriter.createDirectoryIfNotExists(paths.local().game(game).dir());
+    }
+
+    private void createServerProperties(Game game) throws IOException {
+        Path propertiesPath = paths.local().game(game).properties();
+        BrokerCompatiblePropertiesWriter.write(
+            propertiesPath.toString(),
+            properties.getServerProperties(game));
+    }
+
+    private void createBrokerProperties(Game game, Broker broker) throws IOException {
+        Path propertiesPath = paths.local().game(game).broker(broker).properties();
+        BrokerCompatiblePropertiesWriter.write(
+            propertiesPath.toString(),
+            properties.getBrokerProperties(game, broker));
     }
 
 }

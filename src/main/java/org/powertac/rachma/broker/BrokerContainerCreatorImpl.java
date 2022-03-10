@@ -8,7 +8,8 @@ import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import org.powertac.rachma.docker.DockerContainer;
 import org.powertac.rachma.docker.DockerNetwork;
-import org.powertac.rachma.file.PathProvider;
+import org.powertac.rachma.game.GameRun;
+import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.game.Game;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,12 +33,12 @@ public class BrokerContainerCreatorImpl implements BrokerContainerCreator {
     }
 
     @Override
-    public DockerContainer create(Game game, Broker broker, DockerNetwork network) throws DockerException {
+    public DockerContainer create(GameRun run, Broker broker, DockerNetwork network) throws DockerException {
         CreateContainerCmd create = docker.createContainerCmd(broker.getImageTag());
-        String name = getBrokerContainerName(game, broker);
+        String name = getBrokerContainerName(run.getGame(), broker);
         create.withName(name);
-        create.withCmd(getCommand(game, broker));
-        create.withHostConfig(getHostConfig(game, broker, network));
+        create.withCmd(getCommand(run.getGame(), broker));
+        create.withHostConfig(getHostConfig(run, broker, network));
         CreateContainerResponse response = create.exec();
         return new DockerContainer(response.getId(), name);
     }
@@ -48,24 +49,24 @@ public class BrokerContainerCreatorImpl implements BrokerContainerCreator {
     }
 
     private List<String> getCommand(Game game, Broker broker) {
-        Path propertiesContainerPath = paths.container().game(game).broker(broker).properties();
+        Path propertiesContainerPath = paths.container().broker(broker).game(game).properties();
         List<String> command = new ArrayList<>();
         command.add("--config");
         command.add(propertiesContainerPath.toString());
         return command;
     }
 
-    private HostConfig getHostConfig(Game game, Broker broker, DockerNetwork network) {
+    private HostConfig getHostConfig(GameRun run, Broker broker, DockerNetwork network) {
         HostConfig config = new HostConfig();
-        config.withBinds(getBinds(game, broker));
+        config.withBinds(getBinds(run, broker));
         config.withNetworkMode(network.getId());
         return config;
     }
 
-    private List<Bind> getBinds(Game game, Broker broker) {
+    private List<Bind> getBinds(GameRun run, Broker broker) {
         List<Bind> binds = new ArrayList<>();
-        binds.add(bindFactory.createPropertiesBind(game, broker));
-        binds.add(bindFactory.createSharedDirectoryBind(game, broker));
+        binds.add(bindFactory.createPropertiesBind(run.getGame(), broker));
+        binds.add(bindFactory.createLogDirBind(run, broker));
         return binds;
     }
 

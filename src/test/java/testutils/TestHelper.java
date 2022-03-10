@@ -1,4 +1,4 @@
-package org.powertac.rachma;
+package testutils;
 
 import org.springframework.util.ResourceUtils;
 

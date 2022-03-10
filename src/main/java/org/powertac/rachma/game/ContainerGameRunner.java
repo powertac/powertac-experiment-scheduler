@@ -33,6 +33,7 @@ public class ContainerGameRunner implements GameRunner {
     private final DockerContainerController controller;
     private final DockerNetworkRepository networks;
     private final GameRunLifecycleManager lifecycle;
+    private final GameValidator gameValidator;
 
     private final Map<Game, GameRun> activeRuns;
     private final Logger logger;
@@ -43,7 +44,7 @@ public class ContainerGameRunner implements GameRunner {
                                SimulationContainerCreator simulationContainerCreator,
                                BrokerContainerCreator brokerContainerCreator,
                                DockerContainerController controller, DockerNetworkRepository networks,
-                               GameRunLifecycleManager lifecycle) {
+                               GameRunLifecycleManager lifecycle, GameValidator gameValidator) {
         this.runs = runs;
         this.gameFileManager = gameFileManager;
         this.bootstrapContainerCreator = bootstrapContainerCreator;
@@ -52,6 +53,7 @@ public class ContainerGameRunner implements GameRunner {
         this.controller = controller;
         this.networks = networks;
         this.lifecycle = lifecycle;
+        this.gameValidator = gameValidator;
         this.activeRuns = new ConcurrentHashMap<>();
         logger = LogManager.getLogger(ContainerGameRunner.class);
     }
@@ -62,7 +64,7 @@ public class ContainerGameRunner implements GameRunner {
         GameRun run = runs.create(game);
         activeRuns.put(game, run);
         try {
-            prepareGameFiles(run);
+            prepare(run);
             bootstrap(run);
             simulate(run);
             lifecycle.done(run);
@@ -83,66 +85,47 @@ public class ContainerGameRunner implements GameRunner {
         }
     }
 
-    private void prepareGameFiles(GameRun run) throws GameValidationException {
+    private void prepare(GameRun run) throws GameValidationException {
         try {
+            gameFileManager.createRunScaffold(run);
             lifecycle.preparation(run);
-            gameFileManager.removeExisting(run.getGame());
-            gameFileManager.createGameDirectories(run.getGame());
-            gameFileManager.createSimulationProperties(run.getGame());
-            gameFileManager.createLogs(run.getGame());
-            for (Broker broker : run.getGame().getBrokers()) {
-                gameFileManager.createBrokerProperties(run.getGame(), broker);
-            }
+            gameValidator.validate(run.getGame());
+            removeExistingDockerResources(run.getGame());
+            // FIXME : how to handle properties file?
+            gameFileManager.createRunScaffold(run);
         } catch (IOException e) {
             throw new GameValidationException("could not create game file", e);
         }
-        if (!shouldBootstrap(run) && !gameFileManager.bootstrapExists(run.getGame())) {
-            throw new GameValidationException("required bootstrap does not exist");
-        }
-        if (hasSeed(run) && !gameFileManager.seedExists(run.getGame())) {
-            throw new GameValidationException("required seed does not exist");
-        }
-    }
-
-    private boolean shouldBootstrap(GameRun run) {
-        return null == run.getGame().getBootstrap();
-    }
-
-    private boolean hasSeed(GameRun run) {
-        return null != run.getGame().getSeed();
     }
 
     private void bootstrap(GameRun run) throws GameRunException {
-        if (shouldBootstrap(run)) {
+        if (run.shouldBootstrap()) {
             try {
                 gameFileManager.createBootstrap(run.getGame());
-                removeBootstrapContainerIfExists(run.getGame());
                 DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame());
                 lifecycle.bootstrap(run, bootstrapContainer);
                 DockerContainerExitState exitState = controller.run(run.getBootstrapContainer());
                 if (exitState.isErrorState()) {
+                    // FIXME : bootstrap should also be removed if this happens!!!
                     throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId());
                 }
             } catch (IOException| ContainerException| DockerException e) {
+                try {
+                    gameFileManager.removeBootstrap(run.getGame());
+                } catch (IOException f) {
+                    // FIXME : just log this attempt
+                }
                 throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId(), e);
             }
         }
         lifecycle.ready(run);
     }
 
-    private void removeBootstrapContainerIfExists(Game game) throws DockerException {
-        String bootstrapContainerName = bootstrapContainerCreator.getBootstrapContainerName(game);
-        if (controller.exists(bootstrapContainerName)) {
-            controller.forceRemove(bootstrapContainerName);
-        }
-    }
-
     private void simulate(GameRun run) throws GameRunException {
         try {
-            removeExistingDockerResources(run.getGame());
-            DockerNetwork network = createNetwork(run.getGame());
-            DockerContainer serverContainer = simulationContainerCreator.create(run.getGame(), network);
-            Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run.getGame(), network);
+            DockerNetwork network = networks.createNetwork(getNetworkName(run.getGame()));
+            DockerContainer serverContainer = simulationContainerCreator.create(run, network);
+            Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run, network);
             lifecycle.simulation(run, network, serverContainer, brokerContainers);
             Map<DockerContainer, DockerContainerExitState> exitStates = controller.run(run.getSimulationContainers());
             for (DockerContainerExitState exitState : exitStates.values()) {
@@ -159,18 +142,14 @@ public class ContainerGameRunner implements GameRunner {
         }
     }
 
-    private DockerNetwork createNetwork(Game game) {
-        return networks.createNetwork(getNetworkName(game));
-    }
-
     private String getNetworkName(Game game) {
         return String.format("ptac.%s", game.getId());
     }
 
-    private Map<Broker, DockerContainer> createBrokerContainers(Game game, DockerNetwork network) throws DockerException {
+    private Map<Broker, DockerContainer> createBrokerContainers(GameRun run, DockerNetwork network) throws DockerException {
         Map<Broker, DockerContainer> brokerContainers = new HashMap<>();
-        for (Broker broker : game.getBrokers()) {
-            brokerContainers.put(broker, brokerContainerCreator.create(game, broker, network));
+        for (Broker broker : run.getGame().getBrokers()) {
+            brokerContainers.put(broker, brokerContainerCreator.create(run, broker, network));
         }
         return brokerContainers;
     }
@@ -191,9 +170,17 @@ public class ContainerGameRunner implements GameRunner {
     }
 
     private void removeExistingDockerResources(Game game) {
+        removeBootstrapContainerIfExists(game);
         removeSimulationContainerIfExists(game);
         removeExistingBrokerContainers(game);
         removeNetworkIfExists(game);
+    }
+
+    private void removeBootstrapContainerIfExists(Game game) throws DockerException {
+        String bootstrapContainerName = bootstrapContainerCreator.getBootstrapContainerName(game);
+        if (controller.exists(bootstrapContainerName)) {
+            controller.forceRemove(bootstrapContainerName);
+        }
     }
 
     private void removeSimulationContainerIfExists(Game game) {

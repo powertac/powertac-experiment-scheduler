@@ -8,7 +8,7 @@ import org.powertac.rachma.docker.DockerImageBuilder;
 import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.broker.BrokerTypeRepository;
-import org.powertac.rachma.file.PathProvider;
+import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.persistence.MigrationRunner;
 import org.powertac.rachma.persistence.SchemaViewSeeder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,8 +66,8 @@ public class ApplicationSetup {
     }
 
     private void createDirectories() throws IOException {
-        Files.createDirectories(paths.local().brokersDir());
-        Files.createDirectories(paths.local().gamesDir());
+        Files.createDirectories(paths.local().brokers());
+        Files.createDirectories(paths.local().games());
     }
 
     private void prepareDockerImages() {

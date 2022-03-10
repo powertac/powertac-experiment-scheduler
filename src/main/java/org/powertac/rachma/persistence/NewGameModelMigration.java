@@ -7,7 +7,7 @@ import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRepository;
 import org.powertac.rachma.file.FileRole;
-import org.powertac.rachma.file.PathProvider;
+import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.game.*;
 import org.powertac.rachma.job.Job;
 import org.powertac.rachma.job.JobRepository;
@@ -70,7 +70,7 @@ public class NewGameModelMigration implements Migration {
             Game game = entry.getKey();
             SimulationJob job = entry.getValue();
             try {
-                GamePathProvider gamePaths = paths.local().game(game);
+                PathProvider.OrchestratorPaths.GamePaths gamePaths = paths.local().game(game);
                 moveFileIfExists(gamePaths.bootstrap(), intermediateBootstrapPath(game, job.getId()));
                 moveFileIfExists(gamePaths.properties(), intermediateSimulationPropertiesPath(game, job.getId()));
                 moveFile(gamePaths.dir(), jobDirPath(job.getId()));
@@ -204,7 +204,7 @@ public class NewGameModelMigration implements Migration {
     }
 
     private void moveFiles(Game game, SimulationJob job) throws IOException {
-        GamePathProvider gamePaths = paths.local().game(game);
+        PathProvider.OrchestratorPaths.GamePaths gamePaths = paths.local().game(game);
         moveFile(jobDirPath(job.getId()), gamePaths.dir());
         moveFileIfExists(intermediateBootstrapPath(game, job.getId()), gamePaths.bootstrap());
         moveFileIfExists(intermediateSimulationPropertiesPath(game, job.getId()), gamePaths.properties());

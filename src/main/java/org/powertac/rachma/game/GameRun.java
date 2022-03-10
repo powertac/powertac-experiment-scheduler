@@ -96,6 +96,23 @@ public class GameRun implements Comparable<GameRun> {
             && !phase.equals(GameRunPhase.DONE);
     }
 
+    @Transient
+    public boolean hasSeed() {
+        return null != this.getGame().getSeed();
+    }
+
+    @Transient
+    public boolean shouldBootstrap() {
+        return null == this.getGame().getBootstrap();
+    }
+
+    @Transient
+    public boolean wasSuccessful() {
+        return phase != null
+            && phase.equals(GameRunPhase.DONE)
+            && !failed;
+    }
+
     @Override
     public int compareTo(GameRun run) {
         if (this.start.equals(run.getStart())) {

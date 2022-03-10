@@ -126,8 +126,27 @@ public class Game {
 
     @Transient
     public boolean isRunning() {
-        return runs.stream().map(GameRun::isRunning)
+        return runs.stream()
+            .map(GameRun::isRunning)
             .reduce(false, (oneIsRunning, currentOneIsRunning) -> oneIsRunning || currentOneIsRunning);
+    }
+
+    @Transient
+    public boolean hasSeed() {
+        return null != getSeed();
+    }
+
+    @Transient
+    public boolean shouldBootstrap() {
+        return null == getBootstrap();
+    }
+
+    public GameRun getLatestSuccessfulRun() {
+        return runs.stream().reduce(null, (current, run) ->
+           run.wasSuccessful()
+               ? null == current || run.getEnd().isAfter(current.getEnd()) ? run : current
+               : null
+        );
     }
 
 }

@@ -17,5 +17,7 @@ buildNumber.properties
 
 ### development
 /application.properties
-/dev
+/deployment/local
+/deployment/ws1
+
 
