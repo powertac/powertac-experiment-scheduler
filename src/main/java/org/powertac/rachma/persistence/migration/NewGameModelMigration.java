@@ -27,9 +27,6 @@ import java.util.*;
 @ConditionalOnProperty(value = "persistence.legacy.enable-mongo", havingValue = "true")
 public class NewGameModelMigration implements Migration {
 
-    @Value("${persistence.migration.new-model-migration.enabled}")
-    private boolean enabled;
-
     @Value("${directory.local.jobs}")
     private String jobBaseDir;
 
@@ -79,11 +76,6 @@ public class NewGameModelMigration implements Migration {
                 logger.error(String.format("Could not roll back changes for job[%s]", job.getId()));
             }
         }
-    }
-
-    @Override
-    public boolean shouldRun() {
-        return enabled;
     }
 
     private void buildGames() throws MigrationException {

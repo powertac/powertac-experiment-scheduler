@@ -1,5 +1,6 @@
 package org.powertac.rachma.persistence;
 
+import org.powertac.rachma.persistence.migration.BaselineMigration;
 import org.powertac.rachma.persistence.migration.MigrationRunner;
 import org.powertac.rachma.persistence.migration.MigrationRunnerImpl;
 import org.powertac.rachma.persistence.migration.NewGameModelMigration;
@@ -45,6 +46,7 @@ public class PersistenceConfig implements ApplicationContextAware {
         MigrationRunner runner = context.getBean(MigrationRunnerImpl.class);
         if (mongoDbEnabled) {
             runner.registerMigration(context.getBean(NewGameModelMigration.class));
+            runner.registerMigration(context.getBean(BaselineMigration.class));
         }
         return runner;
     }
@@ -63,7 +65,7 @@ public class PersistenceConfig implements ApplicationContextAware {
         StringBuilder builder = new StringBuilder();
         builder.append(baseUrl);
         builder.append("?createDatabaseIfNotExist=true");
-        builder.append("&serverTimezone=").append(defaultTimeZone); // time zone
+        builder.append("&serverTimezone=").append(defaultTimeZone);
         builder.append("&useLegacyDatetimeCode=false");
         return builder.toString();
     }

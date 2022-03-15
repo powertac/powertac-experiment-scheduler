@@ -59,9 +59,8 @@ public class ApplicationSetup {
         }
         createDirectories();
         prepareDockerImages();
-        brokerSeeder.seedBrokers();
+        brokerSeeder.seedBrokers(); // TODO : remove
         viewSeeder.seedViews();
-        migrationRunner.runMigrations();
         status.setRunning();
     }
 

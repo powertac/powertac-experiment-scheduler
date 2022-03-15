@@ -4,42 +4,46 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class MigrationRunnerImpl implements MigrationRunner {
 
     private final MigrationStatusRepository migrationStatusRepository;
-    private final List<Migration> migrations;
+    private final Map<String, Migration> migrations;
     private final Logger logger;
 
     public MigrationRunnerImpl(MigrationStatusRepository migrationStatusRepository) {
         this.migrationStatusRepository = migrationStatusRepository;
-        this.migrations = new ArrayList<>();
+        this.migrations = new HashMap<>();
         this.logger = LogManager.getLogger(MigrationRunner.class);
     }
 
     @Override
     public void registerMigration(Migration migration) {
-        migrations.add(migration);
+        migrations.put(migration.getName(), migration);
     }
 
     @Override
-    public void runMigrations() {
-        for(Migration migration : migrations) {
-            if (shouldRun(migration)) {
+    public void runMigration(String name) throws MigrationException {
+        if (migrations.containsKey(name)) {
+            Migration migration = migrations.get(name);
+            if (!isAlreadyComplete(migration)) {
                 runMigration(migration);
+            } else {
+                logger.warn(String.format("migration '%s' has already been completed", name));
             }
+        } else {
+            throw new MigrationException(String.format("migration '%s' does not exist", name));
         }
     }
 
-    private boolean shouldRun(Migration migration) {
-        return !migrationStatusRepository.existsAllByNameAndSuccessTrue(migration.getName())
-            && migration.shouldRun();
+    private boolean isAlreadyComplete(Migration migration) {
+        return !migrationStatusRepository.existsByNameAndSuccessTrue(migration.getName());
     }
 
-    private void runMigration(Migration migration) {
+    private void runMigration(Migration migration) throws MigrationException {
         MigrationStatus status = MigrationStatus.start(migration);
         try {
             logger.info(String.format("starting migration '%s'", migration.getName()));
@@ -48,11 +52,14 @@ public class MigrationRunnerImpl implements MigrationRunner {
             logger.info(String.format("successfully finished migration '%s'", migration.getName()));
         } catch (MigrationException e) {
             logger.error(String.format("migration '%s' failed", migration.getName()), e);
+            status.failNow();
             try {
                 migration.rollback();
-                status.failNow();
+                throw e;
             } catch (MigrationException r) {
-                logger.error(String.format("migration rollback for '%s' failed; manual intervention is required", migration.getName()), e);
+                logger.error(String.format(
+                    "migration rollback for '%s' failed; manual intervention is required!!!", migration.getName()), e);
+                throw r;
             }
         } finally {
             migrationStatusRepository.save(status);

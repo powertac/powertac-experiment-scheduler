@@ -1,6 +1,18 @@
 package org.powertac.rachma.persistence.migration;
 
+import org.powertac.rachma.job.MongoJobRepository;
+import org.springframework.beans.factory.annotation.Value;
+
 public class BaselineMigration implements Migration {
+
+    @Value("${persistence.migration.baseline.enabled}")
+    private Boolean baselineMigrationEnabled;
+
+    private final MongoJobRepository jobRepository;
+
+    public BaselineMigration(MongoJobRepository jobRepository) {
+        this.jobRepository = jobRepository;
+    }
 
     @Override
     public String getName() {
@@ -23,7 +35,7 @@ public class BaselineMigration implements Migration {
 
     @Override
     public boolean shouldRun() {
-        return true;
+        return baselineMigrationEnabled;
     }
 
 }

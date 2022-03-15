@@ -8,9 +8,8 @@ import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.application.ApplicationSetup;
 import org.powertac.rachma.application.Cli;
 import org.powertac.rachma.application.LockException;
-import org.powertac.rachma.persistence.migration.Migration;
+import org.powertac.rachma.persistence.migration.MigrationException;
 import org.powertac.rachma.persistence.migration.MigrationRunner;
-import org.powertac.rachma.persistence.migration.NewGameModelMigration;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -52,32 +51,30 @@ public class MigrationService implements ApplicationRunner, ApplicationContextAw
 
     @Override
     public void run(ApplicationArguments args) {
-        final ApplicationSetup setup = context.getBean(ApplicationSetup.class);
         try {
+            setup();
+            CommandLine cli = Cli.parse(args.getSourceArgs());
+            if (cli.hasOption("migrate")) {
+                final String migrationName = cli.getOptionValue("migrate");
+                final MigrationRunner runner = context.getBean(MigrationRunner.class);
+                runner.runMigration(migrationName);
+            } else {
+                throw new MissingArgumentException("missing argument: 'migrate' (migration name)");
+            }
+        } catch (ParseException| IllegalArgumentException| MigrationException e) {
+            logger.error(e);
+            System.exit(1);
+        }
+    }
+
+    private void setup() {
+        try {
+            final ApplicationSetup setup = context.getBean(ApplicationSetup.class);
             setup.start();
         } catch (LockException e) {
             logger.error("setup is already running", e);
         } catch (IOException e) {
             logger.error("application setup failed", e);
-        }
-        try {
-            CommandLine cli = Cli.parse(args.getSourceArgs());
-            if (cli.hasOption("migrate")) {
-                if (cli.getOptionValue("migrate").equals("baseline")) {
-                    MigrationRunner runner = context.getBean(MigrationRunner.class);
-                    Migration migration = context.getBean(NewGameModelMigration.class);
-                    runner.registerMigration(migration);
-                    runner.runMigrations();
-                } else {
-                    throw new IllegalArgumentException(
-                        String.format("migration '%s' does not exist", cli.getOptionValue("migrate")));
-                }
-            } else {
-                throw new MissingArgumentException("missing argument 'migrate'");
-            }
-        } catch (ParseException| IllegalArgumentException e) {
-            logger.error(e);
-            System.exit(1);
         }
     }
 
