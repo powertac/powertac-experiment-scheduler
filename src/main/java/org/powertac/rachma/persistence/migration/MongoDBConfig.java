@@ -1,4 +1,4 @@
-package org.powertac.rachma.persistence;
+package org.powertac.rachma.persistence.migration;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;

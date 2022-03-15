@@ -1,4 +1,4 @@
-package org.powertac.rachma.persistence;
+package org.powertac.rachma.persistence.migration;
 
 public class MigrationException extends Exception {
 

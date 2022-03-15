@@ -1,4 +1,4 @@
-package org.powertac.rachma.persistence;
+package org.powertac.rachma.persistence.migration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

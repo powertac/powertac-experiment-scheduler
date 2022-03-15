@@ -9,7 +9,7 @@ import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.broker.BrokerType;
 import org.powertac.rachma.broker.BrokerTypeRepository;
 import org.powertac.rachma.paths.PathProvider;
-import org.powertac.rachma.persistence.MigrationRunner;
+import org.powertac.rachma.persistence.migration.MigrationRunner;
 import org.powertac.rachma.persistence.SchemaViewSeeder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

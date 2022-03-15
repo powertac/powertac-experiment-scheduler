@@ -10,62 +10,41 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import java.io.IOException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-@SpringBootApplication(exclude = {
+@EnableAutoConfiguration(exclude = {
     MongoAutoConfiguration.class,
     MongoDataAutoConfiguration.class
 })
+@ComponentScan
 @EnableAspectJAutoProxy
 @EnableJpaRepositories
-public class ExperimentSchedulerApplication implements ApplicationRunner, ApplicationContextAware {
+public class ExperimentSchedulerService implements ApplicationRunner, ApplicationContextAware {
 
     private ApplicationContext context;
-
-    public enum Mode {
-
-        PRODUCTION("production"),
-        DEVELOPMENT("development");
-
-        private final String identifier;
-
-        Mode(String identifier) {
-            this.identifier = identifier;
-        }
-
-        public static Mode from(String identifier) {
-            for (Mode mode : Mode.values()) {
-                if (mode.identifier.equalsIgnoreCase(identifier)) {
-                    return mode;
-                }
-            }
-            return null;
-        }
-    }
-
-    public static void main(String[] args) {
-        SpringApplication app = new SpringApplication(ExperimentSchedulerApplication.class);
-        app.setBannerMode(Banner.Mode.OFF);
-        app.setLogStartupInfo(false);
-		app.run(args);
-	}
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.context = applicationContext;
+    }
+
+    public static void main(String[] args) {
+        SpringApplication app = new SpringApplication(ExperimentSchedulerService.class);
+        app.setBannerMode(Banner.Mode.OFF);
+        app.setLogStartupInfo(false);
+        app.run(args);
     }
 
     @Override
@@ -74,12 +53,12 @@ public class ExperimentSchedulerApplication implements ApplicationRunner, Applic
         try {
             setup.start();
         } catch (LockException e) {
-            LogManager.getLogger(ExperimentSchedulerApplication.class).error("setup is already running", e);
+            LogManager.getLogger(ExperimentSchedulerService.class).error("setup is already running", e);
         } catch (IOException e) {
-            LogManager.getLogger(ExperimentSchedulerApplication.class).error("application setup failed", e);
+            LogManager.getLogger(ExperimentSchedulerService.class).error("application setup failed", e);
         }
         final GameScheduler gameScheduler = context.getBean(GameScheduler.class);
-        final Logger logger = LogManager.getLogger(ExperimentSchedulerApplication.class);
+        final Logger logger = LogManager.getLogger(ExperimentSchedulerService.class);
         ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
         executor.scheduleAtFixedRate(runGames(gameScheduler, logger), 1, 1, TimeUnit.SECONDS);
     }

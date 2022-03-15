@@ -1,5 +1,8 @@
 package org.powertac.rachma.persistence;
 
+import org.powertac.rachma.persistence.migration.MigrationRunner;
+import org.powertac.rachma.persistence.migration.MigrationRunnerImpl;
+import org.powertac.rachma.persistence.migration.NewGameModelMigration;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;

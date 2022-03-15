@@ -1,4 +1,4 @@
-package org.powertac.rachma.persistence;
+package org.powertac.rachma.persistence.migration;
 
 public interface MigrationRunner {
 
