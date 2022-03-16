@@ -57,7 +57,12 @@ public class MigrationService implements ApplicationRunner, ApplicationContextAw
             if (cli.hasOption("migrate")) {
                 final String migrationName = cli.getOptionValue("migrate");
                 final MigrationRunner runner = context.getBean(MigrationRunner.class);
-                runner.runMigration(migrationName);
+                if (cli.hasOption("force")) {
+                    runner.forceMigration(migrationName);
+                } else {
+                    runner.runMigration(migrationName);
+                }
+                System.exit(0);
             } else {
                 throw new MissingArgumentException("missing argument: 'migrate' (migration name)");
             }

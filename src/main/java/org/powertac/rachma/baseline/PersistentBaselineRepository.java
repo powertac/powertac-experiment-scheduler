@@ -3,6 +3,8 @@ package org.powertac.rachma.baseline;
 import org.powertac.rachma.game.Game;
 import org.springframework.stereotype.Component;
 
+import java.util.Optional;
+
 @Component
 public class PersistentBaselineRepository implements BaselineRepository {
 
@@ -28,6 +30,16 @@ public class PersistentBaselineRepository implements BaselineRepository {
     @Override
     public String getBaselineIdByGame(Game game) {
         return crudRepository.getBaselineIdByGameId(game.getId());
+    }
+
+    @Override
+    public Optional<Baseline> findByName(String name) {
+        return crudRepository.findByName(name);
+    }
+
+    @Override
+    public void delete(Baseline baseline) {
+        crudRepository.delete(baseline);
     }
 
 }

@@ -1,5 +1,6 @@
 package org.powertac.rachma.baseline;
 
+import org.apache.commons.lang.StringUtils;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameFactory;
@@ -21,12 +22,13 @@ public class BaselineGameFactoryImpl implements BaselineGameFactory {
     @Override
     public List<Game> createGames(Baseline baseline) {
         List<Game> games = new ArrayList<>();
+        final int baselineSize = baseline.getBrokerSets().size() * baseline.getWeatherConfigurations().size();
         int index = 0;
         for (BrokerSet brokers : baseline.getBrokerSets()) {
             for (WeatherConfiguration weather : baseline.getWeatherConfigurations()) {
                 index++;
                 games.add(gameFactory.createGame(
-                    getName(baseline.getName(), index),
+                    getName(baseline.getName(), index, baselineSize),
                     brokers,
                     weather,
                     baseline.getCommonParameters(),
@@ -36,8 +38,11 @@ public class BaselineGameFactoryImpl implements BaselineGameFactory {
         return games;
     }
 
-    private String getName(String baselineName, int index) {
-        return String.format("%s - %d", baselineName, index);
+    private String getName(String baselineName, int index, int baselineSize) {
+        final int maxDigits = (int) (Math.log10(baselineSize) + 1);
+        return String.format("%s - %s",
+            baselineName,
+            StringUtils.leftPad(String.valueOf(index), maxDigits, "0"));
     }
 
 }

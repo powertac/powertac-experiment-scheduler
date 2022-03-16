@@ -1,5 +1,7 @@
 package org.powertac.rachma.file.action;
 
+import lombok.AccessLevel;
+import lombok.Getter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -7,28 +9,38 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.LinkedList;
 
-public class FileTransaction {
+public class FileActions {
 
+    @Getter(AccessLevel.PRIVATE)
     private final LinkedList<FileAction> actions = new LinkedList<>();
-    private final Logger logger = LogManager.getLogger(FileTransaction.class);
 
-    public FileTransaction copy(Path source, Path target) {
+    private final Logger logger = LogManager.getLogger(FileActions.class);
+
+    public FileActions copy(Path source, Path target) {
         actions.add(new CopyFileAction(source, target));
         return this;
     }
 
-    public FileTransaction move(Path source, Path target) {
+    public FileActions move(Path source, Path target) {
         actions.add(new MoveFileAction(source, target));
         return this;
     }
 
-    public FileTransaction delete(Path path) {
+    public FileActions delete(Path path) {
         actions.add(new DeleteFileAction(path));
         return this;
     }
 
-    public FileTransaction mkdir(Path path) {
+    public FileActions mkdir(Path path) {
         actions.add(new MkdirFileAction(path));
+        return this;
+    }
+
+    public FileActions append(FileActions other) {
+        LinkedList<FileAction> otherActions = (LinkedList<FileAction>) other.getActions().clone();
+        while (null != otherActions.peekFirst()) {
+            actions.add(otherActions.removeFirst());
+        }
         return this;
     }
 

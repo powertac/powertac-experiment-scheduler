@@ -3,6 +3,7 @@ package org.powertac.rachma.docker;
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.exception.DockerException;
+import com.github.dockerjava.api.exception.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,16 @@ public class DockerImageBuilderImpl implements DockerImageBuilder {
             .withTags(tags)
             .exec(new BuildImageResultCallback())
             .awaitImageId();
+    }
+
+    @Override
+    public boolean exists(String tagOrHash) {
+        try {
+            dockerClient.inspectImageCmd(tagOrHash).exec();
+            return true;
+        } catch (NotFoundException e) {
+            return false;
+        }
     }
 
 }

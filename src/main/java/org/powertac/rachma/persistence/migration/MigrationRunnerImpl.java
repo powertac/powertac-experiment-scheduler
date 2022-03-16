@@ -2,12 +2,10 @@ package org.powertac.rachma.persistence.migration;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
 public class MigrationRunnerImpl implements MigrationRunner {
 
     private final MigrationStatusRepository migrationStatusRepository;
@@ -39,8 +37,18 @@ public class MigrationRunnerImpl implements MigrationRunner {
         }
     }
 
+    @Override
+    public void forceMigration(String name) throws MigrationException {
+        if (migrations.containsKey(name)) {
+            Migration migration = migrations.get(name);
+            runMigration(migration);
+        } else {
+            throw new MigrationException(String.format("migration '%s' does not exist", name));
+        }
+    }
+
     private boolean isAlreadyComplete(Migration migration) {
-        return !migrationStatusRepository.existsByNameAndSuccessTrue(migration.getName());
+        return migrationStatusRepository.existsByNameAndSuccessTrue(migration.getName());
     }
 
     private void runMigration(Migration migration) throws MigrationException {

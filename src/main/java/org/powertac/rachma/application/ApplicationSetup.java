@@ -31,7 +31,6 @@ public class ApplicationSetup {
     private final BrokerTypeRepository brokerTypeRepository;
     private final BrokerSeeder brokerSeeder;
     private final SchemaViewSeeder viewSeeder;
-    private final MigrationRunner migrationRunner;
     private final Logger logger;
     private final ApplicationStatus status;
 
@@ -41,14 +40,13 @@ public class ApplicationSetup {
     @Autowired
     public ApplicationSetup(PathProvider paths, DockerImageBuilder dockerImageBuilder, DockerImageRepository imageRepository,
                             BrokerTypeRepository brokerTypeRepository, ApplicationStatus status,
-                            BrokerSeeder brokerSeeder, SchemaViewSeeder viewSeeder, MigrationRunner migrationRunner) {
+                            BrokerSeeder brokerSeeder, SchemaViewSeeder viewSeeder) {
         this.paths = paths;
         this.dockerImageBuilder = dockerImageBuilder;
         this.imageRepository = imageRepository;
         this.brokerTypeRepository = brokerTypeRepository;
         this.brokerSeeder = brokerSeeder;
         this.viewSeeder = viewSeeder;
-        this.migrationRunner = migrationRunner;
         this.logger = LogManager.getLogger(ApplicationSetup.class);
         this.status = status;
     }

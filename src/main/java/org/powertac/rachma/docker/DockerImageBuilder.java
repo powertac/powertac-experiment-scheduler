@@ -8,4 +8,6 @@ public interface DockerImageBuilder {
 
     String buildImage(String dockerFilePath, Set<String> tags) throws DockerException;
 
+    boolean exists(String tagOrHash);
+
 }

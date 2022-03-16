@@ -16,6 +16,7 @@ public class Cli extends Options {
 
     private void configureOptions() {
         this.addOption("m", "migrate", true, "run specified migration");
+        this.addOption("f", "force", false, "force the specified action");
     }
 
 }

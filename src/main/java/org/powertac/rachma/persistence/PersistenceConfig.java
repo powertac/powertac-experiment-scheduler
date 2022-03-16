@@ -1,9 +1,6 @@
 package org.powertac.rachma.persistence;
 
-import org.powertac.rachma.persistence.migration.BaselineMigration;
-import org.powertac.rachma.persistence.migration.MigrationRunner;
-import org.powertac.rachma.persistence.migration.MigrationRunnerImpl;
-import org.powertac.rachma.persistence.migration.NewGameModelMigration;
+import org.powertac.rachma.persistence.migration.*;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
@@ -43,7 +40,8 @@ public class PersistenceConfig implements ApplicationContextAware {
 
     @Bean
     public MigrationRunner migrationRunner() {
-        MigrationRunner runner = context.getBean(MigrationRunnerImpl.class);
+        MigrationStatusRepository statusRepository = context.getBean(MigrationStatusRepository.class);
+        MigrationRunner runner = new MigrationRunnerImpl(statusRepository);
         if (mongoDbEnabled) {
             runner.registerMigration(context.getBean(NewGameModelMigration.class));
             runner.registerMigration(context.getBean(BaselineMigration.class));
@@ -62,12 +60,10 @@ public class PersistenceConfig implements ApplicationContextAware {
     }
 
     private String getDatasourceUrl() {
-        StringBuilder builder = new StringBuilder();
-        builder.append(baseUrl);
-        builder.append("?createDatabaseIfNotExist=true");
-        builder.append("&serverTimezone=").append(defaultTimeZone);
-        builder.append("&useLegacyDatetimeCode=false");
-        return builder.toString();
+        return baseUrl +
+            "?createDatabaseIfNotExist=true" +
+            "&serverTimezone=" + defaultTimeZone +
+            "&useLegacyDatetimeCode=false";
     }
 
 }
