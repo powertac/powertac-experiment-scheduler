@@ -16,6 +16,7 @@ import org.powertac.rachma.util.ID;
 import org.powertac.rachma.validation.exception.ValidationException;
 import org.powertac.rachma.weather.WeatherConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -29,6 +30,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Component
+@ConditionalOnProperty(value = "persistence.legacy.enable-mongo", havingValue = "true")
 public class BaselineMigration implements Migration {
 
     private final static String baselineName = "IS3 broker baseline";
