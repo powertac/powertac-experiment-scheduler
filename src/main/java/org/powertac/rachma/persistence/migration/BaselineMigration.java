@@ -12,6 +12,7 @@ import org.powertac.rachma.game.GameRunPhase;
 import org.powertac.rachma.job.JobState;
 import org.powertac.rachma.job.MongoJobRepository;
 import org.powertac.rachma.job.SimulationJob;
+import org.powertac.rachma.util.ID;
 import org.powertac.rachma.validation.exception.ValidationException;
 import org.powertac.rachma.weather.WeatherConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,9 @@ public class BaselineMigration implements Migration {
             baselineRepository.save(baseline);
             List<Game> games = new ArrayList<>();
             for (Game game : gameFactory.createGames(baseline)) {
-                games.add(matchAndMerge(game));
+                game.getRuns().add(getRun(game));
+                games.add(game);
+                // FIXME : set created at
             }
             baseline.setGames(games);
             Optional<Instant> createdAt = games.stream()
@@ -131,7 +134,7 @@ public class BaselineMigration implements Migration {
         if (null == brokerRepository.findByNameAndVersion(name, version)) {
             try {
                 brokerRepository.save(new Broker(
-                    UUID.randomUUID().toString(),
+                    ID.gen(),
                     name,
                     version,
                     imageTag,
@@ -185,16 +188,15 @@ public class BaselineMigration implements Migration {
         return configs;
     }
 
-    private Game matchAndMerge(Game game) throws MigrationException {
+    private GameRun getRun(Game game) throws MigrationException {
         Optional<SimulationJob> job = findMatch(game);
         if (job.isPresent()) {
-            GameRun run = new GameRun(UUID.randomUUID().toString(), game);
+            GameRun run = new GameRun(ID.gen(), game);
             run.setStart(job.get().getStatus().getStart());
             run.setEnd(job.get().getStatus().getEnd());
             run.setPhase(GameRunPhase.DONE);
             run.setFailed(false);
-            game.getRuns().add(run);
-            return game;
+            return run;
         } else {
             throw new MigrationException(String.format("could not find match for game '%s'", game.getName()));
         }

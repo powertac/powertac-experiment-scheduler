@@ -28,8 +28,8 @@ public class PersistentBaselineRepository implements BaselineRepository {
     }
 
     @Override
-    public String getBaselineIdByGame(Game game) {
-        return crudRepository.getBaselineIdByGameId(game.getId());
+    public Optional<Baseline> findById(String id) {
+        return crudRepository.findById(id);
     }
 
     @Override

@@ -1,9 +1,6 @@
 package org.powertac.rachma.baseline;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.weather.WeatherConfiguration;
 
@@ -12,7 +9,8 @@ import java.util.Map;
 
 @NoArgsConstructor
 @AllArgsConstructor
-public class BaselineSpec {
+@Builder
+public class BaselineSpec { // TODO : rename to GameSetGeneratorSpec or something
 
     @Getter
     @Setter

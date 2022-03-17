@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 
+// TODO : unnecessary abstraction
 abstract public class AbstractEntityPublisher<T> implements EntityPublisher<T> {
 
     private final SimpMessagingTemplate template;

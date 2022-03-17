@@ -6,9 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.Setter;
-import org.powertac.rachma.baseline.BaselineRepository;
-import org.powertac.rachma.broker.Broker;
-import org.powertac.rachma.broker.BrokerDeserializer;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileDeserializer;
 import org.powertac.rachma.game.*;
@@ -19,6 +16,9 @@ import org.powertac.rachma.job.serialization.JobSerializer;
 import org.powertac.rachma.job.serialization.JobStatusDeserializer;
 import org.powertac.rachma.job.serialization.JobStatusSerializer;
 import org.powertac.rachma.powertac.broker.BrokerSerializer;
+import org.powertac.rachma.treatment.Modifier;
+import org.powertac.rachma.treatment.ModifierDeserializer;
+import org.powertac.rachma.treatment.ModifierSerializer;
 import org.powertac.rachma.weather.WeatherConfiguration;
 import org.powertac.rachma.weather.WeatherConfigurationSerializer;
 import org.springframework.context.ApplicationContext;
@@ -60,12 +60,13 @@ public class SerializationConfig implements ApplicationContextAware {
         module.addSerializer(GameRun.class, new GameRunSerializer());
         module.addSerializer(Game.class, new GameSerializer(applicationContext.getBean(GameFileManager.class)));
         module.addSerializer(WeatherConfiguration.class, new WeatherConfigurationSerializer());
+        module.addSerializer(Modifier.class, new ModifierSerializer());
     }
 
     private void registerDeserializers(SimpleModule module) {
-        // module.addDeserializer(Broker.class, new BrokerDeserializer());
         module.addDeserializer(File.class, applicationContext.getBean(FileDeserializer.class));
         module.addDeserializer(Game.class, new GameDeserializer());
+        module.addDeserializer(Modifier.class, new ModifierDeserializer());
     }
 
     @Deprecated

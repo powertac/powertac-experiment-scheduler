@@ -9,30 +9,47 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class BaselineGameFactoryImpl implements BaselineGameFactory {
 
     private final GameFactory gameFactory;
+    private final BaselineSpecFactory specFactory;
 
-    public BaselineGameFactoryImpl(GameFactory gameFactory) {
+    public BaselineGameFactoryImpl(GameFactory gameFactory, BaselineSpecFactory specFactory) {
         this.gameFactory = gameFactory;
+        this.specFactory = specFactory;
     }
 
     @Override
     public List<Game> createGames(Baseline baseline) {
+        // the exact objects (broker sets, etc.) have to be used here to keep object relationship information
+        BaselineSpec spec = BaselineSpec.builder()
+            .name(baseline.getName())
+            .commonParameters(baseline.getCommonParameters())
+            .brokerSets(baseline.getBrokerSets())
+            .weatherConfigurations(baseline.getWeatherConfigurations())
+            .build();
+        return createGames(spec).stream()
+            .peek(game -> game.setBaseline(baseline))
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Game> createGames(BaselineSpec spec) {
         List<Game> games = new ArrayList<>();
-        final int baselineSize = baseline.getBrokerSets().size() * baseline.getWeatherConfigurations().size();
+        final int baselineSize = spec.getBrokerSets().size() * spec.getWeatherConfigurations().size();
         int index = 0;
-        for (BrokerSet brokers : baseline.getBrokerSets()) {
-            for (WeatherConfiguration weather : baseline.getWeatherConfigurations()) {
+        for (BrokerSet brokers : spec.getBrokerSets()) {
+            for (WeatherConfiguration weather : spec.getWeatherConfigurations()) {
                 index++;
                 games.add(gameFactory.createGame(
-                    getName(baseline.getName(), index, baselineSize),
+                    getName(spec.getName(), index, baselineSize),
                     brokers,
                     weather,
-                    baseline.getCommonParameters(),
-                    baseline));
+                    spec.getCommonParameters(),
+                    null));
             }
         }
         return games;

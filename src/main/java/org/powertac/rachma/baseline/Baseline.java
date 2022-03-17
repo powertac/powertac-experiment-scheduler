@@ -39,18 +39,18 @@ public class Baseline {
     @Getter
     @Setter
     @OrderColumn
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<BrokerSet> brokerSets;
 
     @Getter
     @Setter
     @OrderColumn
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<WeatherConfiguration> weatherConfigurations;
 
     @Getter
     @Setter
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "baseline")
+    @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "baseline")
     @OrderColumn
     private List<Game> games;
 
