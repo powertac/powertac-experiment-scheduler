@@ -35,7 +35,7 @@ public class DeserializationHelper {
     }
 
     public static <T> Set<T> parseAsSet(JsonNode arrayNode, Function<JsonNode, T> entryParser) {
-        if (arrayNode.isArray()) {
+        if (null != arrayNode && arrayNode.isArray()) {
             Iterator<JsonNode> iterator = arrayNode.iterator();
             Set<T> set = new HashSet<>();
             while (iterator.hasNext()) {

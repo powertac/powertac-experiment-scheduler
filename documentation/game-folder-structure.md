@@ -29,3 +29,21 @@
 	- <GAME_ID>.<BROKER_ID>.properties
 	- ...
 ```
+
+```
+├── 655ba1f.bootstrap.properties
+├── 655ba1f.bootstrap.xml
+├── 655ba1f.simulation.properties
+├── broker.EWIIS3.properties
+├── brokers
+│   ├── EWIIS3
+│   │   └── logs
+│   └── TUC_TAC
+│       └── logs
+├── broker.TUC_TAC.properties
+└── log
+    ├── init.state
+    ├── init.trace
+    ├── powertac-sim-0.state
+    └── powertac-sim-0.trace
+```

@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/runs")
@@ -47,6 +50,28 @@ public class GameRunRestController {
         } catch (IOException e) {
             logger.error(String.format("could not read log file %s", logPath), e);
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    @GetMapping("/{id}/files")
+    public ResponseEntity<List<String>> getFilesMeta(@PathVariable("id") String id) {
+        GameRun run = runRepository.find(id);
+        if (null == run) {
+            logger.error(String.format("could not find run[%s]", id));
+            return ResponseEntity.notFound().build();
+        } else {
+            PathProvider.OrchestratorPaths.GameRunPaths runPaths = paths.local().run(run);
+            List<String> fileTypes = new ArrayList<>();
+            if (Files.exists(runPaths.log())) {
+                fileTypes.add("log");
+            }
+            if (Files.exists(runPaths.state())) {
+                fileTypes.add("state");
+            }
+            if (Files.exists(runPaths.trace())) {
+                fileTypes.add("trace");
+            }
+            return ResponseEntity.ok(fileTypes);
         }
     }
 

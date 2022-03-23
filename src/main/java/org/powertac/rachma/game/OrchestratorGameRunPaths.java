@@ -33,14 +33,14 @@ public class OrchestratorGameRunPaths implements PathProvider.OrchestratorPaths.
     @Override
     public Path state() {
         return Paths.get(
-            serverLogDir().toString(),
+            serverLogs().toString(),
             String.format("%s.state", run.getId()));
     }
 
     @Override
     public Path trace() {
         return Paths.get(
-            serverLogDir().toString(),
+            serverLogs().toString(),
             String.format("%s.trace", run.getId()));
     }
 
@@ -51,7 +51,8 @@ public class OrchestratorGameRunPaths implements PathProvider.OrchestratorPaths.
             String.format("%s.broker", broker.getName()));
     }
 
-    private Path serverLogDir() {
+    @Override
+    public Path serverLogs() {
         return Paths.get(
             dir().toString(),
             "server");

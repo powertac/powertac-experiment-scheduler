@@ -57,6 +57,7 @@ public class Game {
     private File seed;
 
     @Getter
+    @Setter
     @JsonSerialize(using = InstantToNumberSerializer.class)
     @Builder.Default
     private Instant createdAt = Instant.now();

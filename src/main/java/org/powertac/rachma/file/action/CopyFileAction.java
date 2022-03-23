@@ -3,6 +3,7 @@ package org.powertac.rachma.file.action;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public class CopyFileAction implements FileAction {
 
@@ -16,7 +17,7 @@ public class CopyFileAction implements FileAction {
 
     @Override
     public void exec() throws IOException {
-        Files.copy(source, target);
+        Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
     }
 
     @Override

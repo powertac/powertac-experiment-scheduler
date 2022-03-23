@@ -36,7 +36,7 @@ public class MkdirFileAction implements FileAction {
             .sorted(Comparator.reverseOrder())
             .collect(Collectors.toList());
         for (Path dir : dirs) {
-            Files.delete(dir);
+            Files.deleteIfExists(dir);
         }
     }
 

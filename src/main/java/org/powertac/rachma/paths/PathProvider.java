@@ -40,6 +40,7 @@ public interface PathProvider extends Versioned {
         interface GameRunPaths {
             Path dir();
             Path log();
+            Path serverLogs();
             Path state();
             Path trace();
             BrokerPaths broker(Broker broker);

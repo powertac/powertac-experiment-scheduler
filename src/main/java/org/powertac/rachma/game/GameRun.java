@@ -4,9 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.docker.DockerContainer;
 import org.powertac.rachma.docker.DockerNetwork;
@@ -18,6 +16,8 @@ import java.util.*;
 
 @Entity
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property="id")
 public class GameRun implements Comparable<GameRun> {
 
@@ -27,6 +27,7 @@ public class GameRun implements Comparable<GameRun> {
     private String id;
 
     @Getter
+    @Setter
     @ManyToOne(fetch = FetchType.EAGER)
     private Game game;
 
@@ -42,10 +43,12 @@ public class GameRun implements Comparable<GameRun> {
 
     @Setter
     @Getter
-    private GameRunPhase phase;
+    @Builder.Default
+    private GameRunPhase phase = GameRunPhase.NONE;
 
     @Setter
-    private boolean failed;
+    @Builder.Default
+    private boolean failed = false;
 
     @Setter
     @Getter
@@ -69,13 +72,12 @@ public class GameRun implements Comparable<GameRun> {
     @Setter
     @Transient
     @JsonIgnore
-    private Map<Broker, DockerContainer> brokerContainers;
+    @Builder.Default
+    private Map<Broker, DockerContainer> brokerContainers = new HashMap<>();
 
     public GameRun(String id, Game game) {
         this.id = id;
         this.game = game;
-        this.phase = GameRunPhase.NONE;
-        this.brokerContainers = new HashMap<>();
     }
 
     @JsonIgnore

@@ -16,6 +16,10 @@ public class FileActions {
 
     private final Logger logger = LogManager.getLogger(FileActions.class);
 
+    public static FileActions create() {
+        return new FileActions();
+    }
+
     public FileActions copy(Path source, Path target) {
         actions.add(new CopyFileAction(source, target));
         return this;
@@ -73,7 +77,7 @@ public class FileActions {
         }
     }
 
-    private void rollback(LinkedList<FileAction> actionList) {
+    private void rollback(LinkedList<FileAction> actionList) throws IOException {
         try {
             while (null != actionList.peekLast()) { // actions are rolled back in reverse order
                 FileAction action = actionList.removeLast();
@@ -81,6 +85,7 @@ public class FileActions {
             }
         } catch (IOException e) {
             logger.warn(e);
+            throw e;
         }
     }
 
