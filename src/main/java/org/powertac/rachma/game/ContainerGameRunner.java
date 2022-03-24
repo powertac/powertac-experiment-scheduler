@@ -101,6 +101,7 @@ public class ContainerGameRunner implements GameRunner {
     private void bootstrap(GameRun run) throws GameRunException {
         if (run.shouldBootstrap()) {
             try {
+                gameFileManager.createServerProperties(run.getGame());
                 gameFileManager.createBootstrap(run.getGame());
                 DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame());
                 lifecycle.bootstrap(run, bootstrapContainer);
@@ -123,6 +124,11 @@ public class ContainerGameRunner implements GameRunner {
 
     private void simulate(GameRun run) throws GameRunException {
         try {
+            gameFileManager.createSimulationScaffold(run);
+            gameFileManager.createServerProperties(run.getGame());
+            for (Broker broker : run.getGame().getBrokers()) {
+                gameFileManager.createBrokerProperties(run.getGame(), broker);
+            }
             DockerNetwork network = networks.createNetwork(getNetworkName(run.getGame()));
             DockerContainer serverContainer = simulationContainerCreator.create(run, network);
             Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run, network);
@@ -133,6 +139,8 @@ public class ContainerGameRunner implements GameRunner {
                     throw new GameRunException("a simulation container exited with an error code");
                 }
             }
+        } catch (IOException e) {
+            throw new GameRunException("could not create simulation files", e);
         } catch (ContainerException| DockerException e) {
             throw new GameRunException("simulation run failed due to container error", e);
         } finally {

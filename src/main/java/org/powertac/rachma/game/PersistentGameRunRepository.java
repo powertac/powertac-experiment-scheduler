@@ -1,10 +1,10 @@
 package org.powertac.rachma.game;
 
 import org.powertac.rachma.persistence.JpaGameRunRepository;
+import org.powertac.rachma.util.ID;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.UUID;
 
 @Component
 public class PersistentGameRunRepository implements GameRunRepository {
@@ -24,8 +24,8 @@ public class PersistentGameRunRepository implements GameRunRepository {
 
     @Override
     public GameRun create(Game game) {
-        String id = UUID.randomUUID().toString();
-        GameRun run = new GameRun(id, game);
+        GameRun run = new GameRun(ID.gen(), game);
+        run.setPhase(GameRunPhase.NONE);
         game.getRuns().add(run);
         this.save(run);
         return run;
@@ -33,7 +33,7 @@ public class PersistentGameRunRepository implements GameRunRepository {
 
     @Override
     public void save(GameRun run) {
-        crudRepository.save(run);
+        // crudRepository.save(run);
         games.save(run.getGame());
     }
 

@@ -38,7 +38,7 @@ public class GameRestController {
         try {
             Game game = gameFactory.createFromSpec(spec);
             validator.validate(game);
-            createGameFileScaffold(game);
+            createGameFileScaffold(game); // FIXME : move to GameRunner (JIT-approach)
             games.save(game);
             return ResponseEntity.ok().build();
         } catch (IOException|GameValidationException e) {
@@ -97,7 +97,7 @@ public class GameRestController {
         }
     }
 
-    private void createGameFileScaffold(Game game) throws IOException {
+    private void createGameFileScaffold(Game game) throws IOException { // FIXME : move to GameRunner (JIT-approach)
         try {
           gameFileManager.createScaffold(game);
         } catch (IOException e) {

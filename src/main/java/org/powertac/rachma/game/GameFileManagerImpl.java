@@ -30,7 +30,7 @@ public class GameFileManagerImpl implements GameFileManager {
     }
 
     @Override
-    public void createScaffold(Game game) throws IOException {
+    public void createScaffold(Game game) throws IOException { // TODO : too fuzzy -> refactor
         createGameDirectory(game);
         createServerProperties(game);
         for (Broker broker : game.getBrokers()) {
@@ -53,10 +53,17 @@ public class GameFileManagerImpl implements GameFileManager {
     }
 
     @Override
-    public void createRunScaffold(GameRun run) throws IOException {
+    public void createRunScaffold(GameRun run) throws IOException { // TODO : too fuzzy -> refactor
         fileWriter.createDirectoryIfNotExists(paths.local().game(run.getGame()).runs());
         fileWriter.createDirectoryIfNotExists(paths.local().run(run).dir());
         fileWriter.createFileIfNotExists(paths.local().run(run).log());
+    }
+
+    @Override
+    public void createSimulationScaffold(GameRun run) throws IOException { // TODO : too fuzzy -> refactor
+        fileWriter.createDirectoryIfNotExists(paths.local().run(run).serverLogs());
+        fileWriter.createFileIfNotExists(paths.local().run(run).state());
+        fileWriter.createFileIfNotExists(paths.local().run(run).trace());
     }
 
     @Override
@@ -86,22 +93,24 @@ public class GameFileManagerImpl implements GameFileManager {
         return files;
     }
 
-    private void createGameDirectory(Game game) throws IOException {
-        fileWriter.createDirectoryIfNotExists(paths.local().game(game).dir());
-    }
-
-    private void createServerProperties(Game game) throws IOException {
+    @Override
+    public void createServerProperties(Game game) throws IOException {
         Path propertiesPath = paths.local().game(game).properties();
         BrokerCompatiblePropertiesWriter.write(
             propertiesPath.toString(),
             properties.getServerProperties(game));
     }
 
-    private void createBrokerProperties(Game game, Broker broker) throws IOException {
+    @Override
+    public void createBrokerProperties(Game game, Broker broker) throws IOException {
         Path propertiesPath = paths.local().game(game).broker(broker).properties();
         BrokerCompatiblePropertiesWriter.write(
             propertiesPath.toString(),
             properties.getBrokerProperties(game, broker));
+    }
+
+    private void createGameDirectory(Game game) throws IOException {
+        fileWriter.createDirectoryIfNotExists(paths.local().game(game).dir());
     }
 
 }
