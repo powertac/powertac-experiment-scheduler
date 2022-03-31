@@ -17,7 +17,7 @@
     </parent>
 
     <properties>
-        <spring.spring-boot.version>2.2.13.RELEASE</spring.spring-boot.version>
+        <spring.spring-boot.version>2.5.12</spring.spring-boot.version>
         <junit.jupiter.version>5.3.2</junit.jupiter.version>
     </properties>
 
