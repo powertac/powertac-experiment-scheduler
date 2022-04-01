@@ -15,6 +15,8 @@ import org.powertac.rachma.job.serialization.JobDeserializer;
 import org.powertac.rachma.job.serialization.JobSerializer;
 import org.powertac.rachma.job.serialization.JobStatusDeserializer;
 import org.powertac.rachma.job.serialization.JobStatusSerializer;
+import org.powertac.rachma.paths.HostPathSerializer;
+import org.powertac.rachma.paths.PathTranslator;
 import org.powertac.rachma.powertac.broker.BrokerSerializer;
 import org.powertac.rachma.treatment.Modifier;
 import org.powertac.rachma.treatment.ModifierDeserializer;
@@ -26,6 +28,8 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.CommonAnnotationBeanPostProcessor;
 import org.springframework.context.annotation.Configuration;
+
+import java.nio.file.Path;
 
 @Configuration
 public class SerializationConfig implements ApplicationContextAware {
@@ -61,6 +65,7 @@ public class SerializationConfig implements ApplicationContextAware {
         module.addSerializer(Game.class, new GameSerializer(applicationContext.getBean(GameFileManager.class)));
         module.addSerializer(WeatherConfiguration.class, new WeatherConfigurationSerializer());
         module.addSerializer(Modifier.class, new ModifierSerializer());
+        module.addSerializer(Path.class, new HostPathSerializer(applicationContext.getBean(PathTranslator.class)));
     }
 
     private void registerDeserializers(SimpleModule module) {

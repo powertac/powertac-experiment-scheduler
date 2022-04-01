@@ -55,12 +55,8 @@ public class Broker {
 
     @Override
     public int hashCode() {
-        int result = getId().hashCode();
-        result = 31 * result + getName().hashCode();
-        result = 31 * result + getVersion().hashCode();
-        result = 31 * result + getImageTag().hashCode();
-        result = 31 * result + (isEnabled() ? 1 : 0);
+        int result = getName() != null ? getName().hashCode() : 0;
+        result = 31 * result + (getVersion() != null ? getVersion().hashCode() : 0);
         return result;
     }
-
 }

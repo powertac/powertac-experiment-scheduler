@@ -33,9 +33,14 @@ public class GameSerializer extends StdSerializer<Game> {
         writeBrokersField(game.getBrokers(), gen, provider);
         writeServerParametersField(game.getServerParameters(), gen);
         writeRunField(game.getRuns(), gen, provider);
-        writeFilesField(fileManager.getFiles(game), gen);
         if (null != game.getBaseline()) {
             gen.writeStringField("baseline", game.getBaseline().getId());
+        }
+        if (null != game.getTreatment()) {
+            gen.writeStringField("treatment", game.getTreatment().getId());
+        }
+        if (null != game.getBase()) {
+            gen.writeStringField("base", game.getBase().getId());
         }
         provider.defaultSerializeField("weather", game.getWeatherConfiguration(), gen);
         gen.writeEndObject();
@@ -63,14 +68,6 @@ public class GameSerializer extends StdSerializer<Game> {
             provider.defaultSerializeValue(run, gen);
         }
         gen.writeEndArray();
-    }
-
-    private void writeFilesField(Map<FileRole, String> files, JsonGenerator gen) throws IOException {
-        gen.writeObjectFieldStart("files");
-        for (Map.Entry<FileRole, String> file : files.entrySet()) {
-            gen.writeStringField(file.getKey().toString(), file.getValue());
-        }
-        gen.writeEndObject();
     }
 
 }

@@ -66,7 +66,7 @@ public class PersistentGameRepository implements GameRepository {
 
     private void removeDuplicateGameRuns(Game game) {
         game.setRuns(new HashSet<>(game.getRuns()).stream()
-            .sorted(Comparator.comparing(GameRun::getStart))
+            .sorted(GameRun::compareTo)
             .sorted(Collections.reverseOrder())
             .collect(Collectors.toList()));
     }

@@ -99,11 +99,6 @@ public class GameRun implements Comparable<GameRun> {
     }
 
     @Transient
-    public boolean hasSeed() {
-        return null != this.getGame().getSeed();
-    }
-
-    @Transient
     public boolean shouldBootstrap() {
         return null == this.getGame().getBootstrap();
     }
@@ -117,7 +112,11 @@ public class GameRun implements Comparable<GameRun> {
 
     @Override
     public int compareTo(GameRun run) {
-        if (this.start.equals(run.getStart())) {
+        if (null == start) {
+            return -1;
+        } else if (null == run.getStart()) {
+            return 1;
+        } else if (this.start.equals(run.getStart())) {
             return 0;
         } else {
             return Comparator.comparing(GameRun::getStart).compare(this, run);

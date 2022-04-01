@@ -12,27 +12,26 @@ public class EntryScriptServerContainerCommandCreator implements ServerContainer
     @Override
     public List<String> createBootstrapCommand(String propertiesFilePath, String bootstrapFilePath) {
         List<String> command = new ArrayList<>();
-        command.add("boot");
-        command.add("-c");
-        command.add(propertiesFilePath);
-        command.add("-o");
+        command.add("--boot");
         command.add(bootstrapFilePath);
+        command.add("--config");
+        command.add(propertiesFilePath);
         return command;
     }
 
     @Override
     public List<String> createSimulationCommand(String propertiesFilePath, String bootstrapFilePath, String seedFilePath, Set<String> brokerNames) {
         List<String> command = new ArrayList<>();
-        command.add("sim");
-        command.add("-c");
+        command.add("--sim");
+        command.add("--config");
         command.add(propertiesFilePath);
-        command.add("-f");
+        command.add("--boot-data");
         command.add(bootstrapFilePath);
         if (null != seedFilePath) {
-            command.add("-s");
+            command.add("--random-seeds");
             command.add(seedFilePath);
         }
-        command.add("-b");
+        command.add("--brokers");
         command.add(String.join(",", brokerNames));
         // TODO : add game id flag
         return command;

@@ -49,12 +49,12 @@ public class Game {
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private File bootstrap;
+    private File bootstrap; // TODO : make getter return Optional
 
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    private File seed;
+    private File seed; // TODO : make getter return Optional
 
     @Getter
     @Setter
@@ -81,17 +81,17 @@ public class Game {
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER)
-    private Baseline baseline;
+    private Baseline baseline; // TODO : make getter return Optional
 
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER)
-    private Treatment treatment;
+    private Treatment treatment; // TODO : make getter return Optional
 
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER)
-    private Game base;
+    private Game base; // TODO : make getter return Optional
 
     // TODO : replace constructors with factory methods
     @Deprecated
