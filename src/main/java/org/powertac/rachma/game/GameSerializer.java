@@ -3,22 +3,22 @@ package org.powertac.rachma.game;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.powertac.rachma.baseline.BaselineRepository;
 import org.powertac.rachma.broker.Broker;
-import org.powertac.rachma.file.FileRole;
+import org.powertac.rachma.paths.PathProvider;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
 public class GameSerializer extends StdSerializer<Game> {
 
-    private final GameFileManager fileManager;
+    private final PathProvider paths;
 
-    public GameSerializer(GameFileManager fileManager) {
+    public GameSerializer(PathProvider paths) {
         super(Game.class);
-        this.fileManager = fileManager;
+        this.paths = paths;
     }
 
     @Override
@@ -28,19 +28,20 @@ public class GameSerializer extends StdSerializer<Game> {
         gen.writeStringField("name", game.getName());
         gen.writeNumberField("createdAt", game.getCreatedAt().toEpochMilli());
         gen.writeBooleanField("cancelled", game.isCancelled());
+        gen.writeBooleanField("isValidTemplate", isValidTemplate(game));
         provider.defaultSerializeField("bootstrap", game.getBootstrap(), gen);
         provider.defaultSerializeField("seed", game.getSeed(), gen);
         writeBrokersField(game.getBrokers(), gen, provider);
         writeServerParametersField(game.getServerParameters(), gen);
         writeRunField(game.getRuns(), gen, provider);
         if (null != game.getBaseline()) {
-            gen.writeStringField("baseline", game.getBaseline().getId());
+            gen.writeStringField("baselineId", game.getBaseline().getId());
         }
         if (null != game.getTreatment()) {
-            gen.writeStringField("treatment", game.getTreatment().getId());
+            gen.writeStringField("treatmentId", game.getTreatment().getId());
         }
         if (null != game.getBase()) {
-            gen.writeStringField("base", game.getBase().getId());
+            gen.writeStringField("baseId", game.getBase().getId());
         }
         provider.defaultSerializeField("weather", game.getWeatherConfiguration(), gen);
         gen.writeEndObject();
@@ -68,6 +69,14 @@ public class GameSerializer extends StdSerializer<Game> {
             provider.defaultSerializeValue(run, gen);
         }
         gen.writeEndArray();
+    }
+
+    // TODO : there might be an architectually more sound place for this
+    private boolean isValidTemplate(Game game) {
+        GameRun run = game.getLatestSuccessfulRun();
+        return run != null
+            && Files.exists(paths.local().run(run).state())
+            && Files.exists(paths.local().game(game).bootstrap());
     }
 
 }

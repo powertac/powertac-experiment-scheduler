@@ -24,6 +24,7 @@ public class TreatmentFactoryImpl implements TreatmentFactory {
             spec.getName(),
             spec.getBaseline(),
             spec.getModifier(),
+            Instant.now(),
             createGames(spec));
         for (int i = 0; i < treatment.getGames().size(); i++) {
             Game game = treatment.getGames().get(i);
@@ -36,6 +37,8 @@ public class TreatmentFactoryImpl implements TreatmentFactory {
     private List<Game> createGames(TreatmentSpec spec) {
         if (spec.getModifier() instanceof ReplaceBrokerModifier) {
             return applyReplaceBrokerModifier(spec.getBaseline(), (ReplaceBrokerModifier) spec.getModifier());
+        } else if (spec.getModifier() instanceof ParameterSetModifier) {
+            return applyParameterSetModifier(spec.getBaseline(), (ParameterSetModifier) spec.getModifier());
         } else {
             throw new NotImplementedException("unknown modifier of type " + spec.getModifier().getClass());
         }
@@ -55,16 +58,10 @@ public class TreatmentFactoryImpl implements TreatmentFactory {
                 }
             });
         return baseline.getGames().stream()
-            .map(original -> Game.builder()
-                .id(ID.gen())
-                .base(original)
-                .bootstrap(new File(ID.gen(), FileRole.BOOTSTRAP, original))
-                .seed(new File(ID.gen(), FileRole.SEED, original))
-                .brokerSet(brokerSetMap.get(original.getBrokerSet()))
-                .weatherConfiguration(original.getWeatherConfiguration())
-                .serverParameters(new HashMap<>(original.getServerParameters()))
-                .createdAt(Instant.now())
-                .build())
+            .map(original ->
+                copyBuilder(original)
+                    .brokerSet(brokerSetMap.get(original.getBrokerSet()))
+                    .build())
             .collect(Collectors.toList());
     }
 
@@ -73,6 +70,34 @@ public class TreatmentFactoryImpl implements TreatmentFactory {
         return String.format("%s - %s",
             treatmentName,
             StringUtils.leftPad(String.valueOf(gameIndex + 1), maxDigits, "0"));
+    }
+
+    private List<Game> applyParameterSetModifier(Baseline baseline, ParameterSetModifier modifier) {
+        return baseline.getGames().stream()
+            .map(original ->
+                copyBuilder(original)
+                    .serverParameters(mergeServerParameters(original.getServerParameters(), modifier.getParameters()))
+                    .build())
+            .collect(Collectors.toList());
+    }
+
+    private Map<String, String> mergeServerParameters(Map<String, String> original, Map<String, String> update) {
+        Map<String, String> merged = new HashMap<>();
+        merged.putAll(original);
+        merged.putAll(update);
+        return merged;
+    }
+
+    private Game.GameBuilder copyBuilder(Game original) {
+        return Game.builder()
+            .id(ID.gen())
+            .base(original)
+            .bootstrap(new File(ID.gen(), FileRole.BOOTSTRAP, original))
+            .seed(new File(ID.gen(), FileRole.SEED, original))
+            .brokerSet(original.getBrokerSet())
+            .weatherConfiguration(original.getWeatherConfiguration())
+            .serverParameters(original.getServerParameters())
+            .createdAt(Instant.now());
     }
 
 }

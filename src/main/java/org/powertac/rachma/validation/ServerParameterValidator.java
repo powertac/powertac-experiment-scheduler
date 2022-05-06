@@ -17,7 +17,7 @@ public class ServerParameterValidator implements SimulationParameterValidator {
     @Override
     public void validate(String parameter, String value) throws ParameterValidationException {
         try {
-            if (!this.supportedParameters.contains(parameter)) {
+            if (!this.supportedParameters.contains(parameter) && !parameter.startsWith("factoredcustomer")) {
                 throw new ParameterValidationException(parameter, value, String.format(
                     "'%s' is not a supported simulation server parameter", parameter));
             }

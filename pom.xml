@@ -105,14 +105,14 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring.spring-boot.version}</version>
+                <configuration>
+                    <mainClass>org.powertac.rachma.ExperimentSchedulerService</mainClass>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>repackage</goal>
                         </goals>
-                        <configuration>
-                            <mainClass>org.powertac.rachma.ExperimentSchedulerService</mainClass>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

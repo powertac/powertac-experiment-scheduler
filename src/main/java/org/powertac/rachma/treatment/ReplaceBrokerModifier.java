@@ -1,5 +1,7 @@
 package org.powertac.rachma.treatment;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,12 +20,29 @@ public class ReplaceBrokerModifier extends Modifier {
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
     private Broker original;
 
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER)
+    @JsonIgnore
     private Broker replacement;
+
+    @JsonGetter
+    public final String getType() {
+        return "replace-broker";
+    }
+
+    @JsonGetter
+    public String getOriginalId() {
+        return original.getId();
+    }
+
+    @JsonGetter
+    public String getReplacementId() {
+        return replacement.getId();
+    }
 
     public ReplaceBrokerModifier(String id, String name, Broker original, Broker replacement) {
         setId(id);

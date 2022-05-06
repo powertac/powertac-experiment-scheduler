@@ -14,11 +14,10 @@ public class EntryScriptServerContainerCommandCreatorTests {
     void bootstrapCommandTest() {
         ServerContainerCommandCreator commandCreator = new EntryScriptServerContainerCommandCreator();
         List<String> expected = new ArrayList<>();
-        expected.add("boot");
-        expected.add("-c");
-        expected.add("/path/to/bootstrap.properties");
-        expected.add("-o");
+        expected.add("--boot");
         expected.add("/path/to/bootstrap.xml");
+        expected.add("--config");
+        expected.add("/path/to/bootstrap.properties");
         Assertions.assertEquals(expected, commandCreator.createBootstrapCommand(
             "/path/to/bootstrap.properties",
             "/path/to/bootstrap.xml"));
@@ -28,12 +27,12 @@ public class EntryScriptServerContainerCommandCreatorTests {
     void simulationCommandWithoutSeedTest() {
         ServerContainerCommandCreator commandCreator = new EntryScriptServerContainerCommandCreator();
         List<String> expected = new ArrayList<>();
-        expected.add("sim");
-        expected.add("-c");
+        expected.add("--sim");
+        expected.add("--config");
         expected.add("/path/to/simulation.properties");
-        expected.add("-f");
+        expected.add("--boot-data");
         expected.add("/path/to/bootstrap.xml");
-        expected.add("-b");
+        expected.add("--brokers");
         expected.add("TUC_TAC_2020,SPOT19,EWIIS3_2021");
         Assertions.assertEquals(expected, commandCreator.createSimulationCommand(
             "/path/to/simulation.properties",

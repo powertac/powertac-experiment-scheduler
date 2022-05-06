@@ -11,10 +11,7 @@ import org.powertac.rachma.treatment.TreatmentRepository;
 import org.powertac.rachma.treatment.TreatmentSpec;
 import org.powertac.rachma.util.ID;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
@@ -44,6 +41,7 @@ public class TreatmentController {
                 if (null == view.getModifier().getId()) {
                     view.getModifier().setId(ID.gen());
                 }
+                // TODO : add treatment validation (e.g. if the changed parameter is set in the baseline, etc.)
                 Treatment treatment = treatmentFactory.createFrom(new TreatmentSpec(
                     view.getName(),
                     baseline.get(),
@@ -59,4 +57,13 @@ public class TreatmentController {
         }
     }
 
+    @GetMapping("/")
+    public ResponseEntity<Iterable<Treatment>> getTreatments() {
+        try {
+            return ResponseEntity.ok(treatmentRepository.findAll());
+        } catch (Exception e) {
+            logger.error(e);
+            return ResponseEntity.status(500).build();
+        }
+    }
 }

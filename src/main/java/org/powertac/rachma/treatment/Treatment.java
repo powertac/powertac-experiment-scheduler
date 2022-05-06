@@ -1,5 +1,7 @@
 package org.powertac.rachma.treatment;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,7 +10,9 @@ import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.game.Game;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -28,6 +32,7 @@ public class Treatment {
     @Getter
     @Setter
     @ManyToOne
+    @JsonIgnore
     private Baseline baseline;
 
     @Getter
@@ -37,8 +42,25 @@ public class Treatment {
 
     @Getter
     @Setter
+    private Instant createdAt;
+
+    @Getter
+    @Setter
     @OneToMany(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "treatment")
     @OrderColumn
+    @JsonIgnore
     private List<Game> games;
+
+    @JsonGetter
+    public String getBaselineId() {
+        return baseline.getId();
+    }
+
+    @JsonGetter
+    public List<String> getGameIds() {
+        return games.stream()
+            .map(Game::getId)
+            .collect(Collectors.toList());
+    }
 
 }
