@@ -100,7 +100,9 @@ public class GameRun implements Comparable<GameRun> {
 
     @Transient
     public boolean shouldBootstrap() {
-        return null == this.getGame().getBootstrap();
+        // FIXME : this is just a hotfix to always create the bootstrap
+        // return null == this.getGame().getBootstrap();
+        return true;
     }
 
     @Transient

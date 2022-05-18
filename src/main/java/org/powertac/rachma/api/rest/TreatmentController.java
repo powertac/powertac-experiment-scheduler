@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.api.view.TreatmentSpecView;
 import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.baseline.BaselineRepository;
+import org.powertac.rachma.game.GameRepository;
 import org.powertac.rachma.treatment.Treatment;
 import org.powertac.rachma.treatment.TreatmentFactory;
 import org.powertac.rachma.treatment.TreatmentRepository;
@@ -22,13 +23,15 @@ public class TreatmentController {
     private final BaselineRepository baselines;
     private final TreatmentFactory treatmentFactory;
     private final TreatmentRepository treatmentRepository;
+    private final GameRepository gameRepository;
     private final Logger logger;
 
     public TreatmentController(BaselineRepository baselines, TreatmentFactory treatmentFactory,
-                               TreatmentRepository treatmentRepository) {
+                               TreatmentRepository treatmentRepository, GameRepository gameRepository) {
         this.baselines = baselines;
         this.treatmentFactory = treatmentFactory;
         this.treatmentRepository = treatmentRepository;
+        this.gameRepository = gameRepository;
         logger = LogManager.getLogger(TreatmentController.class);
     }
 
@@ -66,4 +69,25 @@ public class TreatmentController {
             return ResponseEntity.status(500).build();
         }
     }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<?> cancel(@PathVariable String id) {
+        try {
+            Optional<Treatment> treatment = treatmentRepository.findById(id);
+            if (treatment.isPresent()) {
+                treatment.get().getGames()
+                    .forEach(game -> {
+                        game.setCancelled(true);
+                        gameRepository.save(game);
+                    });
+                return ResponseEntity.ok(true);
+            } else {
+                return ResponseEntity.status(404).build();
+            }
+        } catch (Exception e) {
+            logger.error(e);
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 }

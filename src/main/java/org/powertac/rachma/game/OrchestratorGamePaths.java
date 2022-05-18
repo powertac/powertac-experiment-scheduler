@@ -18,9 +18,7 @@ public class OrchestratorGamePaths implements PathProvider.OrchestratorPaths.Gam
 
     @Override
     public Path bootstrap() {
-        return null != game.getBootstrap()
-            ? parent.game(game.getBootstrap().getGame()).bootstrap()
-            : Paths.get(dir().toString(), String.format("%s.bootstrap.xml", game.getId()));
+        return Paths.get(dir().toString(), String.format("%s.bootstrap.xml", game.getId()));
     }
 
     @Override
