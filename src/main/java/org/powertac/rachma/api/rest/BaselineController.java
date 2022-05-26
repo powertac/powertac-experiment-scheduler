@@ -48,4 +48,8 @@ public class BaselineController {
         }
     }
 
+    public ResponseEntity<?> generateBaseline(@RequestBody BaselineConfig config) {
+
+    }
+
 }
