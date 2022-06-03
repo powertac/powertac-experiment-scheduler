@@ -18,6 +18,7 @@ public class File {
     private String id;
 
     @Getter
+    @Deprecated
     private FileRole role;
 
     @Getter

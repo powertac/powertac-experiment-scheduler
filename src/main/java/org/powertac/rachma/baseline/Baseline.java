@@ -1,11 +1,9 @@
 package org.powertac.rachma.baseline;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.game.Game;
+import org.powertac.rachma.game.generator.GameGeneratorConfig;
 import org.powertac.rachma.weather.WeatherConfiguration;
 
 import javax.persistence.*;
@@ -14,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 @Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Baseline {
@@ -57,5 +56,10 @@ public class Baseline {
     @Getter
     @Setter
     private Instant createdAt;
+
+    @Getter
+    @Setter
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private GameGeneratorConfig config;
 
 }

@@ -1,0 +1,42 @@
+package org.powertac.rachma.game.generator;
+
+import org.powertac.rachma.game.Game;
+import org.powertac.rachma.game.GameFactory;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+public class MultiplierGameGenerator implements GameGenerator {
+
+    private final GameFactory gameFactory;
+
+    public MultiplierGameGenerator(GameFactory gameFactory) {
+        this.gameFactory = gameFactory;
+    }
+
+    @Override
+    public List<Game> generate(String name, GameGeneratorConfig config) {
+        if (config instanceof MultiplierGameGeneratorConfig) {
+            MultiplierGameGeneratorConfig multiplierConfig = (MultiplierGameGeneratorConfig) config;
+            List<Game> games = new ArrayList<>();
+            for (int i = 0; i < multiplierConfig.getMultiplier(); i++) {
+                Game game = gameFactory.createFromConfig(multiplierConfig.getGameConfig());
+                game.setName(getName(name, i));
+                games.add(game);
+            }
+            return games;
+        } else {
+            throw new IllegalArgumentException(String.format(
+                "%s cannot process config of type '%s'",
+                MultiplierGameGenerator.class,
+                config.getType()));
+        }
+    }
+
+    private String getName(String name, Integer index) {
+        return String.format("%s - %d", name, index);
+    }
+
+}

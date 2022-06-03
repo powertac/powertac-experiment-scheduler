@@ -49,6 +49,16 @@ public class GameFactoryImpl implements GameFactory {
             .build();
     }
 
+    @Override
+    public Game createFromConfig(GameConfig config) {
+        return Game.builder()
+            .id(ID.gen())
+            .brokerSet(config.getBrokers())
+            .serverParameters(config.getParameters())
+            .createdAt(Instant.now())
+            .build();
+    }
+
     // TODO : use file repository
     // TODO : should throw not found exception
     private File createFile(String baseGameId, FileRole role) {

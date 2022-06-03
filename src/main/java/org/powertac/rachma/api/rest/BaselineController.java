@@ -2,8 +2,11 @@ package org.powertac.rachma.api.rest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.powertac.rachma.api.view.BaselineView;
 import org.powertac.rachma.baseline.*;
 import org.powertac.rachma.game.Game;
+import org.powertac.rachma.game.GameConfig;
+import org.powertac.rachma.util.ID;
 import org.powertac.rachma.validation.exception.ValidationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,8 +51,19 @@ public class BaselineController {
         }
     }
 
-    public ResponseEntity<?> generateBaseline(@RequestBody BaselineConfig config) {
-
+    @PostMapping("/generate")
+    public ResponseEntity<?> generateBaseline(@RequestBody BaselineView view) {
+        try {
+            Baseline baseline = factory.generate(view.getName(), view.getGenerator());
+            baselineRepository.save(baseline);
+            return ResponseEntity.ok().body(baseline);
+        } catch (ValidationException e) {
+            logger.error(e);
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            logger.error("server error during baseline creation", e);
+            return ResponseEntity.status(500).body("a server error occured; check the orchestrator logs for details");
+        }
     }
 
 }

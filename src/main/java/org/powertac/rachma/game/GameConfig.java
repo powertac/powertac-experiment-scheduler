@@ -1,26 +1,38 @@
 package org.powertac.rachma.game;
 
-import org.springframework.beans.BeansException;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import lombok.*;
+import org.powertac.rachma.broker.BrokerSet;
 
-@Configuration
-public class GameConfig implements ApplicationContextAware {
+import javax.persistence.*;
+import java.util.HashMap;
+import java.util.Map;
 
-    private ApplicationContext context;
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonDeserialize(using = GameConfigDeserializer.class)
+public class GameConfig {
 
-    @Override
-    public void setApplicationContext(ApplicationContext context) throws BeansException {
-        this.context = context;
-    }
+    @Id
+    @Getter
+    @Setter
+    @Column(length = 36)
+    private String id;
 
-    @Bean
-    public GameSchedule schedule() {
-        DelegatingGameSchedule schedule = new DelegatingGameSchedule();
-        schedule.register(context.getBean(FifoGameSchedule.class));
-        return schedule;
-    }
+    @Getter
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private BrokerSet brokers;
+
+    @Getter
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "game_config_parameters", joinColumns = {@JoinColumn(name = "game_config_id", referencedColumnName = "id")})
+    @MapKeyColumn(name = "parameter", length = 128)
+    @Column(name = "value")
+    private Map<String, String> parameters = new HashMap<>();
+
+    // TODO : file mappings
 
 }

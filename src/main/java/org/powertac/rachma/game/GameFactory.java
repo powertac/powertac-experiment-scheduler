@@ -10,5 +10,6 @@ public interface GameFactory {
 
     Game createFromSpec(GameSpec spec);
     Game createGame(String name, BrokerSet brokers, WeatherConfiguration weather, Map<String, String> parameters, Baseline baseline);
+    Game createFromConfig(GameConfig config);
 
 }

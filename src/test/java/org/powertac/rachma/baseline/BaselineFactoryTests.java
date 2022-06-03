@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.powertac.rachma.broker.*;
+import org.powertac.rachma.game.generator.MultiplierGameGenerator;
 import org.powertac.rachma.validation.SimulationParameterValidator;
 import org.powertac.rachma.validation.exception.ValidationException;
 import org.powertac.rachma.weather.WeatherConfiguration;
@@ -39,7 +40,8 @@ public class BaselineFactoryTests {
         BrokerSetFactory brokerSetFactory = Mockito.mock(BrokerSetFactory.class);
         Mockito.when(brokerSetFactory.create(setOne.getBrokers())).thenReturn(setOne);
         Mockito.when(brokerSetFactory.create(setTwo.getBrokers())).thenReturn(setTwo);
-        BaselineFactory factory = new BaselineFactoryImpl(validator, brokerSetFactory);
+        MultiplierGameGenerator multiplierGameGenerator = Mockito.mock(MultiplierGameGenerator.class);
+        BaselineFactory factory = new BaselineFactoryImpl(validator, brokerSetFactory, multiplierGameGenerator);
 
         // Baseline
         Baseline baseline = factory.createFromSpec(spec);
