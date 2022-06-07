@@ -8,6 +8,7 @@ import org.powertac.rachma.game.GameRepository;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.HashSet;
 
 @Component
 public class FileDeserializer extends StdNodeBasedDeserializer<File> {
@@ -29,7 +30,7 @@ public class FileDeserializer extends StdNodeBasedDeserializer<File> {
         }
         Game game = new Game();
         game.setId(root.get("game").asText());
-        return new File(null, role, game);
+        return new File(null, role, game, "", new HashSet<>());
     }
 
 }

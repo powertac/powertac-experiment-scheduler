@@ -167,7 +167,7 @@ public class NewGameModelMigration implements Migration {
         Game referencedGame = findReferencedGame(filePath, role);
         File file = fileRepository.findByRoleAndGame(role, referencedGame);
         if (null == file) {
-            file = new File(UUID.randomUUID().toString(), role, referencedGame);
+            file = new File(UUID.randomUUID().toString(), role, referencedGame, "", new HashSet<>());
         }
         return file;
     }

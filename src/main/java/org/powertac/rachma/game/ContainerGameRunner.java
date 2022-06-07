@@ -134,9 +134,12 @@ public class ContainerGameRunner implements GameRunner {
             Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run, network);
             lifecycle.simulation(run, network, serverContainer, brokerContainers);
             Map<DockerContainer, DockerContainerExitState> exitStates = controller.run(run.getSimulationContainers());
-            for (DockerContainerExitState exitState : exitStates.values()) {
-                if (exitState.isErrorState()) {
-                    throw new GameRunException("a simulation container exited with an error code");
+            for (Map.Entry<DockerContainer, DockerContainerExitState> exitStateEntry : exitStates.entrySet()) {
+                if (exitStateEntry.getValue().isErrorState()) {
+                    throw new GameRunException(String.format(
+                        "the simulation container '%s' exited with an error code (%d)",
+                        exitStateEntry.getKey().getName(),
+                        exitStateEntry.getValue().getExitCode()));
                 }
             }
         } catch (IOException e) {

@@ -23,7 +23,7 @@ public class MultiplierGameGenerator implements GameGenerator {
             List<Game> games = new ArrayList<>();
             for (int i = 0; i < multiplierConfig.getMultiplier(); i++) {
                 Game game = gameFactory.createFromConfig(multiplierConfig.getGameConfig());
-                game.setName(getName(name, i));
+                game.setName(getName(name, i + 1));
                 games.add(game);
             }
             return games;

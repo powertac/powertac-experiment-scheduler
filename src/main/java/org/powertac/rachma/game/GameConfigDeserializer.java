@@ -7,8 +7,10 @@ import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.util.DeserializationHelper;
 import org.powertac.rachma.util.ID;
+import org.powertac.rachma.weather.WeatherConfiguration;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -25,6 +27,8 @@ public class GameConfigDeserializer extends StdNodeBasedDeserializer<GameConfig>
             .id(ID.gen())
             .brokers(parseBrokerSet(root.get("brokers"), context))
             .parameters(parseParameters(root.get("parameters")))
+            .weather(DeserializationHelper.defaultDeserialize(root.get("weather"), WeatherConfiguration.class, context))
+            .createdAt(Instant.now())
             .build();
     }
 

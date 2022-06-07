@@ -2,9 +2,13 @@ package org.powertac.rachma.game;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.*;
+import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerSet;
+import org.powertac.rachma.file.File;
+import org.powertac.rachma.weather.WeatherConfiguration;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +37,22 @@ public class GameConfig {
     @Column(name = "value")
     private Map<String, String> parameters = new HashMap<>();
 
-    // TODO : file mappings
+    @Getter
+    @Setter
+    @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    private WeatherConfiguration weather;
+
+    @Getter
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "game_config_binds",
+        joinColumns = {@JoinColumn(name = "game_config_id", referencedColumnName = "id")},
+        inverseJoinColumns = {@JoinColumn(name = "file_id", referencedColumnName = "id")})
+    @MapKeyJoinColumn(name = "broker_id")
+    private Map<Broker, File> binds = new HashMap<>();
+
+    @Getter
+    @Setter
+    private Instant createdAt;
 
 }

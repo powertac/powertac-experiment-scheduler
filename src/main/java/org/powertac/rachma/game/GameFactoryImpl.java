@@ -55,6 +55,7 @@ public class GameFactoryImpl implements GameFactory {
             .id(ID.gen())
             .brokerSet(config.getBrokers())
             .serverParameters(config.getParameters())
+            .weatherConfiguration(config.getWeather())
             .createdAt(Instant.now())
             .build();
     }
@@ -66,7 +67,7 @@ public class GameFactoryImpl implements GameFactory {
             return null;
         }
         Game baseGame = gameRepository.findById(baseGameId);
-        return new File(ID.gen(), role, baseGame);
+        return new File(ID.gen(), role, baseGame, "", new HashSet<>());
     }
 
     // TODO : use broker set repo

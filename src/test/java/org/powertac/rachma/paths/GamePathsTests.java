@@ -11,6 +11,7 @@ import org.powertac.rachma.game.GameRun;
 import testutils.Mocker;
 
 import java.nio.file.Paths;
+import java.util.HashSet;
 
 public class GamePathsTests {
 
@@ -54,7 +55,9 @@ public class GamePathsTests {
         Mockito.when(game.getSeed()).thenReturn(new File(
             null,
             FileRole.SEED,
-            seedGame));
+            seedGame,
+            "",
+            new HashSet<>()));
         GameRun run = Mockito.mock(GameRun.class);
         Mockito.when(run.getId()).thenReturn("08f5c1f9-6f50-4885-bf7c-79e50b448afe");
         Mockito.when(run.getGame()).thenReturn(seedGame);
