@@ -54,13 +54,17 @@ public class BaselineFactoryImpl implements BaselineFactory {
         } else {
             throw new IllegalArgumentException(String.format("unknown type '%s'", config.getType()));
         }
-        return Baseline.builder()
+        Baseline baseline = Baseline.builder()
             .id(ID.gen())
             .name(name)
             .config(config)
             .games(games)
             .createdAt(Instant.now())
             .build();
+        for (Game game : games) {
+            game.setBaseline(baseline);
+        }
+        return baseline;
     }
 
     private void validateServerParameters(Map<String, String> parameters) throws ValidationException {
