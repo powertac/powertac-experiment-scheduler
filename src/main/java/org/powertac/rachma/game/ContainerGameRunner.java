@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -34,6 +35,7 @@ public class ContainerGameRunner implements GameRunner {
     private final DockerNetworkRepository networks;
     private final GameRunLifecycleManager lifecycle;
     private final GameValidator gameValidator;
+    private final GamePostConditionValidator postConditionValidator;
 
     private final Map<Game, GameRun> activeRuns;
     private final Logger logger;
@@ -44,7 +46,7 @@ public class ContainerGameRunner implements GameRunner {
                                SimulationContainerCreator simulationContainerCreator,
                                BrokerContainerCreator brokerContainerCreator,
                                DockerContainerController controller, DockerNetworkRepository networks,
-                               GameRunLifecycleManager lifecycle, GameValidator gameValidator) {
+                               GameRunLifecycleManager lifecycle, GameValidator gameValidator, GamePostConditionValidator postConditionValidator) {
         this.runs = runs;
         this.gameFileManager = gameFileManager;
         this.bootstrapContainerCreator = bootstrapContainerCreator;
@@ -54,6 +56,7 @@ public class ContainerGameRunner implements GameRunner {
         this.networks = networks;
         this.lifecycle = lifecycle;
         this.gameValidator = gameValidator;
+        this.postConditionValidator = postConditionValidator;
         this.activeRuns = new ConcurrentHashMap<>();
         logger = LogManager.getLogger(ContainerGameRunner.class);
     }
@@ -134,13 +137,8 @@ public class ContainerGameRunner implements GameRunner {
             Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run, network);
             lifecycle.simulation(run, network, serverContainer, brokerContainers);
             Map<DockerContainer, DockerContainerExitState> exitStates = controller.run(run.getSimulationContainers());
-            for (Map.Entry<DockerContainer, DockerContainerExitState> exitStateEntry : exitStates.entrySet()) {
-                if (exitStateEntry.getValue().isErrorState()) {
-                    throw new GameRunException(String.format(
-                        "the simulation container '%s' exited with an error code (%d)",
-                        exitStateEntry.getKey().getName(),
-                        exitStateEntry.getValue().getExitCode()));
-                }
+            if (!gameCompletedSuccessfully(run, brokerContainers, exitStates)) {
+                throw new GameRunException("game run didn't meet one of the post conditions; check orchestrator log for details");
             }
         } catch (IOException e) {
             throw new GameRunException("could not create simulation files", e);
@@ -163,6 +161,14 @@ public class ContainerGameRunner implements GameRunner {
             brokerContainers.put(broker, brokerContainerCreator.create(run, broker, network));
         }
         return brokerContainers;
+    }
+
+    private boolean gameCompletedSuccessfully(GameRun run, Map<Broker, DockerContainer> brokerContainers, Map<DockerContainer, DockerContainerExitState> exitStates) {
+        Map<Broker, DockerContainerExitState> brokerToExitStates = new HashMap<>();
+        for (Map.Entry<Broker, DockerContainer> brokerContainer : brokerContainers.entrySet()) {
+            brokerToExitStates.put(brokerContainer.getKey(), exitStates.get(brokerContainer.getValue()));
+        }
+        return postConditionValidator.isValid(run, brokerToExitStates, Instant.now());
     }
 
     private synchronized void stop(GameRun run) {

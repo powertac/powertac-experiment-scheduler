@@ -21,7 +21,7 @@ public class DockerContainerControllerImpl implements DockerContainerController 
 
     private final static int runPoolSize = 10;
     private final static int pollingIntervalMillis = 1000;
-    private final static int killTimeoutMillis = 10000;
+    private final static int killTimeoutMillis = 30000;
 
     private final DockerClient docker;
 
