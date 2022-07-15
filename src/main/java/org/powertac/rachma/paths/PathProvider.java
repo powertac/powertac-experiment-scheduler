@@ -83,6 +83,7 @@ public interface PathProvider extends Versioned {
 
             interface GameRunPaths {
                 Path logs();
+                Path data();
             }
         }
     }

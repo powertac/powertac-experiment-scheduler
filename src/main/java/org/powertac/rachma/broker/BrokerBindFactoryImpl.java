@@ -5,10 +5,16 @@ import org.powertac.rachma.docker.AbstractBindFactory;
 import org.powertac.rachma.game.GameRun;
 import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.game.Game;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.nio.file.Paths;
 
 @Component
 public class BrokerBindFactoryImpl extends AbstractBindFactory implements BrokerBindFactory {
+
+    @Value("${broker.is3.directory.data}")
+    private String is3DataDirectory;
 
     private final PathProvider paths;
 
@@ -30,4 +36,10 @@ public class BrokerBindFactoryImpl extends AbstractBindFactory implements Broker
             paths.container().broker(broker).run(run).logs());
     }
 
+    @Override
+    public Bind createDataDirBind(GameRun run, Broker broker) {
+        return bind(
+            Paths.get(is3DataDirectory),
+            paths.container().broker(broker).run(run).data());
+    }
 }

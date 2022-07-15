@@ -32,11 +32,18 @@ public class GameDeserializer extends StdNodeBasedDeserializer<Game> {
 
     private Map<String, String> parseServerParameters(JsonNode root) {
         Map<String, String> serverParameters = new HashMap<>();
+        // FIXME: 'serverParameters' key should be replaced by 'parameters' in the future
         if (root.has("serverParameters")) {
             JsonNode serverParamsNode = root.get("serverParameters");
             serverParamsNode.forEach((node) -> {
                 serverParameters.put(node.get("key").asText(), node.get("value").asText());
             });
+        } else if (root.has("parameters")) {
+            Iterator<Map.Entry<String, JsonNode>> parameterFields = root.get("parameters").fields();
+            while (parameterFields.hasNext()) {
+                Map.Entry<String, JsonNode> field = parameterFields.next();
+                serverParameters.put(field.getKey(), field.getValue().asText());
+            }
         }
         return serverParameters;
     }

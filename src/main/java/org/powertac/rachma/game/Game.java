@@ -75,7 +75,7 @@ public class Game {
 
     @Getter
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private WeatherConfiguration weatherConfiguration;
 
     @Getter

@@ -44,7 +44,9 @@ public class GamePostConditionValidatorImpl implements GamePostConditionValidato
 
     private boolean brokerMayFail(Broker broker) {
         return broker.getImageTag().equals("powertac/spot19:latest")
-            || broker.getImageTag().equals("powertac/spot17:latest");
+            || broker.getImageTag().equals("powertac/spot17:latest")
+            || broker.getName().equalsIgnoreCase("spot19")
+            || broker.getName().equalsIgnoreCase("spot17");
     }
 
 }

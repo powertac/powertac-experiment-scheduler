@@ -26,14 +26,16 @@ public class GameFactoryImpl implements GameFactory {
 
     @Override
     public Game createFromSpec(GameSpec spec) {
-        return new Game(
-            UUID.randomUUID().toString(),
-            spec.getName(),
-            createBrokerSet(spec.getBrokers()),
-            spec.getServerParameters(),
-            createFile(spec.getBaseGameId(), FileRole.BOOTSTRAP),
-            createFile(spec.getBaseGameId(), FileRole.SEED),
-            Instant.now());
+        return Game.builder()
+            .id(ID.gen())
+            .name(spec.getName())
+            .brokerSet(createBrokerSet(spec.getBrokers()))
+            .serverParameters(spec.getServerParameters())
+            .bootstrap(createFile(spec.getBaseGameId(), FileRole.BOOTSTRAP))
+            .seed(createFile(spec.getBaseGameId(), FileRole.SEED))
+            .weatherConfiguration(spec.getWeather())
+            .createdAt(Instant.now())
+            .build();
     }
 
     @Override

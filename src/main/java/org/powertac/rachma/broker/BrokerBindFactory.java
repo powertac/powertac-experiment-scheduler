@@ -8,5 +8,6 @@ public interface BrokerBindFactory {
 
     Bind createPropertiesBind(Game game, Broker broker);
     Bind createLogDirBind(GameRun run, Broker broker);
+    Bind createDataDirBind(GameRun run, Broker broker);
 
 }

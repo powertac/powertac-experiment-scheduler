@@ -67,6 +67,9 @@ public class BrokerContainerCreatorImpl implements BrokerContainerCreator {
         List<Bind> binds = new ArrayList<>();
         binds.add(bindFactory.createPropertiesBind(run.getGame(), broker));
         binds.add(bindFactory.createLogDirBind(run, broker));
+        if (broker.getName().toLowerCase().contains("is3")) {
+            binds.add(bindFactory.createDataDirBind(run, broker));
+        }
         return binds;
     }
 

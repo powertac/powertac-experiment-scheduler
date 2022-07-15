@@ -32,10 +32,14 @@ public class BrokerContainerPaths implements PathProvider.ContainerPaths.BrokerP
 
     @Override
     public GameRunPaths run(GameRun run) {
-        // since the GamePaths interface has only one method at this time, it may be used as a function interface
-        return () -> Paths.get(
-            base().toString(),
-            "log");
+        return new GameRunPaths() {
+            @Override public Path logs() {
+                return Paths.get(base().toString(), "log");
+            }
+            @Override public Path data() {
+                return Paths.get(base().toString(), "data");
+            }
+        };
     }
 
 }
