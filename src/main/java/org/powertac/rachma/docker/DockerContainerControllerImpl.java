@@ -143,6 +143,7 @@ public class DockerContainerControllerImpl implements DockerContainerController 
                 killTimer.start();
             }
             completed = exitStates.size() == containerMap.size();
+            // TODO : add Thread sleep interval
         }
         killTimer.interrupt();
         return exitStates;

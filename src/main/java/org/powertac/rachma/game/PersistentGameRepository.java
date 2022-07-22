@@ -4,6 +4,8 @@ import org.powertac.rachma.api.stomp.EntityPublisher;
 import org.powertac.rachma.persistence.JpaGameRepository;
 import org.springframework.stereotype.Component;
 
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,10 +14,12 @@ public class PersistentGameRepository implements GameRepository {
 
     private final JpaGameRepository games;
     private final EntityPublisher<Game> publisher;
+    private final EntityManager em;
 
-    public PersistentGameRepository(JpaGameRepository games, EntityPublisher<Game> publisher) {
+    public PersistentGameRepository(JpaGameRepository games, EntityPublisher<Game> publisher, EntityManager em) {
         this.games = games;
         this.publisher = publisher;
+        this.em = em;
     }
 
     @Override
@@ -43,6 +47,14 @@ public class PersistentGameRepository implements GameRepository {
     @Override
     public Game findFirstQueued() {
         return games.findFirstQueued();
+    }
+
+    @Override
+    public List<Game> findTop(int start, int limit) {
+        return em.createQuery("select  g from Game g order by g.createdAt desc", Game.class)
+            .setFirstResult(start)
+            .setMaxResults(limit)
+            .getResultList();
     }
 
     @Override

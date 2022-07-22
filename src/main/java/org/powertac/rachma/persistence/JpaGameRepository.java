@@ -18,4 +18,6 @@ public interface JpaGameRepository extends CrudRepository<Game, String> {
 
     Optional<Game> findOneByName(String name);
 
+
+
 }

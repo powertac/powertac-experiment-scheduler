@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.IdClass;
 import java.time.Instant;
 
+// TODO : make embeddable to reduce number of joins on game
+
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor

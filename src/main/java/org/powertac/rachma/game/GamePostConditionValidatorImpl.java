@@ -13,7 +13,7 @@ import java.util.Map;
 @Component
 public class GamePostConditionValidatorImpl implements GamePostConditionValidator {
 
-    private final static int timeslotToDurationFactor = 25;
+    private final static int timeslotToDurationFactor = 23;
 
     private final Logger logger = LogManager.getLogger(GamePostConditionValidator.class);
 

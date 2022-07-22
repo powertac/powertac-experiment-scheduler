@@ -23,6 +23,19 @@ import java.util.*;
 @Builder
 public class Game {
 
+    enum ExecutionStatus {
+        NONE,
+        RUNNING,
+        COMPLETED,
+        FAILED
+    }
+
+    enum QueueStatus {
+        QUEUED,
+        PAUSED,
+        CANCELLED
+    }
+
     @Getter
     @Setter
     @Id
@@ -49,11 +62,13 @@ public class Game {
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Deprecated // TODO : remove; bootstrap should always be created on a per game basis
     private File bootstrap; // TODO : make getter return Optional
 
     @Getter
     @Setter
     @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @Deprecated // TODO : use 'base' property instead
     private File seed; // TODO : make getter return Optional
 
     @Getter
@@ -71,6 +86,7 @@ public class Game {
     @Getter
     @Setter
     @Builder.Default
+    @Deprecated // TODO : use 'status' property instead
     private boolean cancelled = false;
 
     @Getter
@@ -80,18 +96,40 @@ public class Game {
 
     @Getter
     @Setter
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private Baseline baseline; // TODO : make getter return Optional
 
     @Getter
     @Setter
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private Treatment treatment; // TODO : make getter return Optional
 
     @Getter
     @Setter
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     private Game base; // TODO : make getter return Optional
+
+    @Getter
+    @Setter
+    @Column(length = 2)
+    private QueueStatus queueStatus = QueueStatus.PAUSED;
+
+    @Getter
+    @Column(length = 2)
+    private ExecutionStatus executionStatus = ExecutionStatus.NONE;
+
+    @PrePersist
+    public void updateExecutionStatus() {
+        if (runs.size() < 1) {
+            executionStatus = ExecutionStatus.NONE;
+        } else if (isRunning()) {
+            executionStatus = ExecutionStatus.RUNNING;
+        } else if (null != getLatestSuccessfulRun()) {
+            executionStatus = ExecutionStatus.COMPLETED;
+        } else if (hasFailed()) {
+            executionStatus = ExecutionStatus.FAILED;
+        }
+    }
 
     // TODO : replace constructors with factory methods
     @Deprecated
@@ -108,7 +146,9 @@ public class Game {
             null,
             null,
             null,
-            null);
+            null,
+            QueueStatus.PAUSED,
+            ExecutionStatus.NONE);
     }
 
     @Deprecated
@@ -125,7 +165,9 @@ public class Game {
             null,
             null,
             null,
-            null);
+            null,
+            QueueStatus.PAUSED,
+            ExecutionStatus.NONE);
     }
 
     @Deprecated
@@ -142,7 +184,9 @@ public class Game {
             null,
             null,
             null,
-            null);
+            null,
+            QueueStatus.PAUSED,
+            ExecutionStatus.NONE);
     }
 
     public Set<Broker> getBrokers() {
@@ -156,12 +200,20 @@ public class Game {
             .reduce(false, (oneIsRunning, currentOneIsRunning) -> oneIsRunning || currentOneIsRunning);
     }
 
+    @Transient
     public GameRun getLatestSuccessfulRun() {
         return runs.stream().reduce(null, (current, run) ->
            run.wasSuccessful()
                ? null == current || run.getEnd().isAfter(current.getEnd()) ? run : current
                : null
         );
+    }
+
+    @Transient
+    public boolean hasFailed() {
+        return !isRunning()
+            && runs.size() > 2
+            && null == getLatestSuccessfulRun();
     }
 
 }

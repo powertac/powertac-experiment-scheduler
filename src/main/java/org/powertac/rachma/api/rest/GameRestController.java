@@ -1,6 +1,7 @@
 package org.powertac.rachma.api.rest;
 
 import org.powertac.rachma.game.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -12,6 +13,9 @@ import java.util.Collection;
 @RestController
 @RequestMapping("/games")
 public class GameRestController {
+
+    @Value("${application.api.default-page-size}")
+    private int defaultPageSize;
 
     private final GameRepository games;
     private final GameRunRepository gameRuns;
@@ -28,9 +32,11 @@ public class GameRestController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Collection<Game>> getGames() {
-        Collection<Game> games = this.games.findAll();
-        return ResponseEntity.ok().body(games);
+    public ResponseEntity<Collection<Game>> getGames(@RequestParam(required = false) Integer start, @RequestParam(required = false) Integer limit) {
+        Collection<Game> top = this.games.findTop(
+            start != null ? start : 0,
+            limit != null ? limit : defaultPageSize);
+        return ResponseEntity.ok().body(top);
     }
 
     @PostMapping("/")

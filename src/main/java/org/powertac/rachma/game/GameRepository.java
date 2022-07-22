@@ -8,6 +8,7 @@ public interface GameRepository {
     Game findById(String id);
     Game findOneByName(String name);
     Game findFirstQueued();
+    Collection<Game> findTop(int start, int limit);
     void save(Game game);
     boolean exists(String id);
     void delete(Game game);
