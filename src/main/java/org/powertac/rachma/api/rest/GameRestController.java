@@ -31,6 +31,11 @@ public class GameRestController {
         this.gameFileManager = gameFileManager;
     }
 
+    @GetMapping("/count")
+    public ResponseEntity<Long> getGameCount() {
+        return ResponseEntity.ok().body(games.count());
+    }
+
     @GetMapping("/")
     public ResponseEntity<Collection<Game>> getGames(@RequestParam(required = false) Integer start, @RequestParam(required = false) Integer limit) {
         Collection<Game> top = this.games.findTop(

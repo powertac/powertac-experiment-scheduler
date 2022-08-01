@@ -5,7 +5,6 @@ import org.powertac.rachma.persistence.JpaGameRepository;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
-import javax.persistence.TypedQuery;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,6 +73,11 @@ public class PersistentGameRepository implements GameRepository {
     @Override
     public void delete(Game game) {
         games.delete(game);
+    }
+
+    @Override
+    public long count() {
+        return games.count();
     }
 
     private void removeDuplicateGameRuns(Game game) {

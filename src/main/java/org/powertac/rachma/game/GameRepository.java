@@ -12,4 +12,5 @@ public interface GameRepository {
     void save(Game game);
     boolean exists(String id);
     void delete(Game game);
+    long count();
 }
