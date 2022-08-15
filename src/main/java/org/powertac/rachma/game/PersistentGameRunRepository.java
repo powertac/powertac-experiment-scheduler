@@ -37,6 +37,11 @@ public class PersistentGameRunRepository implements GameRunRepository {
         games.save(run.getGame());
     }
 
+    @Override
+    public Collection<GameRun> findFailed() {
+        return crudRepository.findAllByFailed(true);
+    }
+
     public void delete(Collection<GameRun> runs) {
         crudRepository.deleteAll(runs);
     }

@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +30,19 @@ public class FileNode {
 
     public String getName() {
         return path.getFileName().toString();
+    }
+
+    public void delete() throws IOException {
+        delete(false);
+    }
+
+    public void delete(boolean keepRoot) throws IOException {
+        for (FileNode child : getChildren()) {
+            child.delete();
+        }
+        if (!keepRoot) {
+            Files.delete(getPath());
+        }
     }
 
 }

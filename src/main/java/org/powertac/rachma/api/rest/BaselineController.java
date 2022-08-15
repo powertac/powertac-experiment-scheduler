@@ -3,13 +3,20 @@ package org.powertac.rachma.api.rest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.api.view.BaselineView;
+import org.powertac.rachma.api.view.ExportBaselineView;
 import org.powertac.rachma.baseline.*;
+import org.powertac.rachma.file.GameFileExporter;
+import org.powertac.rachma.file.GameGroupManifestBuilder;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRepository;
 import org.powertac.rachma.validation.exception.ValidationException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,17 +24,24 @@ import java.util.Optional;
 @RequestMapping("/baselines")
 public class BaselineController {
 
+    @Value("${directory.host.export}")
+    private String exportBasePath;
+
     private final BaselineFactory factory;
     private final BaselineGameFactory gameFactory;
     private final BaselineRepository baselineRepository;
     private final GameRepository gameRepository;
+    private final GameFileExporter fileExporter;
+    private final GameGroupManifestBuilder manifestBuilder;
     private final Logger logger;
 
-    public BaselineController(BaselineFactory factory, BaselineGameFactory gameFactory, BaselineRepository baselineRepository, GameRepository gameRepository) {
+    public BaselineController(BaselineFactory factory, BaselineGameFactory gameFactory, BaselineRepository baselineRepository, GameRepository gameRepository, GameFileExporter fileExporter, GameGroupManifestBuilder manifestBuilder) {
         this.factory = factory;
         this.gameFactory = gameFactory;
         this.baselineRepository = baselineRepository;
         this.gameRepository = gameRepository;
+        this.fileExporter = fileExporter;
+        this.manifestBuilder = manifestBuilder;
         this.logger = LogManager.getLogger(BaselineController.class);
     }
 
@@ -85,6 +99,23 @@ public class BaselineController {
         } catch (Exception e) {
             logger.error(e);
             return ResponseEntity.status(500).build();
+        }
+    }
+
+    @PostMapping("/{id}/export")
+    public ResponseEntity<String> cancel(@PathVariable String id, @RequestBody ExportBaselineView export) {
+        Optional<Baseline> baseline = baselineRepository.findById(id);
+        if (baseline.isPresent()) {
+            try {
+                fileExporter.exportGames(baseline.get().getGames(), export.getTarget(), export.getHostUri());
+                Path hostExportPath = Paths.get(exportBasePath,export.getTarget());
+                return ResponseEntity.ok(hostExportPath.toString());
+            } catch (IOException e) {
+                logger.error(e);
+                return ResponseEntity.status(500).build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
         }
     }
 

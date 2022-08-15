@@ -1,6 +1,5 @@
 package org.powertac.rachma.api.rest;
 
-import org.apache.http.Header;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.file.FileNode;
@@ -52,6 +51,23 @@ public class FileRestController {
         }
     }
 
+    @DeleteMapping("/runs/{id}") // TODO : move to GameRunRestController
+    public ResponseEntity<?> removeRunFiles(@PathVariable String id) {
+        GameRun run = runRepository.find(id);
+        if (null == run) {
+            logger.error(String.format("could not find run[%s]", id));
+            return ResponseEntity.notFound().build();
+        } else {
+            try {
+                FileNode root = fileTreeBuilder.build(paths.local().run(run).dir());
+                deleteFileTree(root, true);
+                return ResponseEntity.ok().build();
+            } catch (IOException e) {
+                return ResponseEntity.status(500).build();
+            }
+        }
+    }
+
     @GetMapping
     public ResponseEntity<String> readFile(@RequestParam("path") String path, Optional<Long> offset, Optional<Long> length) {
         try {
@@ -71,6 +87,15 @@ public class FileRestController {
             .skip(start > 0 ? start - 1 : 0)
             .limit(length)
             .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    private void deleteFileTree(FileNode node, boolean isRoot) throws IOException {
+        for (FileNode child : node.getChildren()) {
+            deleteFileTree(child, false);
+        }
+        if (!isRoot) {
+            Files.delete(node.getPath());
+        }
     }
 
 }

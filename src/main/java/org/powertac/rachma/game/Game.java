@@ -210,6 +210,14 @@ public class Game {
     }
 
     @Transient
+    public Optional<GameRun> getSuccessfulRun() {
+        return runs.stream()
+            .filter(GameRun::wasSuccessful)
+            .max(Comparator.comparing(GameRun::getEnd))
+            .stream().findFirst();
+    }
+
+    @Transient
     public boolean hasFailed() {
         return !isRunning()
             && runs.size() > 2

@@ -10,6 +10,7 @@ import java.util.Collection;
 public interface JpaGameRunRepository extends CrudRepository<GameRun, String> {
 
     Collection<GameRun> findAllByGameAndPhaseBetween(Game game, GameRunPhase start, GameRunPhase end);
+    Collection<GameRun> findAllByFailed(boolean failed);
     boolean existsByGameAndPhaseAndFailed(Game game, GameRunPhase phase, boolean failed);
     boolean existsByGameAndPhaseNot(Game game, GameRunPhase phase);
 

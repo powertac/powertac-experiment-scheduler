@@ -16,8 +16,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/runs")
@@ -53,6 +53,7 @@ public class GameRunRestController {
         }
     }
 
+    @Deprecated
     @GetMapping("/{id}/files")
     public ResponseEntity<List<String>> getFilesMeta(@PathVariable("id") String id) {
         GameRun run = runRepository.find(id);
@@ -73,6 +74,12 @@ public class GameRunRestController {
             }
             return ResponseEntity.ok(fileTypes);
         }
+    }
+
+    @GetMapping("/failed")
+    public ResponseEntity<Collection<GameRun>> getFailedRuns() {
+        Collection<GameRun> failedRuns = runRepository.findFailed();
+        return ResponseEntity.ok(failedRuns);
     }
 
 }
