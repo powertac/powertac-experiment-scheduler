@@ -1,4 +1,4 @@
-package org.powertac.rachma.security;
+package org.powertac.rachma.user;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

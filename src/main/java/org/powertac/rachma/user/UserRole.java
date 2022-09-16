@@ -1,4 +1,4 @@
-package org.powertac.rachma.security;
+package org.powertac.rachma.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

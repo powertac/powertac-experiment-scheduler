@@ -1,9 +1,6 @@
-package org.powertac.rachma.security;
+package org.powertac.rachma.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,14 +9,14 @@ import java.time.Instant;
 import java.util.Collection;
 
 @Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User implements UserDetails {
 
     @Id
     @Getter
-    @GeneratedValue
-    private Long id;
+    private String id;
 
     @Getter
     @Setter
@@ -42,7 +39,7 @@ public class User implements UserDetails {
 
     @Getter
     @Setter
-    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
+    @ManyToMany(fetch = FetchType.EAGER)
     private Collection<UserRole> roles;
 
     @Override

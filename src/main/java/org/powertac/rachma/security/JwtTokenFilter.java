@@ -3,6 +3,7 @@ package org.powertac.rachma.security;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.powertac.rachma.user.User;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
