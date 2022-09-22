@@ -17,7 +17,7 @@ public class ServerParameterValidator implements SimulationParameterValidator {
     @Override
     public void validate(String parameter, String value) throws ParameterValidationException {
         try {
-            if (!this.supportedParameters.contains(parameter) && !parameter.startsWith("factoredcustomer")) {
+            if (!this.supportedParameters.contains(parameter) && !hasSupportedPrefix(parameter)) {
                 throw new ParameterValidationException(parameter, value, String.format(
                     "'%s' is not a supported simulation server parameter", parameter));
             }
@@ -28,6 +28,12 @@ public class ServerParameterValidator implements SimulationParameterValidator {
         catch (ValidationException e) {
             throw new ParameterValidationException(parameter, e.getValue().toString(), e.getMessage());
         }
+    }
+
+    // TODO : move to config file
+    private boolean hasSupportedPrefix(String parameter) {
+        return parameter.startsWith("factoredcustomer")
+            || parameter.startsWith("customer.evcharger");
     }
 
 }

@@ -39,7 +39,7 @@ public class GameGroupManifestBuilderImpl implements GameGroupManifestBuilder {
             Field.create("weatherLocation", game -> game.getWeatherConfiguration().getLocation()),
             Field.create("weatherDate", game -> weatherDateFormatter.format(game.getWeatherConfiguration().getStartTime())),
             Field.create("DOI", game -> ""), // TODO : parse DOI
-            Field.create("logUrl", game -> String.format("%s/%s.game.tar.gz", hostUri, game.getId())));
+            Field.create("logUrl", game -> String.format("%s%s.game.tar.gz", hostUri, game.getId())));
         for (Broker broker : brokers) {
             schema.add(Field.create(broker.getName(), game -> "")); // TODO : extract final cash positions from logs
         }

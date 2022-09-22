@@ -2,7 +2,7 @@ package org.powertac.rachma.api.view;
 
 import lombok.Getter;
 
-public class ExportBaselineView {
+public class ExportOptionsView {
 
     @Getter
     private String target;

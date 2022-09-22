@@ -39,7 +39,7 @@ public class GameRestController {
     @GetMapping("/")
     public ResponseEntity<Collection<Game>> getGames(@RequestParam(required = false) Integer start, @RequestParam(required = false) Integer limit) {
         Collection<Game> top = this.games.findTop(
-            start != null ? start : 0,
+            start != null && start > 0 ? start : 0,
             limit != null ? limit : defaultPageSize);
         return ResponseEntity.ok().body(top);
     }

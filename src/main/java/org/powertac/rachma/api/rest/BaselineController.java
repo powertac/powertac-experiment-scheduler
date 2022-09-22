@@ -3,7 +3,7 @@ package org.powertac.rachma.api.rest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.api.view.BaselineView;
-import org.powertac.rachma.api.view.ExportBaselineView;
+import org.powertac.rachma.api.view.ExportOptionsView;
 import org.powertac.rachma.baseline.*;
 import org.powertac.rachma.file.GameFileExporter;
 import org.powertac.rachma.file.GameGroupManifestBuilder;
@@ -24,6 +24,7 @@ import java.util.Optional;
 @RequestMapping("/baselines")
 public class BaselineController {
 
+    // TODO : move to file exporter
     @Value("${directory.host.export}")
     private String exportBasePath;
 
@@ -103,7 +104,7 @@ public class BaselineController {
     }
 
     @PostMapping("/{id}/export")
-    public ResponseEntity<String> cancel(@PathVariable String id, @RequestBody ExportBaselineView export) {
+    public ResponseEntity<String> cancel(@PathVariable String id, @RequestBody ExportOptionsView export) {
         Optional<Baseline> baseline = baselineRepository.findById(id);
         if (baseline.isPresent()) {
             try {
