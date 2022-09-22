@@ -1,4 +1,4 @@
-package org.powertac.rachma.file;
+package org.powertac.rachma.hotfix;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

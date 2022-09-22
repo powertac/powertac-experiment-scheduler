@@ -5,12 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerContainerCreator;
-import org.powertac.rachma.docker.DockerContainerExitState;
-import org.powertac.rachma.docker.DockerContainer;
-import org.powertac.rachma.docker.DockerContainerController;
+import org.powertac.rachma.docker.*;
 import org.powertac.rachma.docker.exception.ContainerException;
-import org.powertac.rachma.docker.DockerNetwork;
-import org.powertac.rachma.docker.DockerNetworkRepository;
 import org.powertac.rachma.server.BootstrapContainerCreator;
 import org.powertac.rachma.server.SimulationContainerCreator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +42,8 @@ public class ContainerGameRunner implements GameRunner {
                                SimulationContainerCreator simulationContainerCreator,
                                BrokerContainerCreator brokerContainerCreator,
                                DockerContainerController controller, DockerNetworkRepository networks,
-                               GameRunLifecycleManager lifecycle, GameValidator gameValidator, GamePostConditionValidator postConditionValidator) {
+                               GameRunLifecycleManager lifecycle, GameValidator gameValidator,
+                               GamePostConditionValidator postConditionValidator) {
         this.runs = runs;
         this.gameFileManager = gameFileManager;
         this.bootstrapContainerCreator = bootstrapContainerCreator;
