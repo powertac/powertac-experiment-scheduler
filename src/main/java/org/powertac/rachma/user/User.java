@@ -16,6 +16,7 @@ public class User implements UserDetails {
 
     @Id
     @Getter
+    @Column(length = 36)
     private String id;
 
     @Getter

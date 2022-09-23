@@ -9,6 +9,8 @@ import org.springframework.security.core.GrantedAuthority;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import java.util.Collection;
 
 @Entity
 @NoArgsConstructor
@@ -19,11 +21,11 @@ public class UserRole implements GrantedAuthority {
     @Getter
     @Setter
     @Column(length = 128)
-    private String id;
+    private String name;
 
     @Override
     public String getAuthority() {
-        return id;
+        return name;
     }
 
 }

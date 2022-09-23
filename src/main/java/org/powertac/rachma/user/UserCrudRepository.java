@@ -10,4 +10,6 @@ public interface UserCrudRepository extends CrudRepository<User, String> {
 
     Optional<User> findByToken(String token);
 
+    boolean existsByUsername(String username);
+
 }

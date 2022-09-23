@@ -1,5 +1,7 @@
 package org.powertac.rachma.security;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.user.User;
 import org.powertac.rachma.user.UserCrudRepository;
 import org.powertac.rachma.user.UserNotFoundException;
@@ -25,12 +27,14 @@ public class AuthenticationRestController {
     private final JwtTokenService tokenFactory;
     private final UserCrudRepository users;
     private final UserProvider userProvider;
+    private final Logger logger;
 
     public AuthenticationRestController(AuthenticationManager authManager, JwtTokenService tokenFactory, UserCrudRepository users, UserProvider userProvider) {
         this.authManager = authManager;
         this.tokenFactory = tokenFactory;
         this.users = users;
         this.userProvider = userProvider;
+        logger = LogManager.getLogger(AuthenticationRestController.class);
     }
 
     @GetMapping("/")
@@ -53,7 +57,10 @@ public class AuthenticationRestController {
             users.save(user);
             return ResponseEntity.ok(token);
         } catch (BadCredentialsException e) {
-            // TODO : log attempt
+            logger.error("login attempt with wrong credentials", e);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } catch (Exception e) {
+            logger.error(e);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
