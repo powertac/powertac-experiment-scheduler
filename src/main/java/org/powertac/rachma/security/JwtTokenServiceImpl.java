@@ -61,9 +61,11 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         Optional<RegistrationToken> registrationToken = registrationTokens.findByToken(token);
         if (registrationToken.isPresent()) {
             try {
-                // FIXME : check if token already claimed!!!
                 verifyExpirationDateClaim(jwt, registrationToken.get().getExpirationDate());
                 verifyExpirationDate(registrationToken.get().getExpirationDate());
+                if (registrationToken.get().getClaimedBy() != null) {
+                    throw new TokenVerificationException("registration token has already been claimed");
+                }
                 return registrationToken.get();
             } catch (JWTVerificationException|TokenVerificationException e) {
                 throw new InvalidRegistrationTokenException("invalid registration token", e);

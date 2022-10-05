@@ -29,7 +29,8 @@ public class AuthenticationRestController {
     private final UserProvider userProvider;
     private final Logger logger;
 
-    public AuthenticationRestController(AuthenticationManager authManager, JwtTokenService tokenFactory, UserCrudRepository users, UserProvider userProvider) {
+    public AuthenticationRestController(AuthenticationManager authManager, JwtTokenService tokenFactory,
+                                        UserCrudRepository users, UserProvider userProvider) {
         this.authManager = authManager;
         this.tokenFactory = tokenFactory;
         this.users = users;
@@ -38,11 +39,11 @@ public class AuthenticationRestController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<?> isLoggedIn() {
+    public ResponseEntity<Boolean> isAuthenticated() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication.isAuthenticated() && !(authentication instanceof AnonymousAuthenticationToken)
-            ? ResponseEntity.ok().build()
-            : ResponseEntity.status(401).build();
+        Boolean isAuthenticated = authentication.isAuthenticated()
+            && !(authentication instanceof AnonymousAuthenticationToken);
+        return ResponseEntity.ok().body(isAuthenticated);
     }
 
     @PostMapping("/")

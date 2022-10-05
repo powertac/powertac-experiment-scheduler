@@ -1,5 +1,6 @@
 package org.powertac.rachma.user;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,6 +13,7 @@ import java.util.Collection;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonSerialize(using = UserSerializer.class)
 public class User implements UserDetails {
 
     @Id
@@ -66,6 +68,15 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public boolean hasAuthority(String name) {
+        for (GrantedAuthority authority : getAuthorities()) {
+            if (authority.getAuthority().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

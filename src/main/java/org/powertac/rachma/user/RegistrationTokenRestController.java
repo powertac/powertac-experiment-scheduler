@@ -4,15 +4,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.security.JwtTokenService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.time.Instant;
 
 @RestController
-@RequestMapping("/registration")
+@RequestMapping("/registrations")
 public class RegistrationTokenRestController {
 
     private final static Duration expirationPeriod = Duration.ofDays(7);
@@ -31,7 +30,7 @@ public class RegistrationTokenRestController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<String> createRegistrationToken() {
+    public ResponseEntity<RegistrationToken> createRegistrationToken() {
         try {
             Instant expiration = Instant.now().plus(expirationPeriod);
             String tokenString = tokenService.createRegistrationToken(expiration);
@@ -42,11 +41,30 @@ public class RegistrationTokenRestController {
                 .expirationDate(expiration)
                 .build();
             registrationTokens.save(token);
-            return ResponseEntity.ok(tokenString);
+            // FIXME : ID is not automatically updated on this object
+            return ResponseEntity.ok(token);
         } catch (UserNotFoundException e) {
             logger.error(e);
             return ResponseEntity.status(401).build();
         }
+    }
+
+    @GetMapping("/{tokenString}")
+    public ResponseEntity<?> verifyRegistrationToken(@PathVariable String tokenString) {
+        try {
+            tokenService.getVerifiedRegistrationToken(tokenString);
+            return ResponseEntity.noContent().build();
+        } catch (InvalidRegistrationTokenException e) {
+            logger.error(e);
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ResponseEntity<Iterable<RegistrationToken>> getRegistrations() {
+        Iterable<RegistrationToken> tokens = registrationTokens.findAll();
+        return ResponseEntity.ok(tokens);
     }
 
 }

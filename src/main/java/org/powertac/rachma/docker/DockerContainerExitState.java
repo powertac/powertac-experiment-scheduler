@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
-public class DockerContainerExitState { // FIXME : might be replaced with int :D
+public class DockerContainerExitState {
 
     @Getter
     private final int exitCode;

@@ -38,7 +38,21 @@ public class UserRestController {
     }
 
     @GetMapping("/")
-    public ResponseEntity<User> getUser() {
+    public ResponseEntity<Iterable<User>> getUsers() {
+        try {
+            User currentUser = userProvider.getCurrentUser();
+            if (currentUser.hasAuthority("ADMIN")) {
+                return ResponseEntity.ok(users.findAll());
+            } else {
+                return ResponseEntity.status(403).build();
+            }
+        } catch (UserNotFoundException e) {
+            return ResponseEntity.status(401).build();
+        }
+    }
+
+    @GetMapping("/current")
+    public ResponseEntity<User> getAuthenticatedUser() {
         try {
             return ResponseEntity.ok(userProvider.getCurrentUser());
         } catch (UserNotFoundException e) {
