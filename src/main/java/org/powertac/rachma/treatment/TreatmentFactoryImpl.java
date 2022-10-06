@@ -1,7 +1,7 @@
 package org.powertac.rachma.treatment;
 
-import org.apache.commons.lang.NotImplementedException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
