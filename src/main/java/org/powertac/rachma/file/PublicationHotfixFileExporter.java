@@ -10,7 +10,6 @@ import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.treatment.Treatment;
 import org.powertac.rachma.treatment.TreatmentRepository;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Files;

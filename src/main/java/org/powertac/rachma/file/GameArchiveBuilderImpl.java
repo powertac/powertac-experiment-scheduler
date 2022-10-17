@@ -52,14 +52,10 @@ public class GameArchiveBuilderImpl implements GameArchiveBuilder {
         PathProvider.OrchestratorPaths.GameRunPaths runPaths = paths.local().run(run);
         Map<Path, Path> fileMap = new HashMap<>();
         Path statePath = runPaths.state();
-        fileMap.put(statePath, getRelativePath(statePath, "/log"));
+        fileMap.put(statePath, Paths.get("/log", String.format("%s.state", run.getGame().getId())));
         Path tracePath = runPaths.trace();
-        fileMap.put(tracePath, getRelativePath(tracePath, "/log"));
+        fileMap.put(tracePath, Paths.get("/log", String.format("%s.state", run.getGame().getId())));
         return fileMap;
-    }
-
-    private Path getRelativePath(Path originalPath, String root) {
-        return Paths.get(root, originalPath.getFileName().toString());
     }
 
 }
