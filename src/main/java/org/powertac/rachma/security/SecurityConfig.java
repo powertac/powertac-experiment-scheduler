@@ -2,6 +2,7 @@ package org.powertac.rachma.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -39,8 +40,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
             })).and();
         http.authorizeRequests()
-            .antMatchers("/auth/**").permitAll()
-            .antMatchers("/status").permitAll()
+            .antMatchers("/auth/**").permitAll()                            // authentication
+            .antMatchers(HttpMethod.POST, "/users/").permitAll()            // registration
+            .antMatchers(HttpMethod.GET, "/registrations/{*}").permitAll()  // registration token verification
             .anyRequest().authenticated();
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }

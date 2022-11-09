@@ -49,6 +49,7 @@ public class RegistrationTokenRestController {
         }
     }
 
+    // FIXME : this should be a POST Request to prevent man-in-the-middle-attacks
     @GetMapping("/{tokenString}")
     public ResponseEntity<?> verifyRegistrationToken(@PathVariable String tokenString) {
         try {

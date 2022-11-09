@@ -60,7 +60,7 @@ public class UserRestController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<User> createUser(@RequestBody CreateUserRequest request) {
         try {
             RegistrationToken registrationToken = tokenService.getVerifiedRegistrationToken(request.getToken());
