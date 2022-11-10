@@ -61,30 +61,50 @@ public class UserRestController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<User> createUser(@RequestBody CreateUserRequest request) {
+    public ResponseEntity<User> createUser(@RequestBody CreateUserDTO userData) {
         try {
-            RegistrationToken registrationToken = tokenService.getVerifiedRegistrationToken(request.getToken());
-            Set<UserRole> roles = loadRoles(request.getRoleNames());
-            User user = buildUser(request.getUsername(), request.getPassword(), roles);
+            RegistrationToken registrationToken = tokenService.getVerifiedRegistrationToken(userData.getRegistrationToken());
+            Set<UserRole> roles = loadRoles(userData.getRoleNames());
+            User user = buildUser(userData.getUsername(), userData.getPassword(), roles);
             users.save(user);
             claimRegistrationToken(user, registrationToken);
             return ResponseEntity.ok(user);
         } catch (InvalidRegistrationTokenException|UserRoleNotFoundException e) {
-            logger.error(e);
+            logger.error("unable to create user", e);
             return ResponseEntity.badRequest().build();
         }
     }
 
-    private Set<UserRole> loadRoles(Set<String> roleNames) throws UserRoleNotFoundException {
-        Set<UserRole> roles = new HashSet<>();
-        for (String name : roleNames) {
-            Optional<UserRole> role = userRoles.findById(name);
-            if (role.isEmpty()) {
-                throw new UserRoleNotFoundException(String.format("user role '%s' not found", name));
+    @PutMapping("/")
+    public ResponseEntity<User> updateUser(@RequestBody UpdateUserDTO userData) {
+        try {
+            User currentUser = userProvider.getCurrentUser();
+            Optional<User> userOptional = users.findById(userData.getUserId());
+            if (userOptional.isEmpty()) {
+                if (currentUser.hasAuthority("ADMIN")) {
+                    logger.error("update on non-existing user"); // TODO : structured logging
+                    return ResponseEntity.badRequest().build();
+                } else {
+                    logger.error("unauthorized update on non-existing user"); // TODO : structured logging
+                    return ResponseEntity.status(403).build();
+                }
+            } else {
+                User user;
+                if (currentUser.hasAuthority("ADMIN")) {
+                     user = getUpdatedUser(userOptional.get(), userData, true);
+                } else if (userOptional.get().getId().equals(userProvider.getCurrentUser().getId())) {
+                    user = getUpdatedUser(userOptional.get(), userData, false);
+                } else {
+                    logger.error("unauthorized user update"); // TODO : structured logging
+                    return ResponseEntity.status(403).build();
+                }
+                users.save(user);
+                return ResponseEntity.ok(user);
             }
-            roles.add(role.get());
+        } catch (UserRoleNotFoundException|UserNotFoundException e) {
+            logger.error("unable to update user", e);
+            return ResponseEntity.badRequest().build();
         }
-        return roles;
     }
 
     private User buildUser(String username, String password, Set<UserRole> roles) {
@@ -101,6 +121,29 @@ public class UserRestController {
         token.setClaimedBy(user);
         token.setClaimedAt(Instant.now());
         registrationTokens.save(token);
+    }
+
+    private Set<UserRole> loadRoles(Set<String> roleNames) throws UserRoleNotFoundException {
+        Set<UserRole> roles = new HashSet<>();
+        for (String name : roleNames) {
+            Optional<UserRole> role = userRoles.findById(name);
+            if (role.isEmpty()) {
+                throw new UserRoleNotFoundException(String.format("user role '%s' not found", name));
+            }
+            roles.add(role.get());
+        }
+        return roles;
+    }
+
+    private User getUpdatedUser(User user, UpdateUserDTO userData, boolean fullUpdate) throws UserRoleNotFoundException {
+        if (fullUpdate) {
+            user.getRoles().addAll(loadRoles(userData.getRoleNames()));
+            user.setEnabled(userData.isEnabled());
+        }
+        if (null != userData.getPassword()) {
+            user.setPassword(passwordEncoder.encode(userData.getPassword())); // TODO : enforce password rules
+        }
+        return user;
     }
 
 }

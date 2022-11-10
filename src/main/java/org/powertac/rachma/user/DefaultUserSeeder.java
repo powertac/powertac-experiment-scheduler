@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Component
 public class DefaultUserSeeder implements Seeder {
@@ -40,7 +40,7 @@ public class DefaultUserSeeder implements Seeder {
                 .username(adminAccountName)
                 .password(encoder.encode(defaultAdminPassword))
                 .enabled(true)
-                .roles(List.of(adminRole.get()))
+                .roles(Set.of(adminRole.get()))
                 .build());
         }
     }

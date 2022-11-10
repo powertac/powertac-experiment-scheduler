@@ -11,7 +11,7 @@ public class UserRoleSeeder implements Seeder {
     public final static String adminRoleName = "ADMIN";
     private final static Set<String> roleNames = Set.of(
         adminRoleName,
-        "AUTHENTICATED"
+        "AUTHENTICATED" // TODO : rename to "BASE"
     );
 
     private final UserRoleRepository roles;

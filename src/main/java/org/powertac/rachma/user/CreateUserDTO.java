@@ -4,7 +4,7 @@ import lombok.Getter;
 
 import java.util.Set;
 
-public class CreateUserRequest {
+public class CreateUserDTO {
 
     @Getter
     private String username;
@@ -16,6 +16,6 @@ public class CreateUserRequest {
     private Set<String> roleNames;
 
     @Getter
-    private String token;
+    private String registrationToken;
 
 }

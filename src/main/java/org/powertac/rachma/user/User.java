@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.Set;
 
 @Entity
 @Builder
@@ -43,7 +44,7 @@ public class User implements UserDetails {
     @Getter
     @Setter
     @ManyToMany(fetch = FetchType.EAGER)
-    private Collection<UserRole> roles;
+    private Set<UserRole> roles;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
