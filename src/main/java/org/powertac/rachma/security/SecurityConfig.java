@@ -1,5 +1,6 @@
 package org.powertac.rachma.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,10 +19,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+
+    @Value("#{'${application.api.allowed-origins}'.split(',')}")
+    private List<String> allowedOrigins;
 
     private final UserDetailsService userDetailsService;
     private final JwtTokenFilter jwtTokenFilter;
@@ -61,8 +66,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
+        allowedOrigins.forEach(config::addAllowedOrigin);
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:9000"); // FIXME : use configured value(s)
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         source.registerCorsConfiguration("/**", config);
