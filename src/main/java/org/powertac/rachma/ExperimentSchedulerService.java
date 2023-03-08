@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.application.ApplicationSetup;
 import org.powertac.rachma.application.LockException;
 import org.powertac.rachma.game.GameScheduler;
+import org.powertac.rachma.persistence.SeederException;
+import org.powertac.rachma.persistence.SeederManager;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -50,11 +52,13 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
     @Override
     public void run(ApplicationArguments args) {
         final ApplicationSetup setup = context.getBean(ApplicationSetup.class);
+        final SeederManager seeder = context.getBean(SeederManager.class);
         try {
             setup.start();
+            seeder.runSeeders();
         } catch (LockException e) {
             LogManager.getLogger(ExperimentSchedulerService.class).error("setup is already running", e);
-        } catch (IOException e) {
+        } catch (IOException | SeederException e) {
             LogManager.getLogger(ExperimentSchedulerService.class).error("application setup failed", e);
         }
         final GameScheduler gameScheduler = context.getBean(GameScheduler.class);

@@ -2,7 +2,7 @@ package org.powertac.rachma.api.rest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.api.view.BaselineView;
+import org.powertac.rachma.baseline.NewBaselineDTO;
 import org.powertac.rachma.api.view.ExportOptionsView;
 import org.powertac.rachma.baseline.*;
 import org.powertac.rachma.file.GameFileExporter;
@@ -69,7 +69,7 @@ public class BaselineController {
     }
 
     @PostMapping("/generate")
-    public ResponseEntity<?> generateBaseline(@RequestBody BaselineView view) {
+    public ResponseEntity<?> generateBaseline(@RequestBody NewBaselineDTO view) {
         try {
             Baseline baseline = factory.generate(view.getName(), view.getGenerator());
             baselineRepository.save(baseline);

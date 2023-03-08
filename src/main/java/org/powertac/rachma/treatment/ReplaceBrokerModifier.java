@@ -1,16 +1,12 @@
 package org.powertac.rachma.treatment;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import org.powertac.rachma.broker.Broker;
 
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
+import java.util.Map;
 
 @Entity
 @NoArgsConstructor
@@ -18,37 +14,21 @@ import javax.persistence.ManyToOne;
 public class ReplaceBrokerModifier extends Modifier {
 
     @Getter
-    @Setter
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Broker original;
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "broker_mapping",
+        joinColumns = {@JoinColumn(name = "modifier_id", referencedColumnName = "id")},
+        inverseJoinColumns = {@JoinColumn(name = "replacement_id", referencedColumnName = "id")})
+    @MapKeyJoinColumn(name = "original_id")
+    private Map<Broker, Broker> brokerMapping;
 
-    @Getter
-    @Setter
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JsonIgnore
-    private Broker replacement;
-
-    @JsonGetter
-    public final String getType() {
-        return "replace-broker";
+    public final ModifierType getType() {
+        return ModifierType.REPLACE_BROKER;
     }
 
-    @JsonGetter
-    public String getOriginalId() {
-        return original.getId();
-    }
-
-    @JsonGetter
-    public String getReplacementId() {
-        return replacement.getId();
-    }
-
-    public ReplaceBrokerModifier(String id, String name, Broker original, Broker replacement) {
-        setId(id);
-        setName(name);
-        setOriginal(original);
-        setReplacement(replacement);
+    public ReplaceBrokerModifier(String id, String name, Map<Broker, Broker> brokerMapping) {
+        this.setId(id);
+        this.setName(name);
+        this.brokerMapping = brokerMapping;
     }
 
 }

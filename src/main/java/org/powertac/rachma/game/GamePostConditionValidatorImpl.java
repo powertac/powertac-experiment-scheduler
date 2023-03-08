@@ -14,6 +14,7 @@ import java.util.Map;
 public class GamePostConditionValidatorImpl implements GamePostConditionValidator {
 
     private final static int timeslotToDurationFactor = 23;
+    private final static double defaultTimeslotSeconds = 4;
 
     private final Logger logger = LogManager.getLogger(GamePostConditionValidator.class);
 
@@ -37,7 +38,9 @@ public class GamePostConditionValidatorImpl implements GamePostConditionValidato
     }
 
     private boolean minGameLengthReached(GameRun run, Instant exitTime) {
-        int timeslotSeconds = Integer.parseInt(run.getGame().getServerParameters().get("common.competition.simulationTimeslotSeconds"));
+        double timeslotSeconds = run.getGame().getServerParameters().containsKey("common.competition.simulationTimeslotSeconds")
+            ? Double.parseDouble(run.getGame().getServerParameters().get("common.competition.simulationTimeslotSeconds"))
+            : defaultTimeslotSeconds;
         long durationMinutes = Duration.between(run.getStart(), exitTime).abs().toMinutes();
         return ((long) timeslotSeconds * timeslotToDurationFactor) <= durationMinutes;
     }

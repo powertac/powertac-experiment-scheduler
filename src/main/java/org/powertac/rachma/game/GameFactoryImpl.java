@@ -2,6 +2,8 @@ package org.powertac.rachma.game;
 
 import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.broker.Broker;
+import org.powertac.rachma.broker.BrokerNotFoundException;
+import org.powertac.rachma.broker.BrokerRepository;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRole;
@@ -10,18 +12,30 @@ import org.powertac.rachma.weather.WeatherConfiguration;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class GameFactoryImpl implements GameFactory {
 
     private final GameRepository gameRepository;
+    private final BrokerRepository brokerRepository;
 
-    public GameFactoryImpl(GameRepository gameRepository) {
+    public GameFactoryImpl(GameRepository gameRepository, BrokerRepository brokerRepository) {
         this.gameRepository = gameRepository;
+        this.brokerRepository = brokerRepository;
+    }
+
+    @Override
+    public Game createFromDTO(NewGameDTO newGameData) throws BrokerNotFoundException {
+        Set<Broker> brokers = brokerIdsToSet(newGameData.getBrokerIds());
+        return Game.builder()
+            .id(ID.gen())
+            .name(newGameData.getName())
+            .brokerSet(createBrokerSet(brokers))
+            .weatherConfiguration(newGameData.getWeather())
+            .serverParameters(newGameData.getParameters())
+            .createdAt(Instant.now())
+            .build();
     }
 
     @Override
@@ -77,6 +91,19 @@ public class GameFactoryImpl implements GameFactory {
         return new BrokerSet(
             UUID.randomUUID().toString(),
             new HashSet<>(brokers));
+    }
+
+    private Set<Broker> brokerIdsToSet(Set<String> ids) throws BrokerNotFoundException {
+        Set<Broker> brokers = new HashSet<>();
+        for (String id : ids) {
+            Optional<Broker> broker = brokerRepository.findById(id);
+            if (broker.isPresent()) {
+                brokers.add(broker.get());
+            } else {
+                throw new BrokerNotFoundException(String.format("could not find broker with id=%s", id));
+            }
+        }
+        return brokers;
     }
 
     private WeatherConfiguration copyWeatherConfig(WeatherConfiguration config) {

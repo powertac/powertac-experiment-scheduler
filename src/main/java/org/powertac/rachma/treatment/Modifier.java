@@ -22,4 +22,6 @@ public abstract class Modifier {
     @Setter
     private String name;
 
+    abstract public ModifierType getType();
+
 }

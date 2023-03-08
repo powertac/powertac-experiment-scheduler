@@ -3,10 +3,7 @@ package org.powertac.rachma.broker;
 import org.powertac.rachma.api.stomp.EntityPublisher;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class PersistentBrokerRepository implements BrokerRepository {
@@ -24,6 +21,11 @@ public class PersistentBrokerRepository implements BrokerRepository {
         List<Broker> brokerList = new ArrayList<>();
         brokers.findAll().forEach(brokerList::add);
         return brokerList;
+    }
+
+    @Override
+    public Optional<Broker> findById(String id) {
+        return brokers.findById(id);
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.powertac.rachma.api.view;
+package org.powertac.rachma.baseline;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import org.powertac.rachma.game.generator.GameGeneratorConfig;
 import org.powertac.rachma.game.generator.GameGeneratorConfigDeserializer;
 
 @NoArgsConstructor
-public class BaselineView {
+public class NewBaselineDTO {
 
     @Getter
     private String name;

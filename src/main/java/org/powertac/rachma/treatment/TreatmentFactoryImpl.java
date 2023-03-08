@@ -7,17 +7,21 @@ import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileRole;
 import org.powertac.rachma.game.Game;
+import org.powertac.rachma.game.generator.GameGeneratorConfig;
+import org.powertac.rachma.game.generator.MultiplierGameGeneratorConfig;
 import org.powertac.rachma.util.ID;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Component
 public class TreatmentFactoryImpl implements TreatmentFactory {
 
     @Override
+    @Deprecated
     public Treatment createFrom(TreatmentSpec spec) {
         Treatment treatment = new Treatment(
             ID.gen(),
@@ -26,6 +30,24 @@ public class TreatmentFactoryImpl implements TreatmentFactory {
             spec.getModifier(),
             Instant.now(),
             createGames(spec));
+        for (int i = 0; i < treatment.getGames().size(); i++) {
+            Game game = treatment.getGames().get(i);
+            game.setName(getGameName(treatment.getName(), i, treatment.getGames().size()));
+            game.setTreatment(treatment);
+        }
+        return treatment;
+    }
+
+    @Override
+    public Treatment create(String name, Baseline baseline, Modifier modifier) {
+        List<Game> games = createGames(baseline, modifier);
+        Treatment treatment = new Treatment(
+            ID.gen(),
+            name,
+            baseline,
+            modifier,
+            Instant.now(),
+            games);
         for (int i = 0; i < treatment.getGames().size(); i++) {
             Game game = treatment.getGames().get(i);
             game.setName(getGameName(treatment.getName(), i, treatment.getGames().size()));
@@ -44,25 +66,41 @@ public class TreatmentFactoryImpl implements TreatmentFactory {
         }
     }
 
+    private List<Game> createGames(Baseline baseline, Modifier modifier) {
+        if (modifier instanceof ReplaceBrokerModifier) {
+            return applyReplaceBrokerModifier(baseline, (ReplaceBrokerModifier) modifier);
+        } else if (modifier instanceof ParameterSetModifier) {
+            return applyParameterSetModifier(baseline, (ParameterSetModifier) modifier);
+        } else {
+            throw new NotImplementedException("unknown modifier of type " + modifier.getClass());
+        }
+    }
+
+    // TODO : this has to be refactored ASAP (in the way that many baselines/treatments/games may linked to one or more game configs)
     private List<Game> applyReplaceBrokerModifier(Baseline baseline, ReplaceBrokerModifier modifier) {
         Map<BrokerSet, BrokerSet> brokerSetMap = new HashMap<>();
-        baseline.getBrokerSets().stream()
-            .peek(set -> brokerSetMap.put(set, new BrokerSet(ID.gen(), new HashSet<>(set.getBrokers()))))
-            .map(brokerSetMap::get)
-            .forEach(newSet -> {
-                // that's the actual replacement
-                // TODO : put this part in the Modifier, add reflection information (granularity, etc.), then abstract
-                if (newSet.getBrokers().contains(modifier.getOriginal())) {
-                    newSet.getBrokers().remove(modifier.getOriginal());
-                    newSet.getBrokers().add(modifier.getReplacement());
-                }
-            });
-        return baseline.getGames().stream()
-            .map(original ->
-                copyBuilder(original)
-                    .brokerSet(brokerSetMap.get(original.getBrokerSet()))
-                    .build())
-            .collect(Collectors.toList());
+        GameGeneratorConfig config = baseline.getConfig();
+        if (config instanceof MultiplierGameGeneratorConfig) {
+            Stream.of(((MultiplierGameGeneratorConfig) config).getGameConfig().getBrokers())
+                .peek(set -> brokerSetMap.put(set, new BrokerSet(ID.gen(), new HashSet<>(set.getBrokers()))))
+                .map(brokerSetMap::get)
+                .forEach(newSet -> {
+                    modifier.getBrokerMapping().forEach((original, replacement) -> {
+                        if (!original.equals(replacement) && newSet.getBrokers().contains(original)) {
+                            newSet.getBrokers().remove(original);
+                            newSet.getBrokers().add(replacement);
+                        }
+                    });
+                });
+            return baseline.getGames().stream()
+                .map(original ->
+                    copyBuilder(original)
+                        .brokerSet(brokerSetMap.get(original.getBrokerSet()))
+                        .build())
+                .collect(Collectors.toList());
+        } else {
+            throw new RuntimeException("unknown game generator type");
+        }
     }
 
     private String getGameName(String treatmentName, int gameIndex, int treatmentSize) {

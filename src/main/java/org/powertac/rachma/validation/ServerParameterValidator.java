@@ -24,6 +24,7 @@ public class ServerParameterValidator implements SimulationParameterValidator {
             for (ValidationRule rule : ruleProvider.get(parameter)) {
                 rule.validate(value);
             }
+            // FIXME : check parameter value for existence (e.g. length > 0)
         }
         catch (ValidationException e) {
             throw new ParameterValidationException(parameter, e.getValue().toString(), e.getMessage());

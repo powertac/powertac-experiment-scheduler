@@ -24,8 +24,8 @@ public class ParameterSetModifier extends Modifier {
     private Map<String, String> parameters = new HashMap<>();
 
     @JsonGetter
-    public String getType() {
-        return "parameter-set";
+    public ModifierType getType() {
+        return ModifierType.PARAMETER_SET;
     }
 
     public ParameterSetModifier(String id, String name, Map<String, String> parameters) {

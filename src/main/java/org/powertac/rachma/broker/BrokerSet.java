@@ -8,6 +8,7 @@ import lombok.Setter;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @NoArgsConstructor
@@ -28,6 +29,12 @@ public class BrokerSet {
     public BrokerSet addBroker(Broker broker) {
         brokers.add(broker);
         return this;
+    }
+
+    public Set<String> getIds() {
+        return this.brokers.stream()
+            .map(Broker::getId)
+            .collect(Collectors.toSet());
     }
 
 }
