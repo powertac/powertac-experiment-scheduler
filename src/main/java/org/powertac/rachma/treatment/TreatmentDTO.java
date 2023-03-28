@@ -2,6 +2,7 @@ package org.powertac.rachma.treatment;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.powertac.rachma.game.GameConfigDTO;
 
 import java.time.Instant;
 import java.util.List;
@@ -25,5 +26,9 @@ public class TreatmentDTO {
     private List<String> gameIds;
 
     @Getter
+    private GameConfigDTO config;
+
+    @Getter
     private Instant createdAt;
+
 }

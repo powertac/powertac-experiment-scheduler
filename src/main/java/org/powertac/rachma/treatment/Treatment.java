@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.game.Game;
+import org.powertac.rachma.game.GameConfig;
 
 import javax.persistence.*;
 import java.time.Instant;

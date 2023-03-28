@@ -7,14 +7,12 @@ import org.powertac.rachma.baseline.BaselineRepository;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerRepository;
 import org.powertac.rachma.treatment.*;
-import org.powertac.rachma.user.RegistrationTokenCrudRepository;
 import org.powertac.rachma.util.ID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/v2/treatments")
@@ -25,18 +23,15 @@ public class TreatmentRestControllerV2 {
     private final TreatmentFactory treatmentFactory;
     private final TreatmentRepository treatmentRepository;
     private final Logger logger;
-    private final RegistrationTokenCrudRepository registrationTokenCrudRepository;
 
     public TreatmentRestControllerV2(BaselineRepository baselines,
                                      BrokerRepository brokers, TreatmentFactory treatmentFactory,
-                                     TreatmentRepository treatmentRepository,
-                                     RegistrationTokenCrudRepository registrationTokenCrudRepository) {
+                                     TreatmentRepository treatmentRepository) {
         this.baselines = baselines;
         this.brokers = brokers;
         this.treatmentFactory = treatmentFactory;
         this.treatmentRepository = treatmentRepository;
         this.logger = LogManager.getLogger(TreatmentRestControllerV2.class);
-        this.registrationTokenCrudRepository = registrationTokenCrudRepository;
     }
 
     @PostMapping("/")
@@ -59,13 +54,27 @@ public class TreatmentRestControllerV2 {
     }
 
     @GetMapping("/{id}/")
-    public ResponseEntity<Treatment> getById(@PathVariable String id) {
+    public ResponseEntity<TreatmentDTO> getById(@PathVariable String id) {
         Optional<Treatment> treatment = treatmentRepository.findById(id);
         if (treatment.isPresent()) {
             TreatmentDTO dto = treatmentToDto(treatment.get());
-            return ResponseEntity.ok(treatment.get());
+            return ResponseEntity.ok(dto);
         } else {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<Collection<TreatmentDTO>> getAll() {
+        try {
+            Set<Treatment> treatments = new HashSet<>();
+            treatmentRepository.findAll().forEach(treatments::add);
+            return ResponseEntity.ok(treatments.stream()
+                .map(this::treatmentToDto)
+                .collect(Collectors.toSet()));
+        } catch (Exception e) {
+            logger.error("unable to fetch treatments", e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 
@@ -98,6 +107,7 @@ public class TreatmentRestControllerV2 {
             .modifier(modifierToDto(treatment.getModifier()))
             .gameIds(treatment.getGameIds())
             .createdAt(treatment.getCreatedAt())
+            .config(treatment.getGames().get(0).getConfigDto())
             .build();
     }
 
