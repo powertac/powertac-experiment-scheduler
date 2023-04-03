@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +31,10 @@ public class FileNode {
 
     public String getName() {
         return path.getFileName().toString();
+    }
+
+    public Long getByteCount() {
+        return new File(path.toString()).length();
     }
 
     public void delete() throws IOException {

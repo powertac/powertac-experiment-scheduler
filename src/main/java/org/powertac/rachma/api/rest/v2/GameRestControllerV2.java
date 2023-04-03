@@ -3,11 +3,15 @@ package org.powertac.rachma.api.rest.v2;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.BrokerNotFoundException;
+import org.powertac.rachma.file.FileNode;
+import org.powertac.rachma.file.FileTreeBuilder;
 import org.powertac.rachma.game.*;
+import org.powertac.rachma.paths.PathProvider;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.stream.Collectors;
 
 @RestController
@@ -19,18 +23,22 @@ public class GameRestControllerV2 {
     private final GameValidator validator;
     private final GameFileManager gameFileManager;
     private final GameDTOMapper gameMapper;
+    private final FileTreeBuilder fileTreeBuilder;
+    private final PathProvider paths;
     private final Logger logger;
 
     public GameRestControllerV2(GameRepository games,
                                 GameFactory gameFactory,
                                 GameValidator validator,
                                 GameFileManager gameFileManager,
-                                GameDTOMapper mapper) {
+                                GameDTOMapper mapper, FileTreeBuilder fileTreeBuilder, PathProvider paths) {
         this.games = games;
         this.gameFactory = gameFactory;
         this.validator = validator;
         this.gameFileManager = gameFileManager;
         this.gameMapper = mapper;
+        this.fileTreeBuilder = fileTreeBuilder;
+        this.paths = paths;
         logger = LogManager.getLogger(GameRestControllerV2.class);
     }
 
@@ -67,6 +75,18 @@ public class GameRestControllerV2 {
         } catch (IOException | GameValidationException | BrokerNotFoundException e) {
             logger.error("unable to create new game", e);
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/file-root")
+    public ResponseEntity<FileNode> getRootNode(@PathVariable String id) {
+        try {
+            Game game = games.findById(id);
+            Path gameRoot = paths.host().game(game).dir();
+            return ResponseEntity.ok(fileTreeBuilder.build(gameRoot));
+        } catch (Exception e) {
+            logger.error("unable to deliver file root node for game with id=" + id, e);
+            return ResponseEntity.internalServerError().build();
         }
     }
 
