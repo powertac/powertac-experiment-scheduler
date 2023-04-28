@@ -43,7 +43,7 @@ public class LocalFileSystemGameFileExporter implements GameFileExporter {
     }
 
     private void writeManifest(List<Game> games, String hostUri, String folder) throws IOException {
-        String manifest = manifestBuilder.getManifest(games, hostUri);
+        String manifest = manifestBuilder.buildManifest(games, hostUri, GameGroupManifestBuilderImpl.defaultDelimiter);
         Path manifestPath = Paths.get(exportBasePath, folder, "games.csv"); // TODO : make file name configurable
         Files.writeString(manifestPath, manifest, StandardCharsets.UTF_8);
     }

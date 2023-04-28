@@ -2,6 +2,7 @@ package org.powertac.rachma.util.schema;
 
 import lombok.Setter;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,7 +15,7 @@ public class Schema<E> {
 
     @SafeVarargs
     public static <T> Schema<T> create(Field<T>... fields) {
-        return new Schema<>(List.of(fields));
+        return new Schema<>(Arrays.stream(fields).collect(Collectors.toList()));
     }
 
     public Schema(List<Field<E>> fields) {

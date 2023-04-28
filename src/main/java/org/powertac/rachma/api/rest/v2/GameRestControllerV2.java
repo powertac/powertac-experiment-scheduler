@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.broker.BrokerNotFoundException;
 import org.powertac.rachma.file.FileNode;
 import org.powertac.rachma.file.FileTreeBuilder;
+import org.powertac.rachma.file.GameArchiveBuilder;
 import org.powertac.rachma.game.*;
 import org.powertac.rachma.paths.PathProvider;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +26,12 @@ public class GameRestControllerV2 {
     private final GameDTOMapper gameMapper;
     private final FileTreeBuilder fileTreeBuilder;
     private final PathProvider paths;
+    private final GameArchiveBuilder archiveBuilder;
     private final Logger logger;
 
-    public GameRestControllerV2(GameRepository games,
-                                GameFactory gameFactory,
-                                GameValidator validator,
-                                GameFileManager gameFileManager,
-                                GameDTOMapper mapper, FileTreeBuilder fileTreeBuilder, PathProvider paths) {
+    public GameRestControllerV2(GameRepository games, GameFactory gameFactory, GameValidator validator,
+                                GameFileManager gameFileManager, GameDTOMapper mapper, FileTreeBuilder fileTreeBuilder,
+                                PathProvider paths, GameArchiveBuilder archiveBuilder) {
         this.games = games;
         this.gameFactory = gameFactory;
         this.validator = validator;
@@ -39,6 +39,7 @@ public class GameRestControllerV2 {
         this.gameMapper = mapper;
         this.fileTreeBuilder = fileTreeBuilder;
         this.paths = paths;
+        this.archiveBuilder = archiveBuilder;
         logger = LogManager.getLogger(GameRestControllerV2.class);
     }
 
@@ -86,6 +87,18 @@ public class GameRestControllerV2 {
             return ResponseEntity.ok(fileTreeBuilder.build(gameRoot));
         } catch (Exception e) {
             logger.error("unable to deliver file root node for game with id=" + id, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{id}/archive")
+    public ResponseEntity<?> createArchive(@PathVariable String id) {
+        try {
+            Game game = games.findById(id);
+            archiveBuilder.buildArchive(game);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            logger.error("unable to build game archive for game with id=" + id, e);
             return ResponseEntity.internalServerError().build();
         }
     }

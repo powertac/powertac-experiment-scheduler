@@ -16,23 +16,25 @@ import java.util.Set;
 @Component
 public class GameGroupManifestBuilderImpl implements GameGroupManifestBuilder {
 
+    public final static String defaultDelimiter = ", "; // TODO : make configurable via properties
+
     private final DateTimeFormatter weatherDateFormatter = DateTimeFormatter
         .ofPattern("yyyy-MM-dd")
         .withLocale(Locale.getDefault())
         .withZone(ZoneId.systemDefault());
 
     @Override
-    public String getManifest(List<Game> games, String hostUri) {
+    public String buildManifest(List<Game> games, String hostUri, String delimiter) {
         Set<Broker> brokers = collectBrokers(games);
-        Schema<Game> schema = buildSchema(hostUri, brokers);
+        Schema<Game> schema = buildSchema(hostUri, brokers, delimiter);
         return parseCsv(schema, games);
     }
 
-    private Schema<Game> buildSchema(String hostUri, Set<Broker> brokers) {
+    private Schema<Game> buildSchema(String hostUri, Set<Broker> brokers, String delimiter) {
         Schema<Game> schema = Schema.create(
             Field.create("gameId", Game::getId),
             Field.create("gameName", Game::getName),
-            Field.create("status", game -> "game_completed"), // TODO : what are the available game status codes?
+            Field.create("status", game -> "game_completed"), // TODO : @Govert/@Erik what are the available game status codes?
             Field.create("gameSize", game -> ((Integer) game.getBrokers().size()).toString()),
             Field.create("gameLength", game -> ""), // TODO : extract game length from logs
             Field.create("lastTick", game -> ""), // TODO : extract last tick from logs
@@ -43,7 +45,7 @@ public class GameGroupManifestBuilderImpl implements GameGroupManifestBuilder {
         for (Broker broker : brokers) {
             schema.add(Field.create(broker.getName(), game -> "")); // TODO : extract final cash positions from logs
         }
-        schema.setDelimiter(", ");
+        schema.setDelimiter(delimiter);
         return schema;
     }
 
@@ -57,9 +59,9 @@ public class GameGroupManifestBuilderImpl implements GameGroupManifestBuilder {
 
     private String parseCsv(Schema<Game> schema, List<Game> games) {
         StringBuilder builder = new StringBuilder();
-        builder.append(schema.header()).append("\n");
+        builder.append(schema.header()).append("\n"); // TODO : should use system default
         for (Game game : games) {
-            builder.append(schema.format(game)).append("\n");
+            builder.append(schema.format(game)).append("\n"); // TODO : should use system default
         }
         return builder.toString();
     }
