@@ -4,7 +4,6 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateNetworkResponse;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.exception.NotFoundException;
-import com.github.dockerjava.api.model.Network;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +55,18 @@ public class ApiDrivenDockerNetworkRepository implements DockerNetworkRepository
             managedNetworks.remove(name);
         } catch (NotFoundException e) {
             // suppress exception due to non-existent network
+        }
+    }
+
+    @Override
+    public boolean exists(String networkIdOrName) throws DockerException {
+        try {
+            dockerClient.inspectNetworkCmd()
+                .withNetworkId(networkIdOrName)
+                .exec();
+            return true;
+        } catch (NotFoundException e) {
+            return false;
         }
     }
 

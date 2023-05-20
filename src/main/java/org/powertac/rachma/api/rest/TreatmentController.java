@@ -48,6 +48,7 @@ public class TreatmentController {
     }
 
     @PostMapping("/")
+    @Deprecated
     public ResponseEntity<Treatment> create(@RequestBody TreatmentSpecView view) {
         try {
             Optional<Baseline> baseline = baselines.findById(view.getBaselineId());

@@ -6,7 +6,7 @@ import org.powertac.rachma.game.Game;
 
 public interface BootstrapContainerCreator {
 
-    DockerContainer create(Game game) throws DockerException;
+    DockerContainer create(Game game, String networkId) throws DockerException;
     String getBootstrapContainerName(Game game);
 
 }

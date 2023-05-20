@@ -48,6 +48,9 @@ public class TreatmentRestControllerV2 {
                 return ResponseEntity.badRequest().build();
             }
         } catch (Exception e) {
+            // TODO :   wrap creation in Transaction and only add games to queue once creation has been completed,
+            //          otherwise remove persisted entities/files
+            //          Check @Transactional in conjunction with rollback behaviours for details
             logger.error(e);
             return ResponseEntity.status(500).build();
         }
@@ -106,7 +109,7 @@ public class TreatmentRestControllerV2 {
             .baselineId(treatment.getBaselineId())
             .modifier(modifierToDto(treatment.getModifier()))
             .gameIds(treatment.getGameIds())
-            .createdAt(treatment.getCreatedAt())
+            .createdAt(treatment.getCreatedAt().toEpochMilli())
             .config(treatment.getGames().get(0).getConfigDto())
             .build();
     }

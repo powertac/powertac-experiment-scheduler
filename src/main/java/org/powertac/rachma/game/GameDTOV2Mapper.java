@@ -2,6 +2,8 @@ package org.powertac.rachma.game;
 
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -9,13 +11,16 @@ public class GameDTOV2Mapper implements GameDTOMapper {
 
     @Override
     public GameDTO toDTO(Game game) {
+        List<GameRunDTO> runDTOs = new HashSet<>(game.getRuns()).stream()
+            .map(this::parseGameRunDTO)
+            .collect(Collectors.toList());
         return GameDTO.builder()
             .id(game.getId())
             .name(game.getName())
             .config(parseConfigDTO(game))
             .createdAt(game.getCreatedAt().toEpochMilli())
             .cancelled(game.isCancelled())
-            .runs(game.getRuns().stream().map(this::parseGameRunDTO).collect(Collectors.toList()))
+            .runs(runDTOs)
             .baselineId(game.getBaseline() != null ? game.getBaseline().getId() : null)
             .treatmentId(game.getTreatment() != null ? game.getTreatment().getId() : null)
             .baseGameId(game.getBase() != null ? game.getBase().getId() : null)

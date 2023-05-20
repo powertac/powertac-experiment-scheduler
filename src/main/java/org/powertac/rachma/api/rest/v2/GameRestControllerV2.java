@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 @RestController
@@ -27,11 +28,12 @@ public class GameRestControllerV2 {
     private final FileTreeBuilder fileTreeBuilder;
     private final PathProvider paths;
     private final GameArchiveBuilder archiveBuilder;
+    private final GameRunner runner;
     private final Logger logger;
 
     public GameRestControllerV2(GameRepository games, GameFactory gameFactory, GameValidator validator,
                                 GameFileManager gameFileManager, GameDTOMapper mapper, FileTreeBuilder fileTreeBuilder,
-                                PathProvider paths, GameArchiveBuilder archiveBuilder) {
+                                PathProvider paths, GameArchiveBuilder archiveBuilder, GameRunner runner) {
         this.games = games;
         this.gameFactory = gameFactory;
         this.validator = validator;
@@ -40,7 +42,22 @@ public class GameRestControllerV2 {
         this.fileTreeBuilder = fileTreeBuilder;
         this.paths = paths;
         this.archiveBuilder = archiveBuilder;
+        this.runner = runner;
         logger = LogManager.getLogger(GameRestControllerV2.class);
+    }
+
+    @GetMapping("/running")
+    public ResponseEntity<Collection<GameDTO>> getRunning() {
+        try {
+            Collection<Game> runningGames = runner.getRunningGames();
+            return ResponseEntity.ok(
+                runningGames.stream()
+                    .map(gameMapper::toDTO)
+                    .collect(Collectors.toSet()));
+        } catch (Exception e) {
+            logger.error("unable to serve running games", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -83,7 +100,7 @@ public class GameRestControllerV2 {
     public ResponseEntity<FileNode> getRootNode(@PathVariable String id) {
         try {
             Game game = games.findById(id);
-            Path gameRoot = paths.host().game(game).dir();
+            Path gameRoot = paths.local().game(game).dir();
             return ResponseEntity.ok(fileTreeBuilder.build(gameRoot));
         } catch (Exception e) {
             logger.error("unable to deliver file root node for game with id=" + id, e);
@@ -99,6 +116,17 @@ public class GameRestControllerV2 {
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             logger.error("unable to build game archive for game with id=" + id, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/games/{id}/paths/dir")
+    public ResponseEntity<String> getGamePath(@PathVariable String id) {
+        try {
+            Game game = games.findById(id);
+            return ResponseEntity.ok(paths.host().game(game).dir().toString());
+        } catch (Exception e) {
+            logger.error("unable to determine game directory path", e);
             return ResponseEntity.internalServerError().build();
         }
     }

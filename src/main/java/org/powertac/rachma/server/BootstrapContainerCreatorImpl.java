@@ -7,8 +7,8 @@ import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.model.Bind;
 import com.github.dockerjava.api.model.HostConfig;
 import org.powertac.rachma.docker.DockerContainer;
-import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.game.Game;
+import org.powertac.rachma.paths.PathProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -36,12 +36,12 @@ public class BootstrapContainerCreatorImpl implements BootstrapContainerCreator 
     }
 
     @Override
-    public DockerContainer create(Game game) throws DockerException {
+    public DockerContainer create(Game game, String networkId) throws DockerException {
         CreateContainerCmd create = docker.createContainerCmd(defaultImageTag);
         String name = getBootstrapContainerName(game);
         create.withName(name);
         create.withCmd(getCommand(game));
-        create.withHostConfig(getHostConfig(game));
+        create.withHostConfig(getHostConfig(game, networkId));
         CreateContainerResponse response = create.exec();
         return new DockerContainer(response.getId(), name);
     }
@@ -57,9 +57,10 @@ public class BootstrapContainerCreatorImpl implements BootstrapContainerCreator 
             paths.container().server().game(game).bootstrap().toString());
     }
 
-    private HostConfig getHostConfig(Game game) {
+    private HostConfig getHostConfig(Game game, String networkId) {
         HostConfig config = new HostConfig();
         config.withBinds(getBinds(game));
+        config.withNetworkMode(networkId);
         return config;
     }
 

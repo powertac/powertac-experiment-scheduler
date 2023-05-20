@@ -63,6 +63,7 @@ public class FileRestController {
                 deleteFileTree(root, true);
                 return ResponseEntity.ok().build();
             } catch (IOException e) {
+                logger.error("unable to remove files for run with id=" + id, e);
                 return ResponseEntity.status(500).build();
             }
         }

@@ -124,4 +124,17 @@ public class GameRun implements Comparable<GameRun> {
             return Comparator.comparing(GameRun::getStart).compare(this, run);
         }
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GameRun gameRun = (GameRun) o;
+        return getId() != null ? getId().equals(gameRun.getId()) : gameRun.getId() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return getId() != null ? getId().hashCode() : 0;
+    }
 }

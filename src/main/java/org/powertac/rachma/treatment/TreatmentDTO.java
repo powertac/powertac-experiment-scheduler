@@ -4,7 +4,6 @@ import lombok.Builder;
 import lombok.Getter;
 import org.powertac.rachma.game.GameConfigDTO;
 
-import java.time.Instant;
 import java.util.List;
 
 @Builder
@@ -29,6 +28,6 @@ public class TreatmentDTO {
     private GameConfigDTO config;
 
     @Getter
-    private Instant createdAt;
+    private Long createdAt;
 
 }
