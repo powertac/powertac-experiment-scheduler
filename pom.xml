@@ -18,7 +18,7 @@
 
     <properties>
         <spring.spring-boot.version>2.2.13.RELEASE</spring.spring-boot.version>
-        <junit.jupiter.version>5.3.2</junit.jupiter.version>
+        <junit.jupiter.version>5.7.0</junit.jupiter.version>
     </properties>
 
     <dependencies>
@@ -77,7 +77,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.16</version>
+            <version>1.18.26</version>
         </dependency>
         <dependency>
             <groupId>commons-cli</groupId>

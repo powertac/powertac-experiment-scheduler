@@ -34,6 +34,7 @@ public interface PathProvider extends Versioned {
             Path properties();
             Path seed();
             Path archive();
+            Path artifacts();
             BrokerPaths broker(Broker broker);
 
             interface BrokerPaths {
