@@ -243,10 +243,12 @@ public class ContainerGameRunner implements GameRunner {
     }
 
     private void removeExistingBrokerContainers(Game game) {
-        for (Broker broker : game.getBrokers()) {
-            String brokerContainerName = brokerContainerCreator.getBrokerContainerName(game, broker);
-            if (controller.exists(brokerContainerName)) {
-                controller.forceRemove(brokerContainerName);
+        for (GameRun run : game.getRuns()) {
+            for (Broker broker : game.getBrokers()) {
+                String brokerContainerName = brokerContainerCreator.getBrokerContainerName(run, broker);
+                if (controller.exists(brokerContainerName)) {
+                    controller.forceRemove(brokerContainerName);
+                }
             }
         }
     }

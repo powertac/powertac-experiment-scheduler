@@ -78,7 +78,7 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
 
     private void runTasks() {
         final TaskScheduler taskScheduler = context.getBean(TaskScheduler.class);
-        final TaskExecutor<Task> taskExecutor = context.getBean(TaskExecutor.class);
+        final TaskExecutor<Task> taskExecutor = (TaskExecutor<Task>) context.getBean("taskExecutor");
         final Logger logger = LogManager.getLogger("task runner");
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             Optional<Task> task = taskScheduler.next();

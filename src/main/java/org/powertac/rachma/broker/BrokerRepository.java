@@ -10,6 +10,6 @@ public interface BrokerRepository {
     Broker findByNameAndVersion(String name, String version);
     boolean exists(String id);
     boolean exists(String name, String version);
-    void save(Broker broker) throws BrokerConflictException;
+    void save(Broker broker) throws BrokerConflictException, BrokerValidationException;
 
 }

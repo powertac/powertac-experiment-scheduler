@@ -3,8 +3,6 @@ package org.powertac.rachma.exec;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 public class PersistentTaskSchedulerTests {
 
     @Test

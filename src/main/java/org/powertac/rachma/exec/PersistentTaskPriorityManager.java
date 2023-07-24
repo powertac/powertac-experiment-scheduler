@@ -1,7 +1,10 @@
 package org.powertac.rachma.exec;
 
+import org.springframework.stereotype.Component;
+
 import java.util.Optional;
 
+@Component
 public class PersistentTaskPriorityManager implements TaskPriorityManager {
 
     private final PersistentTaskRepository repository;

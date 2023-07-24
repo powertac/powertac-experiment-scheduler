@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-@Component
 public class DelegatingTaskExecutor implements TaskExecutor<Task> {
 
     private final Set<TaskExecutor<?>> executors = new HashSet<>();

@@ -47,6 +47,7 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             docker.startContainerCmd(container.getId()).exec();
         }
         catch (DockerException e) {
+            logger.error("could not start container with name=" + container.getName());
             throw new ContainerStartException("could not start container with name=" + container.getName());
         }
     }
