@@ -224,4 +224,12 @@ public class Game {
             && null == getLatestSuccessfulRun();
     }
 
+    public GameConfigDTO getConfigDto() {
+        return GameConfigDTO.builder()
+            .brokerIds(brokerSet.getIds())
+            .parameters(serverParameters)
+            .weather(weatherConfiguration)
+            .build();
+    }
+
 }

@@ -6,5 +6,6 @@ import java.nio.file.Path;
 public interface FileTreeBuilder {
 
     FileNode build(Path path) throws IOException;
+    FileNode build(Path path, int depth) throws IOException;
 
 }

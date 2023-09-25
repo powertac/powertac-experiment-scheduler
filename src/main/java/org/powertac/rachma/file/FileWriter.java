@@ -7,5 +7,6 @@ public interface FileWriter {
 
     void createFileIfNotExists(Path filePath) throws IOException;
     void createDirectoryIfNotExists(Path dirPath) throws IOException;
+    void write(Path filePath, String contents) throws IOException;
 
 }

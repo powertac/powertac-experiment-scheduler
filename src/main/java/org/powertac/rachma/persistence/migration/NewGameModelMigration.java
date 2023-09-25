@@ -108,7 +108,7 @@ public class NewGameModelMigration implements Migration {
             try {
                 Broker broker = brokerRepository.findByNameAndVersion(type.getName(), "latest");
                 brokers.add(null == broker ? createBrokerFromType(type) : broker);
-            } catch (BrokerConflictException e) {
+            } catch (BrokerConflictException|BrokerValidationException e) {
                 throw new MigrationException(String.format("failed to create new broker '%s' due to conflict with existing one", type.getName()), e);
             }
         }
@@ -117,7 +117,7 @@ public class NewGameModelMigration implements Migration {
             brokers);
     }
 
-    private Broker createBrokerFromType(BrokerType type) throws BrokerConflictException {
+    private Broker createBrokerFromType(BrokerType type) throws BrokerConflictException, BrokerValidationException {
         Broker broker = new Broker(
             null,
             type.getName(),

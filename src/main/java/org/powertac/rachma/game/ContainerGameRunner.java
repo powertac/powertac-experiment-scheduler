@@ -1,8 +1,10 @@
 package org.powertac.rachma.game;
 
+import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.exception.DockerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.powertac.rachma.application.DeploymentContext;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerContainerCreator;
 import org.powertac.rachma.docker.*;
@@ -10,17 +12,25 @@ import org.powertac.rachma.docker.exception.ContainerException;
 import org.powertac.rachma.server.BootstrapContainerCreator;
 import org.powertac.rachma.server.SimulationContainerCreator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
 public class ContainerGameRunner implements GameRunner {
+
+    @Value("${application.deployment.context}")
+    private DeploymentContext deploymentContext;
+
+    @Value("${services.weatherserver.containerId}")
+    private String weatherServerContainerId;
 
     private final GameRunRepository runs;
     private final GameFileManager gameFileManager;
@@ -32,6 +42,7 @@ public class ContainerGameRunner implements GameRunner {
     private final GameRunLifecycleManager lifecycle;
     private final GameValidator gameValidator;
     private final GamePostConditionValidator postConditionValidator;
+    private final DockerClient client;
 
     private final Map<Game, GameRun> activeRuns;
     private final Logger logger;
@@ -43,7 +54,7 @@ public class ContainerGameRunner implements GameRunner {
                                BrokerContainerCreator brokerContainerCreator,
                                DockerContainerController controller, DockerNetworkRepository networks,
                                GameRunLifecycleManager lifecycle, GameValidator gameValidator,
-                               GamePostConditionValidator postConditionValidator) {
+                               GamePostConditionValidator postConditionValidator, DockerClient client) {
         this.runs = runs;
         this.gameFileManager = gameFileManager;
         this.bootstrapContainerCreator = bootstrapContainerCreator;
@@ -54,6 +65,7 @@ public class ContainerGameRunner implements GameRunner {
         this.lifecycle = lifecycle;
         this.gameValidator = gameValidator;
         this.postConditionValidator = postConditionValidator;
+        this.client = client;
         this.activeRuns = new ConcurrentHashMap<>();
         logger = LogManager.getLogger(ContainerGameRunner.class);
     }
@@ -77,6 +89,11 @@ public class ContainerGameRunner implements GameRunner {
         }
     }
 
+    @Override
+    public Collection<Game> getRunningGames() {
+        return activeRuns.keySet();
+    }
+
     @PreDestroy
     public void shutdown() {
         for (GameRun run : activeRuns.values()) {
@@ -87,11 +104,15 @@ public class ContainerGameRunner implements GameRunner {
 
     private void prepare(GameRun run) throws GameValidationException {
         try {
+            removeExistingDockerResources(run.getGame());
             gameFileManager.createRunScaffold(run);
             lifecycle.preparation(run);
             gameValidator.validate(run.getGame());
-            removeExistingDockerResources(run.getGame());
-            // FIXME : how to handle properties file?
+            DockerNetwork network = networks.createNetwork(getNetworkName(run.getGame()));
+            run.setNetwork(network);
+            if (deploymentContext.equals(DeploymentContext.CONTAINER)) {
+                connectWeatherServer(network.getId());
+            }
             gameFileManager.createRunScaffold(run);
         } catch (IOException e) {
             throw new GameValidationException("could not create game file", e);
@@ -103,18 +124,18 @@ public class ContainerGameRunner implements GameRunner {
             try {
                 gameFileManager.createServerProperties(run.getGame());
                 gameFileManager.createBootstrap(run.getGame());
-                DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame());
+                DockerContainer bootstrapContainer = bootstrapContainerCreator.create(run.getGame(), run.getNetwork().getId());
                 lifecycle.bootstrap(run, bootstrapContainer);
                 DockerContainerExitState exitState = controller.run(run.getBootstrapContainer());
                 if (exitState.isErrorState()) {
-                    // FIXME : bootstrap should also be removed if this happens!!!
+                    gameFileManager.removeBootstrap(run.getGame());
                     throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId());
                 }
             } catch (IOException| ContainerException| DockerException e) {
                 try {
                     gameFileManager.removeBootstrap(run.getGame());
                 } catch (IOException f) {
-                    // FIXME : just log this attempt
+                    logger.error("unable to remove failed bootstrap file for game with id=" + run.getGame().getId());
                 }
                 throw new GameRunException("failed to create bootstrap for game with id=" + run.getGame().getId(), e);
             }
@@ -129,10 +150,9 @@ public class ContainerGameRunner implements GameRunner {
             for (Broker broker : run.getGame().getBrokers()) {
                 gameFileManager.createBrokerProperties(run.getGame(), broker);
             }
-            DockerNetwork network = networks.createNetwork(getNetworkName(run.getGame()));
-            DockerContainer serverContainer = simulationContainerCreator.create(run, network);
-            Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run, network);
-            lifecycle.simulation(run, network, serverContainer, brokerContainers);
+            DockerContainer serverContainer = simulationContainerCreator.create(run, run.getNetwork());
+            Map<Broker, DockerContainer> brokerContainers = createBrokerContainers(run, run.getNetwork());
+            lifecycle.simulation(run, run.getNetwork(), serverContainer, brokerContainers);
             Map<DockerContainer, DockerContainerExitState> exitStates = controller.run(run.getSimulationContainers());
             if (!gameCompletedSuccessfully(run, brokerContainers, exitStates)) {
                 throw new GameRunException("game run didn't meet one of the post conditions; check orchestrator log for details");
@@ -142,10 +162,28 @@ public class ContainerGameRunner implements GameRunner {
         } catch (ContainerException| DockerException e) {
             throw new GameRunException("simulation run failed due to container error", e);
         } finally {
-            if (null != run.getNetwork()) {
-                networks.removeNetwork(run.getNetwork());
+            DockerNetwork network = run.getNetwork();
+            if (null != network) {
+                if (deploymentContext.equals(DeploymentContext.CONTAINER)) {
+                    disconnectWeatherServer(network.getId());
+                }
+                networks.removeNetwork(network);
             }
         }
+    }
+
+    private void connectWeatherServer(String networkNameOrId) throws DockerException {
+        client.connectToNetworkCmd()
+            .withContainerId(weatherServerContainerId)
+            .withNetworkId(networkNameOrId)
+            .exec();
+    }
+
+    private void disconnectWeatherServer(String networkNameOrId) throws DockerException {
+        client.disconnectFromNetworkCmd()
+            .withContainerId(weatherServerContainerId)
+            .withNetworkId(networkNameOrId)
+            .exec();
     }
 
     private String getNetworkName(Game game) {
@@ -205,17 +243,24 @@ public class ContainerGameRunner implements GameRunner {
     }
 
     private void removeExistingBrokerContainers(Game game) {
-        for (Broker broker : game.getBrokers()) {
-            String brokerContainerName = brokerContainerCreator.getBrokerContainerName(game, broker);
-            if (controller.exists(brokerContainerName)) {
-                controller.forceRemove(brokerContainerName);
+        for (GameRun run : game.getRuns()) {
+            for (Broker broker : game.getBrokers()) {
+                String brokerContainerName = brokerContainerCreator.getBrokerContainerName(run, broker);
+                if (controller.exists(brokerContainerName)) {
+                    controller.forceRemove(brokerContainerName);
+                }
             }
         }
     }
 
     private void removeNetworkIfExists(Game game) {
         String networkName = getNetworkName(game);
-        networks.removeNetworkIfExists(networkName);
+        if (networks.exists(networkName)) {
+            if (deploymentContext.equals(DeploymentContext.CONTAINER)) {
+                disconnectWeatherServer(networkName);
+            }
+            networks.removeNetworkIfExists(networkName);
+        }
     }
 
 }

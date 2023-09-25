@@ -34,6 +34,10 @@ public class Broker {
     @Setter
     private boolean enabled;
 
+    public String getBrokerContainerPrefix() {
+        return String.format("%s..%s", this.name, this.version);
+    }
+
     public Broker(String name, String version) {
         this.name = name;
         this.version = version;

@@ -7,5 +7,6 @@ import java.util.Set;
 public interface BrokerSetFactory {
 
     BrokerSet create(Set<Broker> brokers) throws ValidationException;
+    BrokerSet createFromIds(Set<String> ids) throws ValidationException;
 
 }

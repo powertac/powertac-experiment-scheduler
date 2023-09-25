@@ -40,7 +40,7 @@ public class LocalStorageBrokerSeederImpl implements BrokerSeeder {
                     broker.setEnabled(images.exists(type.getImage()));
                 }
                 brokers.save(broker);
-            } catch (BrokerConflictException e) {
+            } catch (BrokerConflictException|BrokerValidationException e) {
                 logger.error(String.format("could not seed broker with name '%s' due to conflict with existing broker", type.getName()), e);
             }
         }

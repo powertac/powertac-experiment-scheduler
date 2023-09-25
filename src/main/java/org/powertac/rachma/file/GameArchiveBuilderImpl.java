@@ -3,6 +3,7 @@ package org.powertac.rachma.file;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRun;
 import org.powertac.rachma.paths.PathProvider;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class GameArchiveBuilderImpl implements GameArchiveBuilder {
@@ -23,6 +25,16 @@ public class GameArchiveBuilderImpl implements GameArchiveBuilder {
 
     public GameArchiveBuilderImpl(PathProvider paths) {
         this.paths = paths;
+    }
+
+    @Override
+    public void buildArchive(Game game) throws IOException {
+        Optional<GameRun> run = game.getSuccessfulRun();
+        if (run.isPresent()) {
+            buildArchive(run.get(), paths.local().game(game).archive());
+        } else {
+            throw new IOException("unable to build game archive; no successful run available for game with id=" + game.getId());
+        }
     }
 
     @Override

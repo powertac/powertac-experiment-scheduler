@@ -4,7 +4,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.application.ApplicationSetup;
 import org.powertac.rachma.application.LockException;
+import org.powertac.rachma.exec.Task;
+import org.powertac.rachma.exec.TaskExecutor;
+import org.powertac.rachma.exec.TaskScheduler;
 import org.powertac.rachma.game.GameScheduler;
+import org.powertac.rachma.persistence.SeederException;
+import org.powertac.rachma.persistence.SeederManager;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -20,8 +25,8 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @EnableAutoConfiguration(exclude = {
@@ -48,29 +53,42 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
     }
 
     @Override
-    public void run(ApplicationArguments args) {
-        final ApplicationSetup setup = context.getBean(ApplicationSetup.class);
-        try {
-            setup.start();
-        } catch (LockException e) {
-            LogManager.getLogger(ExperimentSchedulerService.class).error("setup is already running", e);
-        } catch (IOException e) {
-            LogManager.getLogger(ExperimentSchedulerService.class).error("application setup failed", e);
-        }
-        final GameScheduler gameScheduler = context.getBean(GameScheduler.class);
-        final Logger logger = LogManager.getLogger(ExperimentSchedulerService.class);
-        ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-        executor.scheduleAtFixedRate(runGames(gameScheduler, logger), 1, 1, TimeUnit.SECONDS);
+    public void run(ApplicationArguments args) throws Exception {
+        runStartupTasks();
+        runGames();
+        runTasks();
     }
 
-    private Runnable runGames(GameScheduler scheduler, Logger logger) {
-        return () -> {
+    private void runStartupTasks() throws SeederException, LockException, IOException {
+        context.getBean(ApplicationSetup.class).start();
+        context.getBean(SeederManager.class).runSeeders();
+    }
+
+    private void runGames() {
+        final GameScheduler scheduler = context.getBean(GameScheduler.class);
+        final Logger logger = LogManager.getLogger(ExperimentSchedulerService.class);
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             try {
                 scheduler.runGames();
             } catch (InterruptedException e) {
                 logger.error(e);
             }
-        };
+        }, 1, 1, TimeUnit.SECONDS);
+    }
+
+    private void runTasks() {
+        final TaskScheduler taskScheduler = context.getBean(TaskScheduler.class);
+        final TaskExecutor<Task> taskExecutor = (TaskExecutor<Task>) context.getBean("taskExecutor");
+        final Logger logger = LogManager.getLogger("task runner");
+        Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
+            Optional<Task> task = taskScheduler.next();
+            if (task.isPresent()) {
+                if (taskExecutor.accepts(task.get())) {
+                    taskExecutor.exec(task.get());
+                }
+                logger.error("no executor configured for type " + task.getClass());
+            }
+        }, 1, 1, TimeUnit.SECONDS);
     }
 
 }

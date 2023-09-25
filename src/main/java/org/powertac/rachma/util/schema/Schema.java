@@ -15,7 +15,7 @@ public class Schema<E> {
 
     @SafeVarargs
     public static <T> Schema<T> create(Field<T>... fields) {
-        return new Schema<T>(Arrays.stream(fields).collect(Collectors.toList()));
+        return new Schema<>(Arrays.stream(fields).collect(Collectors.toList()));
     }
 
     public Schema(List<Field<E>> fields) {

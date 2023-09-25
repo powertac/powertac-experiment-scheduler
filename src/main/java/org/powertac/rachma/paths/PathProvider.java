@@ -1,5 +1,6 @@
 package org.powertac.rachma.paths;
 
+import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRun;
@@ -11,7 +12,7 @@ public interface PathProvider extends Versioned {
 
     @Override
     default String getVersion() {
-        return "1.0";
+        return "1.1";
     }
 
     OrchestratorPaths host();
@@ -21,8 +22,10 @@ public interface PathProvider extends Versioned {
     interface OrchestratorPaths {
         Path games();
         @Deprecated Path brokers(); // deprecated due to manual broker management; automated image build will be removed
+        Path baselines();
         GamePaths game(Game game);
         GameRunPaths run(GameRun run);
+        BaselinePaths baseline(Baseline baseline);
 
         interface GamePaths {
             Path bootstrap();
@@ -30,6 +33,8 @@ public interface PathProvider extends Versioned {
             Path runs();
             Path properties();
             Path seed();
+            Path archive();
+            Path artifacts();
             BrokerPaths broker(Broker broker);
 
             interface BrokerPaths {
@@ -48,6 +53,11 @@ public interface PathProvider extends Versioned {
             interface BrokerPaths {
                 Path dir();
             }
+        }
+
+        interface BaselinePaths {
+            Path dir();
+            Path manifest();
         }
     }
 

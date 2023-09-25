@@ -6,12 +6,12 @@ import org.powertac.rachma.paths.PathProvider;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class OrchestratorGameRunPaths implements PathProvider.OrchestratorPaths.GameRunPaths {
+public class OrchestratorGameRunPathProvider implements PathProvider.OrchestratorPaths.GameRunPaths {
 
     private final PathProvider.OrchestratorPaths parent;
     private final GameRun run;
 
-    public OrchestratorGameRunPaths(PathProvider.OrchestratorPaths parent, GameRun run) {
+    public OrchestratorGameRunPathProvider(PathProvider.OrchestratorPaths parent, GameRun run) {
         this.parent = parent;
         this.run = run;
     }

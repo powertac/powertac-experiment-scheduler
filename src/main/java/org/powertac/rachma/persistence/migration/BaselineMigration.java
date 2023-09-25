@@ -141,7 +141,7 @@ public class BaselineMigration implements Migration {
                     imageTag,
                     imageRepository.exists(imageTag)
                 ));
-            } catch (BrokerConflictException e) {
+            } catch (BrokerConflictException|BrokerValidationException e) {
                 throw new MigrationException(String.format(
                     "could not create new broker '%s' due to conflict with existing one", name), e);
             }

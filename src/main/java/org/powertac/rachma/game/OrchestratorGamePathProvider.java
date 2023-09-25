@@ -6,12 +6,12 @@ import org.powertac.rachma.paths.PathProvider;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class OrchestratorGamePaths implements PathProvider.OrchestratorPaths.GamePaths {
+public class OrchestratorGamePathProvider implements PathProvider.OrchestratorPaths.GamePaths {
 
     private final PathProvider.OrchestratorPaths parent;
     private final Game game;
 
-    public OrchestratorGamePaths(PathProvider.OrchestratorPaths parent, Game game) {
+    public OrchestratorGamePathProvider(PathProvider.OrchestratorPaths parent, Game game) {
         this.parent = parent;
         this.game = game;
     }
@@ -47,6 +47,21 @@ public class OrchestratorGamePaths implements PathProvider.OrchestratorPaths.Gam
         return null != game.getSeed()
             ? parent.run(game.getSeed().getGame().getLatestSuccessfulRun()).state()
             :null;
+    }
+
+    @Override
+    public Path archive() {
+        return Paths.get(
+            dir().toString(),
+            String.format("%s.game.tar.gz", game.getId()));
+    }
+
+    @Override
+    public Path artifacts() {
+        return Paths.get(
+            dir().toString(),
+            "artifacts"
+        );
     }
 
     @Override

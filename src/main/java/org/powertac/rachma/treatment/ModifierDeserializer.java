@@ -34,11 +34,14 @@ public class ModifierDeserializer extends StdNodeBasedDeserializer<Modifier> {
     }
 
     private ReplaceBrokerModifier parseReplaceBrokerModifier(JsonNode root, DeserializationContext context) throws IOException {
+        Broker original = DeserializationHelper.defaultDeserialize(root.get("original"), Broker.class, context);
+        Broker replacement = DeserializationHelper.defaultDeserialize(root.get("replacement"), Broker.class, context);
+        Map<Broker, Broker> brokerMapping = new HashMap<>();
+        brokerMapping.put(original, replacement);
         return new ReplaceBrokerModifier(
             null,
             root.get("name").asText(),
-            DeserializationHelper.defaultDeserialize(root.get("original"), Broker.class, context),
-            DeserializationHelper.defaultDeserialize(root.get("replacement"), Broker.class, context));
+            brokerMapping);
     }
 
     private ParameterSetModifier parseParameterSetModifier(JsonNode root) {

@@ -1,6 +1,6 @@
 package org.powertac.rachma.baseline;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameFactory;

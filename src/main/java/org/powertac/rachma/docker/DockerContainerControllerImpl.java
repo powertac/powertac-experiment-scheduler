@@ -1,12 +1,18 @@
 package org.powertac.rachma.docker;
 
 import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.async.ResultCallback;
+import com.github.dockerjava.api.async.ResultCallbackTemplate;
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.exception.DockerException;
 import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.model.Frame;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.docker.exception.*;
+import org.powertac.rachma.docker.exception.ContainerException;
+import org.powertac.rachma.docker.exception.ContainerReflectionException;
+import org.powertac.rachma.docker.exception.ContainerStartException;
+import org.powertac.rachma.docker.exception.KillContainerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -41,6 +47,7 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             docker.startContainerCmd(container.getId()).exec();
         }
         catch (DockerException e) {
+            logger.error("could not start container with name=" + container.getName());
             throw new ContainerStartException("could not start container with name=" + container.getName());
         }
     }
@@ -157,9 +164,11 @@ public class DockerContainerControllerImpl implements DockerContainerController 
                 if (!isRunningState(state)) {
                     int exitCode = getExitCode(state);
                     if (exitCode != 0) {
-                        logger.error(String.format("container exited with non-null code %s", exitCode));
+                        logger.error(String.format("container '%s' exited with non-null code %s", container.getName(), exitCode));
                     }
-                    return new DockerContainerExitState(getExitCode(state));
+                    return new DockerContainerExitState(
+                        getExitCode(state),
+                        state.getFinishedAt());
                 }
                 Thread.sleep(pollingIntervalMillis);
             }
@@ -217,6 +226,26 @@ public class DockerContainerControllerImpl implements DockerContainerController 
             .withForce(withForce)
             .withRemoveVolumes(true)
             .exec();
+    }
+
+    private String getLog(DockerContainer container) throws ContainerReflectionException {
+        try {
+            StringBuilder logBuilder = new StringBuilder();
+            ResultCallbackTemplate<ResultCallback<Frame>, Frame> cb = new ResultCallbackTemplate<>() {
+                @Override public void onNext(Frame frame) {
+                    logBuilder.append(new String(frame.getPayload()));
+                }
+            };
+            docker.logContainerCmd(container.getId())
+                .withStdOut(true)
+                .withStdErr(true)
+                .exec(cb)
+                .awaitCompletion();
+            return logBuilder.toString();
+        } catch (InterruptedException e) {
+            logger.error("could not read log for container " + container.getName(), e);
+            throw new ContainerReflectionException("could not read log for container " + container.getName(), e);
+        }
     }
 
 }

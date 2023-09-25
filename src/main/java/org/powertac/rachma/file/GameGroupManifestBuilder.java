@@ -6,6 +6,6 @@ import java.util.List;
 
 public interface GameGroupManifestBuilder {
 
-    String getManifest(List<Game> games, String hostUri);
+    String buildManifest(List<Game> games, String hostUri, String delimiter);
 
 }
