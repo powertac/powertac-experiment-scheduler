@@ -68,7 +68,7 @@ public class SimulationContainerCreatorImpl implements SimulationContainerCreato
 
     private List<String> getCommand(Game game) {
         Set<String> brokerNames = game.getBrokers().stream()
-            .map(Broker::getName)
+            .map(Broker::getHumanReadableIdentifier)
             .collect(Collectors.toSet());
         Path seedFilePath = useSeed(game) ? paths.container().server().game(game).seed() : null;
         return commandCreator.createSimulationCommand(

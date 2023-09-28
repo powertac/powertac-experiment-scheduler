@@ -39,7 +39,7 @@ public class DefaultGamePropertiesProvider implements GamePropertiesProvider {
     @Override
     public Properties getBrokerProperties(Game game, Broker broker) {
         Properties properties = getDefaultBrokerProperties();
-        properties.setProperty("samplebroker.core.powerTacBroker.username", broker.getName());
+        properties.setProperty("samplebroker.core.powerTacBroker.username", broker.getHumanReadableIdentifier());
         return properties;
     }
 

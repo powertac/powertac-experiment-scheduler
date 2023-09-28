@@ -47,8 +47,8 @@ public class OrchestratorGameRunPathProvider implements PathProvider.Orchestrato
     @Override
     public BrokerPaths broker(Broker broker) {
         return () -> Paths.get(
-            dir().toString(),
-            String.format("%s.broker", broker.getName()));
+                dir().toString(),
+                broker.getHumanReadableIdentifier());
     }
 
     @Override

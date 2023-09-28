@@ -45,7 +45,7 @@ public class BrokerContainerCreatorImpl implements BrokerContainerCreator {
 
     @Override
     public String getBrokerContainerName(GameRun run, Broker broker) {
-        return String.format("%s__%s", broker.getBrokerContainerPrefix(), run.getId());
+        return String.format("%s..%s", broker.getHumanReadableIdentifier(), run.getId());
     }
 
     private List<String> getCommand(Game game, Broker broker) {
