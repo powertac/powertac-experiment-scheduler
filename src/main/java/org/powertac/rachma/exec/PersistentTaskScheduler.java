@@ -24,6 +24,7 @@ public class PersistentTaskScheduler implements TaskScheduler {
         } else {
             priorityManager.setPriority(task, 0);
         }
+        // TODO : explicitly save task (no updates within priority manager!)
     }
 
     @Override

@@ -30,6 +30,11 @@ public final class ExecMocks {
             return true;
         }
 
+        @Override
+        public boolean hasCapacity() {
+            return true;
+        }
+
     }
 
     public static class AnotherSampleTask extends PersistentTask {}
@@ -47,6 +52,11 @@ public final class ExecMocks {
         @Override
         public boolean accepts(AnotherSampleTask task) {
             return task.getClass().equals(AnotherSampleTask.class);
+        }
+
+        @Override
+        public boolean hasCapacity() {
+            return true;
         }
 
     }

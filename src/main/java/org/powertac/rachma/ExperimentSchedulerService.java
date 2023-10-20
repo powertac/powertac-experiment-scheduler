@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.application.ApplicationSetup;
 import org.powertac.rachma.application.LockException;
+import org.powertac.rachma.exec.PersistentTaskRepository;
 import org.powertac.rachma.exec.Task;
 import org.powertac.rachma.exec.TaskExecutor;
 import org.powertac.rachma.exec.TaskScheduler;
@@ -82,11 +83,12 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
         final Logger logger = LogManager.getLogger("task runner");
         Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> {
             Optional<Task> task = taskScheduler.next();
-            if (task.isPresent()) {
+            if (taskExecutor.hasCapacity() && task.isPresent()) {
                 if (taskExecutor.accepts(task.get())) {
                     taskExecutor.exec(task.get());
                 }
                 logger.error("no executor configured for type " + task.getClass());
+                // FIXME : fail task with unconfigured executor
             }
         }, 1, 1, TimeUnit.SECONDS);
     }

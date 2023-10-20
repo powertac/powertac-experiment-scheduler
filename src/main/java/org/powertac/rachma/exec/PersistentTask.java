@@ -13,6 +13,7 @@ import java.time.Instant;
 @Table(name = "task")
 @SuperBuilder
 @NoArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class PersistentTask implements Task {
 
     @Id
@@ -38,5 +39,9 @@ public abstract class PersistentTask implements Task {
     @Getter
     @Setter
     private Integer priority;
+
+    @Getter
+    @Setter
+    private boolean failed;
 
 }

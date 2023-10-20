@@ -47,7 +47,6 @@ public class BrokerRestController {
     @PostMapping("/")
     public ResponseEntity<?> createBroker(@RequestBody Broker broker) {
         try {
-            broker.setImageTag(broker.getImageTag().toLowerCase()); // FIXME : is this required?
             broker.setEnabled(images.exists(broker.getImageTag()));
             brokers.save(broker);
             return ResponseEntity.ok().build();

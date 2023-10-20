@@ -3,6 +3,7 @@ package org.powertac.rachma.exec;
 import org.powertac.rachma.docker.ContainerTask;
 import org.powertac.rachma.docker.ContainerTaskExecutor;
 import org.powertac.rachma.docker.DockerContainerController;
+import org.powertac.rachma.game.file.GameFileExportTaskExecutor;
 import org.powertac.rachma.logprocessor.LogProcessorContainerCreatorImpl;
 import org.powertac.rachma.logprocessor.LogProcessorTask;
 import org.springframework.beans.BeansException;
@@ -25,6 +26,7 @@ public class TaskConfiguration implements ApplicationContextAware {
     public TaskExecutor<Task> taskExecutor() {
         DelegatingTaskExecutor executor = new DelegatingTaskExecutor();
         executor.addExecutor(containerTaskExecutor());
+        executor.addExecutor(context.getBean(GameFileExportTaskExecutor.class));
         return executor;
     }
 

@@ -1,37 +1,46 @@
 package org.powertac.rachma.exec;
 
 import org.springframework.core.ResolvableType;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DelegatingTaskExecutor implements TaskExecutor<Task> {
 
     private final Set<TaskExecutor<?>> executors = new HashSet<>();
+    private final AtomicBoolean busy = new AtomicBoolean(false);
 
     @Override
-    public void exec(Task task) {
+    public synchronized void exec(Task task) {
         try {
+            busy.set(true);
             Optional<TaskExecutor<?>> executor = getExecutor(task);
             if (executor.isPresent()) {
                 delegate("exec", executor.get(), task);
             }
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException("unable to delegate", e);
+        } finally {
+            busy.set(false);
         }
     }
 
     @Override
-    public boolean accepts(Task task) {
+    public synchronized boolean accepts(Task task) {
         try {
             return getExecutor(task).isPresent();
         } catch (InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException("unable to delegate", e);
         }
+    }
+
+    @Override
+    public boolean hasCapacity() {
+        return !busy.get();
     }
 
     private Optional<TaskExecutor<?>> getExecutor(Task task) throws InvocationTargetException, NoSuchMethodException, IllegalAccessException {

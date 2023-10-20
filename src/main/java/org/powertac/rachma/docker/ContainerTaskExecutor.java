@@ -2,17 +2,18 @@ package org.powertac.rachma.docker;
 
 import org.powertac.rachma.docker.exception.ContainerException;
 import org.powertac.rachma.exec.TaskExecutor;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ContainerTaskExecutor implements TaskExecutor<ContainerTask> {
 
     private final DockerContainerController controller;
     private final Map<Class<? extends ContainerTask>, ContainerCreator<? extends ContainerTask>> creators = new HashMap<>();
+    private final AtomicBoolean busy = new AtomicBoolean(false);
 
     public ContainerTaskExecutor(DockerContainerController controller) {
         this.controller = controller;
@@ -42,6 +43,11 @@ public class ContainerTaskExecutor implements TaskExecutor<ContainerTask> {
     @Override
     public boolean accepts(ContainerTask task) {
         return creators.containsKey(task.getClass());
+    }
+
+    @Override
+    public boolean hasCapacity() {
+        return busy.get();
     }
 
     public void setCreator(Class<? extends ContainerTask> taskType, ContainerCreator<? extends ContainerTask> creator) {
