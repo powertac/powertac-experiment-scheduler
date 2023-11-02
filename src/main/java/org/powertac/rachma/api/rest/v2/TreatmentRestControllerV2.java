@@ -6,11 +6,20 @@ import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.baseline.BaselineRepository;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.broker.BrokerRepository;
+import org.powertac.rachma.exec.PersistentTaskDTO;
+import org.powertac.rachma.exec.TaskDTOMapper;
+import org.powertac.rachma.exec.TaskScheduler;
+import org.powertac.rachma.game.file.GameFileExportTask;
+import org.powertac.rachma.game.file.GameFileExportTaskRepository;
+import org.powertac.rachma.game.file.NewGameFileExportTaskDTO;
 import org.powertac.rachma.treatment.*;
+import org.powertac.rachma.user.UserNotFoundException;
+import org.powertac.rachma.user.UserProvider;
 import org.powertac.rachma.util.ID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -22,15 +31,25 @@ public class TreatmentRestControllerV2 {
     private final BrokerRepository brokers;
     private final TreatmentFactory treatmentFactory;
     private final TreatmentRepository treatmentRepository;
+    private final TaskScheduler taskScheduler;
+    private final TaskDTOMapper taskDTOMapper;
+    private final UserProvider userProvider;
+    private final GameFileExportTaskRepository exportTaskRepository;
     private final Logger logger;
 
     public TreatmentRestControllerV2(BaselineRepository baselines,
                                      BrokerRepository brokers, TreatmentFactory treatmentFactory,
-                                     TreatmentRepository treatmentRepository) {
+                                     TreatmentRepository treatmentRepository, TaskScheduler taskScheduler,
+                                     TaskDTOMapper taskDTOMapper, UserProvider userProvider,
+                                     GameFileExportTaskRepository exportTaskRepository) {
         this.baselines = baselines;
         this.brokers = brokers;
         this.treatmentFactory = treatmentFactory;
         this.treatmentRepository = treatmentRepository;
+        this.taskScheduler = taskScheduler;
+        this.taskDTOMapper = taskDTOMapper;
+        this.userProvider = userProvider;
+        this.exportTaskRepository = exportTaskRepository;
         this.logger = LogManager.getLogger(TreatmentRestControllerV2.class);
     }
 
@@ -78,6 +97,41 @@ public class TreatmentRestControllerV2 {
         } catch (Exception e) {
             logger.error("unable to fetch treatments", e);
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/{id}/exports")
+    public ResponseEntity<PersistentTaskDTO> export(@PathVariable String id, @RequestBody NewGameFileExportTaskDTO config) {
+        Optional<Treatment> treatment = treatmentRepository.findById(id);
+        if (treatment.isPresent()) {
+            try {
+                GameFileExportTask task = createExportTask(treatment.get(), config);
+                taskScheduler.add(task);
+                return ResponseEntity.ok(taskDTOMapper.toDTO(task));
+            } catch (UserNotFoundException e) {
+                logger.error("unable to create game file export task for treatment with id=" + id, e);
+                return ResponseEntity.status(500).build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/{id}/exports")
+    public ResponseEntity<Collection<PersistentTaskDTO>> getExportTasks(@PathVariable String id) {
+        try {
+            Optional<Treatment> treatment = treatmentRepository.findById(id);
+            if (treatment.isPresent()) {
+                return ResponseEntity.ok(
+                    exportTaskRepository.findAllByTreatment(treatment.get()).stream()
+                        .map(taskDTOMapper::toDTO)
+                        .collect(Collectors.toList()));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("unable to get tasks for treatment with id=" + id, e);
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -132,6 +186,17 @@ public class TreatmentRestControllerV2 {
         } else {
             throw new RuntimeException("unsupported modifier type");
         }
+    }
+
+    private GameFileExportTask createExportTask(Treatment treatment, NewGameFileExportTaskDTO dto) throws UserNotFoundException {
+        return GameFileExportTask.builder()
+            .id(ID.gen())
+            .creator(userProvider.getCurrentUser())
+            .createdAt(Instant.now())
+            .treatment(treatment)
+            .target(dto.getTarget())
+            .baseUri(dto.getBaseUri())
+            .build();
     }
 
 }
