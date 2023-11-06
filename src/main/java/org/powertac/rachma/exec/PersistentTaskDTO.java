@@ -1,11 +1,12 @@
 package org.powertac.rachma.exec;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.experimental.SuperBuilder;
 
 @Getter
 @SuperBuilder
-public class PersistentTaskDTO {
+public class PersistentTaskDTO<C> {
 
     private String type;
     private String id;
@@ -15,5 +16,6 @@ public class PersistentTaskDTO {
     private Long end;
     private Integer priority;
     private boolean failed;
+    private C config;
 
 }

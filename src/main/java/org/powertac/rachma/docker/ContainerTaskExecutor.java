@@ -1,42 +1,50 @@
 package org.powertac.rachma.docker;
 
 import org.powertac.rachma.docker.exception.ContainerException;
+import org.powertac.rachma.exec.PersistentTaskRepository;
 import org.powertac.rachma.exec.TaskExecutor;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ContainerTaskExecutor implements TaskExecutor<ContainerTask> {
 
+    private final PersistentTaskRepository taskRepository;
     private final DockerContainerController controller;
     private final Map<Class<? extends ContainerTask>, ContainerCreator<? extends ContainerTask>> creators = new HashMap<>();
     private final AtomicBoolean busy = new AtomicBoolean(false);
 
-    public ContainerTaskExecutor(DockerContainerController controller) {
+    public ContainerTaskExecutor(PersistentTaskRepository taskRepository, DockerContainerController controller) {
+        this.taskRepository = taskRepository;
         this.controller = controller;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void exec(ContainerTask task) {
         if (accepts(task)) {
             try {
-                // TODO : add lifecycle management for tasks
+                busy.set(true);
+                task.setStart(Instant.now());
+                taskRepository.save(task);
                 ContainerCreator<? extends ContainerTask> creator = creators.get(task.getClass());
                 Method creationMethod = resolveCreationMethod(task.getClass(), (Class<? extends ContainerCreator<? extends ContainerTask>>) creator.getClass());
                 DockerContainer container = (DockerContainer) creationMethod.invoke(creator, task);
-                controller.run(container);
-            } catch (NoSuchMethodException e) {
+                DockerContainerExitState exit = controller.run(container);
+                task.setFailed(exit.isErrorState());
+            } catch (NoSuchMethodException|IllegalAccessException|InvocationTargetException|ContainerException e) {
                 throw new RuntimeException(e);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            } catch (ContainerException e) {
-                throw new RuntimeException(e);
+            } finally {
+                task.setEnd(Instant.now());
+                taskRepository.save(task);
+                busy.set(false);
             }
         } else {
-            throw new RuntimeException("doesn't accept"); // FIXME : create specific Exception type
+            throw new RuntimeException(ContainerTaskExecutor.class + " does not accept tasks of type + " + task.getClass());
         }
     }
 

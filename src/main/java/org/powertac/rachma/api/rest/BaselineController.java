@@ -10,6 +10,7 @@ import org.powertac.rachma.exec.TaskScheduler;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRepository;
 import org.powertac.rachma.game.file.GameFileExportTask;
+import org.powertac.rachma.game.file.GameFileExportTaskConfig;
 import org.powertac.rachma.game.file.GameFileExportTaskRepository;
 import org.powertac.rachma.game.file.NewGameFileExportTaskDTO;
 import org.powertac.rachma.user.UserNotFoundException;
@@ -118,7 +119,7 @@ public class BaselineController {
     }
 
     @PostMapping("/{id}/exports")
-    public ResponseEntity<PersistentTaskDTO> export(@PathVariable String id, @RequestBody NewGameFileExportTaskDTO options) {
+    public ResponseEntity<PersistentTaskDTO<GameFileExportTaskConfig>> export(@PathVariable String id, @RequestBody NewGameFileExportTaskDTO options) {
         Optional<Baseline> baseline = baselineRepository.findById(id);
         if (baseline.isPresent()) {
             try {
@@ -135,13 +136,13 @@ public class BaselineController {
     }
 
     @GetMapping("/{id}/exports")
-    public ResponseEntity<Collection<PersistentTaskDTO>> getExportTasks(@PathVariable String id) {
+    public ResponseEntity<Collection<PersistentTaskDTO<GameFileExportTaskConfig>>> getExportTasks(@PathVariable String id) {
         try {
             Optional<Baseline> baseline = baselineRepository.findById(id);
             if (baseline.isPresent()) {
                 return ResponseEntity.ok(
                     exportTaskRepository.findAllByBaseline(baseline.get()).stream()
-                        .map(taskDTOMapper::toDTO)
+                        .map(taskDTOMapper::<GameFileExportTaskConfig>toDTO)
                         .collect(Collectors.toList()));
             } else {
                 return ResponseEntity.notFound().build();

@@ -12,5 +12,6 @@ public interface Task {
     Instant getStart();
     Instant getEnd();
     Integer getPriority();
+    boolean hasFailed();
 
 }

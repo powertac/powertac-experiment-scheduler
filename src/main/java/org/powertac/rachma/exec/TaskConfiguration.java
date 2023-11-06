@@ -32,7 +32,9 @@ public class TaskConfiguration implements ApplicationContextAware {
 
     @Bean
     public TaskExecutor<ContainerTask> containerTaskExecutor() {
-        ContainerTaskExecutor executor = new ContainerTaskExecutor(context.getBean(DockerContainerController.class));
+        ContainerTaskExecutor executor = new ContainerTaskExecutor(
+            context.getBean(PersistentTaskRepository.class),
+            context.getBean(DockerContainerController.class));
         executor.setCreator(LogProcessorTask.class, context.getBean(LogProcessorContainerCreatorImpl.class));
         return executor;
     }

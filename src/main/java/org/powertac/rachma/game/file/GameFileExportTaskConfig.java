@@ -1,12 +1,11 @@
 package org.powertac.rachma.game.file;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.experimental.SuperBuilder;
-import org.powertac.rachma.exec.PersistentTaskDTO;
 
 @Getter
-@SuperBuilder
-public class GameFileExportTaskDTO extends PersistentTaskDTO {
+@Builder
+public class GameFileExportTaskConfig {
 
     private String baselineId;
     private String treatmentId;

@@ -2,6 +2,6 @@ package org.powertac.rachma.exec;
 
 public interface TaskDTOMapper {
 
-    <T extends PersistentTask> PersistentTaskDTO toDTO(T task);
+    <C> PersistentTaskDTO<C> toDTO(Task task);
 
 }

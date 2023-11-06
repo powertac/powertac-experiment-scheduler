@@ -10,6 +10,7 @@ import org.powertac.rachma.exec.PersistentTaskDTO;
 import org.powertac.rachma.exec.TaskDTOMapper;
 import org.powertac.rachma.exec.TaskScheduler;
 import org.powertac.rachma.game.file.GameFileExportTask;
+import org.powertac.rachma.game.file.GameFileExportTaskConfig;
 import org.powertac.rachma.game.file.GameFileExportTaskRepository;
 import org.powertac.rachma.game.file.NewGameFileExportTaskDTO;
 import org.powertac.rachma.treatment.*;
@@ -101,7 +102,7 @@ public class TreatmentRestControllerV2 {
     }
 
     @PostMapping("/{id}/exports")
-    public ResponseEntity<PersistentTaskDTO> export(@PathVariable String id, @RequestBody NewGameFileExportTaskDTO config) {
+    public ResponseEntity<PersistentTaskDTO<GameFileExportTaskConfig>> export(@PathVariable String id, @RequestBody NewGameFileExportTaskDTO config) {
         Optional<Treatment> treatment = treatmentRepository.findById(id);
         if (treatment.isPresent()) {
             try {
@@ -118,13 +119,13 @@ public class TreatmentRestControllerV2 {
     }
 
     @GetMapping("/{id}/exports")
-    public ResponseEntity<Collection<PersistentTaskDTO>> getExportTasks(@PathVariable String id) {
+    public ResponseEntity<Collection<PersistentTaskDTO<GameFileExportTaskConfig>>> getExportTasks(@PathVariable String id) {
         try {
             Optional<Treatment> treatment = treatmentRepository.findById(id);
             if (treatment.isPresent()) {
                 return ResponseEntity.ok(
                     exportTaskRepository.findAllByTreatment(treatment.get()).stream()
-                        .map(taskDTOMapper::toDTO)
+                        .map(taskDTOMapper::<GameFileExportTaskConfig>toDTO)
                         .collect(Collectors.toList()));
             } else {
                 return ResponseEntity.notFound().build();

@@ -25,7 +25,7 @@ public class TaskRestControllerV2 {
     }
 
     @GetMapping("/")
-    public ResponseEntity<Collection<PersistentTaskDTO>> getTasks() {
+    public ResponseEntity<Collection<PersistentTaskDTO<?>>> getTasks() {
         return ResponseEntity.ok(
             StreamSupport.stream(taskRepository.findAll().spliterator(), false)
                 .map(mapper::toDTO)

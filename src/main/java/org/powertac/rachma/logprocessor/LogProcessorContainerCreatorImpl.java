@@ -19,6 +19,7 @@ import java.util.List;
 public class LogProcessorContainerCreatorImpl implements ContainerCreator<LogProcessorTask> {
 
     private final static String containerRootPath = "/opt/powertac/log-processor";
+    private final static String containerResultsPath = containerRootPath + "/results";
 
     @Value("${logprocessor.container.defaultImage}")
     private String defaultImageTag;
@@ -37,7 +38,7 @@ public class LogProcessorContainerCreatorImpl implements ContainerCreator<LogPro
         String containerId = docker.createContainerCmd(defaultImageTag)
             .withName(containerName)
             .withHostConfig(getHostConfig(task.getGame()))
-            .withCmd(getCommand(task.getGame()))
+            .withCmd(getCommand(task))
             .exec().getId();
         return new DockerContainer(containerId, containerName);
     }
@@ -55,16 +56,18 @@ public class LogProcessorContainerCreatorImpl implements ContainerCreator<LogPro
                     new Volume(containerRootPath + "/game.state")),
                 new Bind(
                     paths.host().game(game).artifacts().toString(),
-                    new Volume(containerRootPath + "/artifacts")));
+                    new Volume(containerResultsPath)));
     }
 
-    private List<String> getCommand(Game game) {
+    private List<String> getCommand(LogProcessorTask task) {
         List<String> command = new ArrayList<>();
         command.add("game.state");
         command.add("--game");
-        command.add(game.getId());
+        command.add(task.getGame().getId());
         command.add("--out");
-        command.add("artifacts");
+        command.add(containerResultsPath);
+        command.add("--processors");
+        command.add(String.join(",", task.getProcessorIds()));
         return command;
     }
 

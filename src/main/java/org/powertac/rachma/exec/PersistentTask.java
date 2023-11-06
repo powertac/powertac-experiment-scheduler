@@ -40,8 +40,11 @@ public abstract class PersistentTask implements Task {
     @Setter
     private Integer priority;
 
-    @Getter
     @Setter
     private boolean failed;
+
+    public boolean hasFailed() {
+        return failed;
+    }
 
 }

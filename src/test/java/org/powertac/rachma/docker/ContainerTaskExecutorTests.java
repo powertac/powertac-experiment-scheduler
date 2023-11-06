@@ -11,7 +11,7 @@ public class ContainerTaskExecutorTests {
     @Test
     public void setCreator() {
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
-        ContainerTaskExecutor executor = new ContainerTaskExecutor(controller);
+        ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         Assertions.assertDoesNotThrow(() ->
             executor.setCreator(
                 ContainerTask.class,
@@ -21,7 +21,7 @@ public class ContainerTaskExecutorTests {
     @Test
     public void acceptsForExistingCreator() {
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
-        ContainerTaskExecutor executor = new ContainerTaskExecutor(controller);
+        ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         ContainerCreator<ContainerTask> creator = Mockito.mock(ContainerCreator.class);
         executor.setCreator(ExecMocks.SampleContainerTask.class, creator);
         Assertions.assertTrue(executor.accepts(new ExecMocks.SampleContainerTask()));
@@ -30,14 +30,14 @@ public class ContainerTaskExecutorTests {
     @Test
     public void acceptsFailsForNonExistentCreator() {
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
-        ContainerTaskExecutor executor = new ContainerTaskExecutor(controller);
+        ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         Assertions.assertFalse(executor.accepts(Mockito.mock(ContainerTask.class)));
     }
 
     @Test
     public void execWithMatchingCreator() throws ContainerException {
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
-        ContainerTaskExecutor executor = new ContainerTaskExecutor(controller);
+        ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         ContainerCreator<ExecMocks.SampleContainerTask> creator = new ExecMocks.SampleContainerTaskCreator();
         ExecMocks.SampleContainerTask task = new ExecMocks.SampleContainerTask();
         executor.setCreator(ExecMocks.SampleContainerTask.class, creator);
@@ -48,7 +48,7 @@ public class ContainerTaskExecutorTests {
     @Test
     public void execWithoutMatchingCreatorThrowsRuntimeException() {
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
-        ContainerTaskExecutor executor = new ContainerTaskExecutor(controller);
+        ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         ContainerCreator<ContainerTask> creator = Mockito.mock(ContainerCreator.class);
         executor.setCreator(ContainerTask.class, creator);
         Assertions.assertThrows(RuntimeException.class, () -> executor.exec(new ExecMocks.SampleContainerTask()));
