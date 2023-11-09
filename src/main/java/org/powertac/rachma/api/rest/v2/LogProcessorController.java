@@ -8,14 +8,19 @@ import org.powertac.rachma.exec.TaskScheduler;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRepository;
 import org.powertac.rachma.logprocessor.*;
+import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.user.UserNotFoundException;
 import org.powertac.rachma.user.UserProvider;
 import org.powertac.rachma.util.ID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,17 +34,20 @@ public class LogProcessorController {
     private final TaskScheduler taskScheduler;
     private final LogProcessorTaskRepository taskRepository;
     private final TaskDTOMapper dtoMapper;
+    private final PathProvider paths;
     private final Logger logger;
 
     public LogProcessorController(UserProvider userProvider, LogProcessorProvider processorProvider,
                                   GameRepository gameRepository, TaskScheduler taskScheduler,
-                                  LogProcessorTaskRepository taskRepository, TaskDTOMapper dtoMapper) {
+                                  LogProcessorTaskRepository taskRepository, TaskDTOMapper dtoMapper,
+                                  PathProvider paths) {
         this.userProvider = userProvider;
         this.processorProvider = processorProvider;
         this.gameRepository = gameRepository;
         this.taskScheduler = taskScheduler;
         this.taskRepository = taskRepository;
         this.dtoMapper = dtoMapper;
+        this.paths = paths;
         logger = LogManager.getLogger(LogProcessorController.class);
     }
 
@@ -75,7 +83,7 @@ public class LogProcessorController {
     }
 
     @GetMapping("/game/{id}")
-    public ResponseEntity<Collection<PersistentTaskDTO<LogProcessorTaskConfig>>> getForGame(@PathVariable String id) {
+    public ResponseEntity<Collection<PersistentTaskDTO<LogProcessorTaskConfig>>> getGameTasks(@PathVariable String id) {
         try {
             Game game = gameRepository.findById(id);
             if (null != game) {
@@ -88,6 +96,36 @@ public class LogProcessorController {
             }
         } catch (Exception e) {
             logger.error("unable to serve log processor tasks for game with id=" + id);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/game/{id}/artifacts")
+    public ResponseEntity<Set<LogProcessorArtifactDTO>> getLogProcessorArtifacts(@PathVariable String id) {
+        try {
+            Game game = gameRepository.findById(id);
+            if (null != game) {
+                Set<LogProcessorArtifactDTO> artifacts = new HashSet<>();
+                String hostGameArtifactsDir = paths.host().game(game).artifacts().toString();
+                String localGameArtifactsDir = paths.host().game(game).artifacts().toString();
+                for (LogProcessor processor : processorProvider.getAvailableProcessors()) {
+                    String filename = String.format(processor.getFileNamePattern(), id);
+                    // we use the local path for existence check
+                    if (Files.exists(Paths.get(localGameArtifactsDir, filename))) {
+                        artifacts.add(LogProcessorArtifactDTO.builder()
+                            .processorName(processor.getName())
+                            // ... and serve the host path for use with outside applications
+                            .filePath(Paths.get(hostGameArtifactsDir, filename).toString())
+                            .build());
+                    }
+                }
+                return ResponseEntity.ok(artifacts);
+            } else {
+                logger.error("unable to find game with id=" + id);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("unable to serve log processor status for game with id=" + id, e);
             return ResponseEntity.internalServerError().build();
         }
     }

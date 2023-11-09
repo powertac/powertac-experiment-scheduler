@@ -5,6 +5,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
+import org.powertac.rachma.file.DownloadToken;
+import org.powertac.rachma.file.DownloadTokenRepository;
 import org.powertac.rachma.user.*;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +20,16 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     private final JWTVerifier verifier;
     private final UserCrudRepository users;
     private final RegistrationTokenCrudRepository registrationTokens;
+    private final DownloadTokenRepository downloadTokens;
 
-    public JwtTokenServiceImpl(Algorithm algorithm, JWTVerifier verifier, UserCrudRepository users, RegistrationTokenCrudRepository registrationTokens) {
+    public JwtTokenServiceImpl(Algorithm algorithm, JWTVerifier verifier, UserCrudRepository users,
+                               RegistrationTokenCrudRepository registrationTokens,
+                               DownloadTokenRepository downloadTokens) {
         this.algorithm = algorithm;
         this.verifier = verifier;
         this.users = users;
         this.registrationTokens = registrationTokens;
+        this.downloadTokens = downloadTokens;
     }
 
     @Override
@@ -44,6 +50,15 @@ public class JwtTokenServiceImpl implements JwtTokenService {
     }
 
     @Override
+    public String createDownloadToken(User user, String filePath) {
+        return JWT.create()
+            .withIssuer("powertac")
+            .withClaim("username", user.getUsername())
+            .withClaim("filepath", filePath)
+            .sign(algorithm);
+    }
+
+    @Override
     public User getVerifiedUser(String token) throws JWTVerificationException, TokenVerificationException {
         DecodedJWT jwt = verifier.verify(token);
         User user = users.findByToken(token).orElse(null);
@@ -56,6 +71,7 @@ public class JwtTokenServiceImpl implements JwtTokenService {
         return user;
     }
 
+    @Override
     public RegistrationToken getVerifiedRegistrationToken(String token) throws InvalidRegistrationTokenException {
         DecodedJWT jwt = verifier.verify(token);
         Optional<RegistrationToken> registrationToken = registrationTokens.findByToken(token);
@@ -72,6 +88,23 @@ public class JwtTokenServiceImpl implements JwtTokenService {
             }
         } else {
             throw new InvalidRegistrationTokenException(String.format("no registration token found for token '%s'", token));
+        }
+    }
+
+    @Override
+    public DownloadToken getVerifiedDownloadToken(String token) throws TokenVerificationException {
+        DecodedJWT jwt = verifier.verify(token);
+        Optional<DownloadToken> download = downloadTokens.findByToken(token);
+        if (download.isPresent()) {
+            if (!jwt.getClaim("username").asString().equals(download.get().getUser().getUsername())) {
+                throw new TokenVerificationException("download token user doesn't match actual user; token=" + token);
+            }
+            if (!jwt.getClaim("filepath").asString().equals(download.get().getFilePath())) {
+                throw new TokenVerificationException("download token file path doesn't match actual file path; token=" + token);
+            }
+            return download.get();
+        } else {
+            throw new TokenVerificationException("download token " + token + "does not exist");
         }
     }
 

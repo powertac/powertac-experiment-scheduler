@@ -74,5 +74,7 @@
   "du.defaultBrokerService.buyLimitPriceMax",
   "du.defaultBrokerService.buyLimitPriceMin",
   "du.defaultBrokerService.sellLimitPriceMax",
-  "du.defaultBrokerService.sellLimitPriceMin"
+  "du.defaultBrokerService.sellLimitPriceMin",
+  "factoredcustomer.probabilityDistribution.SolarLeasingPopulation.mean",
+  "factoredcustomer.probabilityDistribution.SolarLeasingPopulation.stdDev"
 ]

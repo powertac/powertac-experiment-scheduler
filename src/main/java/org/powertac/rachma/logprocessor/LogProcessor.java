@@ -12,4 +12,7 @@ public class LogProcessor {
     @Getter
     private String clazz;
 
+    @Getter
+    private String fileNamePattern;
+
 }
