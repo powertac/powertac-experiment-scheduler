@@ -1,10 +1,12 @@
 package org.powertac.rachma.exec;
 
+import org.powertac.rachma.analysis.AnalyzerContainerCreator;
+import org.powertac.rachma.analysis.AnalyzerTask;
 import org.powertac.rachma.docker.ContainerTask;
 import org.powertac.rachma.docker.ContainerTaskExecutor;
 import org.powertac.rachma.docker.DockerContainerController;
 import org.powertac.rachma.game.file.GameFileExportTaskExecutor;
-import org.powertac.rachma.logprocessor.LogProcessorContainerCreatorImpl;
+import org.powertac.rachma.logprocessor.LogProcessorContainerCreator;
 import org.powertac.rachma.logprocessor.LogProcessorTask;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -35,7 +37,8 @@ public class TaskConfiguration implements ApplicationContextAware {
         ContainerTaskExecutor executor = new ContainerTaskExecutor(
             context.getBean(PersistentTaskRepository.class),
             context.getBean(DockerContainerController.class));
-        executor.setCreator(LogProcessorTask.class, context.getBean(LogProcessorContainerCreatorImpl.class));
+        executor.setCreator(LogProcessorTask.class, context.getBean(LogProcessorContainerCreator.class));
+        executor.setCreator(AnalyzerTask.class, context.getBean(AnalyzerContainerCreator.class));
         return executor;
     }
 

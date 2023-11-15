@@ -6,6 +6,8 @@ import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRun;
 import org.powertac.rachma.game.OrchestratorGamePathProvider;
 import org.powertac.rachma.game.OrchestratorGameRunPathProvider;
+import org.powertac.rachma.treatment.OrchestratorTreatmentPathProvider;
+import org.powertac.rachma.treatment.Treatment;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -46,6 +48,16 @@ public class OrchestratorPathsImpl implements PathProvider.OrchestratorPaths {
     @Override
     public BaselinePaths baseline(Baseline baseline) {
         return new OrchestratorBaselinePathProvider(this, baseline);
+    }
+
+    @Override
+    public Path treatments() {
+        return Paths.get(basePath, "treatments");
+    }
+
+    @Override
+    public TreatmentPaths treatment(Treatment treatment) {
+        return new OrchestratorTreatmentPathProvider(this, treatment);
     }
 
 }

@@ -21,6 +21,11 @@ public class OrchestratorBaselinePathProvider implements PathProvider.Orchestrat
     }
 
     @Override
+    public Path artifacts() {
+        return Paths.get(dir().toString(), "artifacts");
+    }
+
+    @Override
     public Path manifest() {
         return Paths.get(dir().toString(), String.format("%s.games.csv", baseline.getId()));
     }

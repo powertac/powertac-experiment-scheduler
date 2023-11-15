@@ -5,6 +5,7 @@ import java.util.Set;
 public interface LogProcessorProvider {
 
     Set<LogProcessor> getAvailableProcessors();
-    boolean hasProcessor(String processorName);
+    boolean has(String processorName);
+    LogProcessor get(String processorName);
 
 }

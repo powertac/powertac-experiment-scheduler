@@ -21,6 +21,10 @@ public class LogProcessorConfig {
             "balancing-market-transactions",
             "org.powertac.logprocessor.market.BalancingMarketTransactions",
             "%s.balancing-market-transactions.csv"));
+        provider.addProcessor(new LogProcessor(
+            "broker-market-prices",
+            "org.powertac.logprocessor.broker.BrokerMarketPrices",
+            "%s.broker-market-prices.csv"));
         return provider;
     }
 

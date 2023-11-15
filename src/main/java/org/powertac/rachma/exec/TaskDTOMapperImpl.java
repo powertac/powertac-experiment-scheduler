@@ -1,5 +1,7 @@
 package org.powertac.rachma.exec;
 
+import org.powertac.rachma.analysis.AnalyzerTask;
+import org.powertac.rachma.analysis.AnalyzerTaskConfig;
 import org.powertac.rachma.game.file.GameFileExportTask;
 import org.powertac.rachma.game.file.GameFileExportTaskConfig;
 import org.powertac.rachma.logprocessor.LogProcessorTask;
@@ -26,6 +28,9 @@ public class TaskDTOMapperImpl implements TaskDTOMapper {
         } else if (task instanceof LogProcessorTask) {
             builder.type("log-processor");
             builder.config(buildLogProcessorTaskConfig((LogProcessorTask) task));
+        } else if (task instanceof AnalyzerTask) {
+            builder.type("analyzer");
+            builder.config(buildAnalyzerTaskConfig((AnalyzerTask) task));
         }
         return (PersistentTaskDTO<C>) builder.build();
     }
@@ -43,6 +48,14 @@ public class TaskDTOMapperImpl implements TaskDTOMapper {
         return LogProcessorTaskConfig.builder()
             .gameId(task.getGame().getId())
             .processorNames(task.getProcessorIds())
+            .build();
+    }
+
+    private AnalyzerTaskConfig buildAnalyzerTaskConfig(AnalyzerTask task) {
+        return AnalyzerTaskConfig.builder()
+            .gameId(task.getGame() != null ? task.getGame().getId() : null)
+            .baselineId(task.getBaseline() != null ? task.getBaseline().getId() : null)
+            .treatmentId(task.getTreatment() != null ? task.getTreatment().getId() : null)
             .build();
     }
 

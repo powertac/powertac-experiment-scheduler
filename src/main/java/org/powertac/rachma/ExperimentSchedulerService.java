@@ -85,7 +85,11 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
             Optional<Task> task = taskScheduler.next();
             if (taskExecutor.hasCapacity() && task.isPresent()) {
                 if (taskExecutor.accepts(task.get())) {
-                    taskExecutor.exec(task.get());
+                    try {
+                        taskExecutor.exec(task.get());
+                    } catch (Exception e) {
+                        logger.error("error during task execution", e);
+                    }
                 }
                 logger.error("no executor configured for type " + task.getClass());
                 // FIXME : fail task with unconfigured executor

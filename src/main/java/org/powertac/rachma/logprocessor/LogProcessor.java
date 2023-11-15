@@ -2,9 +2,10 @@ package org.powertac.rachma.logprocessor;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.powertac.rachma.artifact.ArtifactProducer;
 
 @AllArgsConstructor
-public class LogProcessor {
+public class LogProcessor implements ArtifactProducer {
 
     @Getter
     private String name;

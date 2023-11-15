@@ -2,6 +2,8 @@ package org.powertac.rachma.api.rest.v2;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.powertac.rachma.baseline.Baseline;
+import org.powertac.rachma.baseline.BaselineRepository;
 import org.powertac.rachma.exec.PersistentTaskDTO;
 import org.powertac.rachma.exec.TaskDTOMapper;
 import org.powertac.rachma.exec.TaskScheduler;
@@ -9,6 +11,8 @@ import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRepository;
 import org.powertac.rachma.logprocessor.*;
 import org.powertac.rachma.paths.PathProvider;
+import org.powertac.rachma.treatment.Treatment;
+import org.powertac.rachma.treatment.TreatmentRepository;
 import org.powertac.rachma.user.UserNotFoundException;
 import org.powertac.rachma.user.UserProvider;
 import org.powertac.rachma.util.ID;
@@ -16,12 +20,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -31,6 +32,8 @@ public class LogProcessorController {
     private final UserProvider userProvider;
     private final LogProcessorProvider processorProvider;
     private final GameRepository gameRepository;
+    private final BaselineRepository baselineRepository;
+    private final TreatmentRepository treatmentRepository;
     private final TaskScheduler taskScheduler;
     private final LogProcessorTaskRepository taskRepository;
     private final TaskDTOMapper dtoMapper;
@@ -38,12 +41,15 @@ public class LogProcessorController {
     private final Logger logger;
 
     public LogProcessorController(UserProvider userProvider, LogProcessorProvider processorProvider,
-                                  GameRepository gameRepository, TaskScheduler taskScheduler,
+                                  GameRepository gameRepository, BaselineRepository baselineRepository,
+                                  TreatmentRepository treatmentRepository, TaskScheduler taskScheduler,
                                   LogProcessorTaskRepository taskRepository, TaskDTOMapper dtoMapper,
                                   PathProvider paths) {
         this.userProvider = userProvider;
         this.processorProvider = processorProvider;
         this.gameRepository = gameRepository;
+        this.baselineRepository = baselineRepository;
+        this.treatmentRepository = treatmentRepository;
         this.taskScheduler = taskScheduler;
         this.taskRepository = taskRepository;
         this.dtoMapper = dtoMapper;
@@ -68,7 +74,7 @@ public class LogProcessorController {
             if (game == null) {
                 logger.error("unable to find game with id=" + dto.getGameId());
                 return ResponseEntity.notFound().build();
-            } else if (!dto.getProcessorNames().stream().allMatch(processorProvider::hasProcessor)) {
+            } else if (!dto.getProcessorNames().stream().allMatch(processorProvider::has)) {
                 logger.error("one or more processors do not exist; " + String.join(", ", dto.getProcessorNames()));
                 return ResponseEntity.badRequest().build();
             } else {
@@ -76,6 +82,32 @@ public class LogProcessorController {
                 taskScheduler.add(task);
                 return ResponseEntity.ok(dtoMapper.toDTO(task));
             }
+        } catch (UserNotFoundException e) {
+            logger.error("unable to determine current user", e);
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<PersistentTaskDTO<LogProcessorTaskConfig>>> processLogs(@RequestBody Set<LogProcessorTaskConfig> configs) {
+        try {
+            List<LogProcessorTask> tasks = new ArrayList<>();
+            for (LogProcessorTaskConfig config : configs) {
+                Game game = gameRepository.findById(config.getGameId());
+                if (game == null) {
+                    logger.error("unable to find game with id=" + config.getGameId());
+                    return ResponseEntity.notFound().build();
+                } else if (!config.getProcessorNames().stream().allMatch(processorProvider::has)) {
+                    logger.error("one or more processors do not exist; " + String.join(", ", config.getProcessorNames()));
+                    return ResponseEntity.badRequest().build();
+                } else {
+                    tasks.add(createTask(game, config.getProcessorNames()));
+                }
+            }
+            tasks.forEach(taskScheduler::add);
+            return ResponseEntity.ok(tasks.stream()
+                .map(dtoMapper::<LogProcessorTaskConfig>toDTO)
+                .collect(Collectors.toList()));
         } catch (UserNotFoundException e) {
             logger.error("unable to determine current user", e);
             return ResponseEntity.badRequest().build();
@@ -105,21 +137,7 @@ public class LogProcessorController {
         try {
             Game game = gameRepository.findById(id);
             if (null != game) {
-                Set<LogProcessorArtifactDTO> artifacts = new HashSet<>();
-                String hostGameArtifactsDir = paths.host().game(game).artifacts().toString();
-                String localGameArtifactsDir = paths.host().game(game).artifacts().toString();
-                for (LogProcessor processor : processorProvider.getAvailableProcessors()) {
-                    String filename = String.format(processor.getFileNamePattern(), id);
-                    // we use the local path for existence check
-                    if (Files.exists(Paths.get(localGameArtifactsDir, filename))) {
-                        artifacts.add(LogProcessorArtifactDTO.builder()
-                            .processorName(processor.getName())
-                            // ... and serve the host path for use with outside applications
-                            .filePath(Paths.get(hostGameArtifactsDir, filename).toString())
-                            .build());
-                    }
-                }
-                return ResponseEntity.ok(artifacts);
+                return ResponseEntity.ok(getGameArtifacts(game));
             } else {
                 logger.error("unable to find game with id=" + id);
                 return ResponseEntity.notFound().build();
@@ -128,6 +146,64 @@ public class LogProcessorController {
             logger.error("unable to serve log processor status for game with id=" + id, e);
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("/baseline/{baselineId}/artifacts")
+    public ResponseEntity<Map<String, Set<LogProcessorArtifactDTO>>> getBaselineArtifacts(@PathVariable String baselineId) {
+        try {
+            Optional<Baseline> baseline = baselineRepository.findById(baselineId);
+            if (baseline.isPresent()) {
+                Map<String, Set<LogProcessorArtifactDTO>> artifacts = new HashMap<>();
+                for (Game game : baseline.get().getGames()) {
+                    artifacts.put(game.getId(), getGameArtifacts(game));
+                }
+                return ResponseEntity.ok(artifacts);
+            } else {
+                logger.error("unable to find baseline with id=" + baselineId);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("unable to serve all log processor artifacts for baseline with id=" + baselineId, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/treatments/{treatmentId}/artifacts")
+    public ResponseEntity<Map<String, Set<LogProcessorArtifactDTO>>> getTreatmentArtifacts(@PathVariable String treatmentId) {
+        try {
+            Optional<Treatment> treatment = treatmentRepository.findById(treatmentId);
+            if (treatment.isPresent()) {
+                Map<String, Set<LogProcessorArtifactDTO>> artifacts = new HashMap<>();
+                for (Game game : treatment.get().getGames()) {
+                    artifacts.put(game.getId(), getGameArtifacts(game));
+                }
+                return ResponseEntity.ok(artifacts);
+            } else {
+                logger.error("unable to find treatment with id=" + treatmentId);
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e) {
+            logger.error("unable to serve all log processor artifacts for treatment with id=" + treatmentId, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    private Set<LogProcessorArtifactDTO> getGameArtifacts(Game game) {
+        Set<LogProcessorArtifactDTO> artifacts = new HashSet<>();
+        String hostGameArtifactsDir = paths.host().game(game).artifacts().toString();
+        String localGameArtifactsDir = paths.host().game(game).artifacts().toString();
+        for (LogProcessor processor : processorProvider.getAvailableProcessors()) {
+            String filename = String.format(processor.getFileNamePattern(), game.getId());
+            // we use the local path for existence check
+            if (Files.exists(Paths.get(localGameArtifactsDir, filename))) {
+                artifacts.add(LogProcessorArtifactDTO.builder()
+                    .processorName(processor.getName())
+                    // ... and serve the host path for use with outside applications
+                    .filePath(Paths.get(hostGameArtifactsDir, filename).toString())
+                    .build());
+            }
+        }
+        return artifacts;
     }
 
     private LogProcessorTask createTask(Game game, Set<String> processorNames) throws UserNotFoundException {

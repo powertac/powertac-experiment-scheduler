@@ -4,6 +4,7 @@ import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.broker.Broker;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameRun;
+import org.powertac.rachma.treatment.Treatment;
 import org.powertac.rachma.util.Versioned;
 
 import java.nio.file.Path;
@@ -23,9 +24,11 @@ public interface PathProvider extends Versioned {
         Path games();
         @Deprecated Path brokers(); // deprecated due to manual broker management; automated image build will be removed
         Path baselines();
+        Path treatments();
         GamePaths game(Game game);
         GameRunPaths run(GameRun run);
         BaselinePaths baseline(Baseline baseline);
+        TreatmentPaths treatment(Treatment treatment);
 
         interface GamePaths {
             Path bootstrap();
@@ -57,7 +60,13 @@ public interface PathProvider extends Versioned {
 
         interface BaselinePaths {
             Path dir();
+            Path artifacts();
             Path manifest();
+        }
+
+        interface TreatmentPaths {
+            Path dir();
+            Path artifacts();
         }
     }
 

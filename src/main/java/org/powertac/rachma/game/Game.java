@@ -201,7 +201,8 @@ public class Game {
     }
 
     @Transient
-    public GameRun getLatestSuccessfulRun() {
+    @Deprecated
+    public GameRun getLatestSuccessfulRun() { // FIXME : this doesn't work correctly!!!
         return runs.stream().reduce(null, (current, run) ->
            run.wasSuccessful()
                ? null == current || run.getEnd().isAfter(current.getEnd()) ? run : current

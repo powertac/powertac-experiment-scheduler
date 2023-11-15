@@ -17,12 +17,18 @@ public class ConfigurableLogProcessorProvider implements LogProcessorProvider {
     }
 
     @Override
-    public boolean hasProcessor(String processorName) {
+    public boolean has(String processorName) {
+        return get(processorName) != null;
+    }
+
+    @Override
+    public LogProcessor get(String processorName) {
         for (LogProcessor processor : availableProcessors) {
             if (processor.getName().equals(processorName)) {
-                return true;
+                return processor;
             }
         }
-        return false;
+        return null;
     }
+
 }
