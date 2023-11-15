@@ -11,7 +11,10 @@ import org.powertac.rachma.exec.TaskScheduler;
 import org.powertac.rachma.game.GameScheduler;
 import org.powertac.rachma.persistence.SeederException;
 import org.powertac.rachma.persistence.SeederManager;
+import org.powertac.rachma.treatment.SeededGameStateLogFixer;
+import org.powertac.rachma.treatment.TreatmentRepository;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.Banner;
@@ -39,6 +42,8 @@ import java.util.concurrent.TimeUnit;
 @EnableJpaRepositories
 public class ExperimentSchedulerService implements ApplicationRunner, ApplicationContextAware {
 
+    private final boolean fixSeededStateLogs = true;
+
     private ApplicationContext context;
 
     @Override
@@ -63,6 +68,7 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
     private void runStartupTasks() throws SeederException, LockException, IOException {
         context.getBean(ApplicationSetup.class).start();
         context.getBean(SeederManager.class).runSeeders();
+        if (fixSeededStateLogs) fixSeededStateLogs();
     }
 
     private void runGames() {
@@ -95,6 +101,14 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
                 // FIXME : fail task with unconfigured executor
             }
         }, 1, 1, TimeUnit.SECONDS);
+    }
+
+    private void fixSeededStateLogs() {
+        final SeededGameStateLogFixer fixer = context.getBean(SeededGameStateLogFixer.class);
+        final TreatmentRepository treatmentRepository =context.getBean(TreatmentRepository.class);
+        treatmentRepository.findAll().forEach(t -> {
+            t.getGames().forEach(fixer::fixGameStateLog);
+        });
     }
 
 }
