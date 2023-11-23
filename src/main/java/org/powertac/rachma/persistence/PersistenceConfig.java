@@ -28,9 +28,6 @@ public class PersistenceConfig implements ApplicationContextAware {
     @Value("${spring.datasource.url}")
     private String baseUrl;
 
-    @Value("${persistence.legacy.enable-mongo}")
-    private boolean mongoDbEnabled;
-
     private ApplicationContext context;
 
     @Override
@@ -42,10 +39,6 @@ public class PersistenceConfig implements ApplicationContextAware {
     public MigrationRunner migrationRunner() {
         MigrationStatusRepository statusRepository = context.getBean(MigrationStatusRepository.class);
         MigrationRunner runner = new MigrationRunnerImpl(statusRepository);
-        if (mongoDbEnabled) {
-            runner.registerMigration(context.getBean(NewGameModelMigration.class));
-            runner.registerMigration(context.getBean(BaselineMigration.class));
-        }
         return runner;
     }
 
@@ -60,6 +53,7 @@ public class PersistenceConfig implements ApplicationContextAware {
     }
 
     private String getDatasourceUrl() {
+        // TODO : is this still required
         return baseUrl +
             "?createDatabaseIfNotExist=true" +
             "&serverTimezone=" + defaultTimeZone +

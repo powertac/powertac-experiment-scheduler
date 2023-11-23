@@ -26,11 +26,6 @@ public class OrchestratorPathsImpl implements PathProvider.OrchestratorPaths {
     }
 
     @Override
-    public Path brokers() {
-        return Paths.get(basePath, "brokers");
-    }
-
-    @Override
     public GamePaths game(Game game) {
         return new OrchestratorGamePathProvider(this, game);
     }

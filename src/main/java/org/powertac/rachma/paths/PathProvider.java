@@ -22,7 +22,6 @@ public interface PathProvider extends Versioned {
 
     interface OrchestratorPaths {
         Path games();
-        @Deprecated Path brokers(); // deprecated due to manual broker management; automated image build will be removed
         Path baselines();
         Path treatments();
         GamePaths game(Game game);

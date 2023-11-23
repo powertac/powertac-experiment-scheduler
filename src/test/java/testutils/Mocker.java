@@ -27,6 +27,7 @@ public class Mocker {
     public static Broker broker(String name) {
         Broker broker = Mockito.mock(Broker.class);
         Mockito.when(broker.getName()).thenReturn(name);
+        Mockito.when(broker.getHumanReadableIdentifier()).thenReturn(name);
         return broker;
     }
 

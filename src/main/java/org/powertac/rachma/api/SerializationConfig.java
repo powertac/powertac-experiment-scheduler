@@ -9,16 +9,9 @@ import lombok.Setter;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.file.FileDeserializer;
 import org.powertac.rachma.game.*;
-import org.powertac.rachma.job.Job;
-import org.powertac.rachma.job.JobStatus;
-import org.powertac.rachma.job.serialization.JobDeserializer;
-import org.powertac.rachma.job.serialization.JobSerializer;
-import org.powertac.rachma.job.serialization.JobStatusDeserializer;
-import org.powertac.rachma.job.serialization.JobStatusSerializer;
 import org.powertac.rachma.paths.HostPathSerializer;
 import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.paths.PathTranslator;
-import org.powertac.rachma.powertac.broker.BrokerSerializer;
 import org.powertac.rachma.treatment.Modifier;
 import org.powertac.rachma.treatment.ModifierDeserializer;
 import org.powertac.rachma.weather.WeatherConfiguration;
@@ -56,7 +49,6 @@ public class SerializationConfig implements ApplicationContextAware {
         SimpleModule module = new SimpleModule();
         registerSerializers(module);
         registerDeserializers(module);
-        registerJobSerialization(module);
         return module;
     }
 
@@ -71,16 +63,6 @@ public class SerializationConfig implements ApplicationContextAware {
         module.addDeserializer(File.class, applicationContext.getBean(FileDeserializer.class));
         module.addDeserializer(Game.class, new GameDeserializer());
         module.addDeserializer(Modifier.class, new ModifierDeserializer());
-    }
-
-    @Deprecated
-    private void registerJobSerialization(SimpleModule module) {
-        module.addSerializer(Job.class, new JobSerializer());
-        module.addDeserializer(Job.class, applicationContext.getBean(JobDeserializer.class));
-        module.addSerializer(JobStatus.class, new JobStatusSerializer());
-        module.addDeserializer(JobStatus.class, new JobStatusDeserializer());
-        module.addSerializer(org.powertac.rachma.powertac.broker.Broker.class, new BrokerSerializer());
-        module.addDeserializer(org.powertac.rachma.powertac.broker.Broker.class, new org.powertac.rachma.powertac.broker.BrokerDeserializer());
     }
 
 }

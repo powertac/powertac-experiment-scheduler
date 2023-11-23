@@ -10,7 +10,7 @@ import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.GameConfig;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;

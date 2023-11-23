@@ -6,7 +6,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.powertac.rachma.exec.PersistentTask;
 
-import javax.persistence.Convert;
+import jakarta.persistence.Convert;
 
 @SuperBuilder
 @NoArgsConstructor

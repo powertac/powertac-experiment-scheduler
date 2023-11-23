@@ -58,7 +58,7 @@ public class GameRunPathsTest {
         GameRun run = Mocker.run("8e3394ae-726c-4d66-969e-addf76371ebf", game);
         Broker broker = Mocker.broker("Galen");
         Assertions.assertEquals(
-            Paths.get("/base/path/games/c6547052-3bf1-4d91-8786-9f91230297f1/runs/8e3394ae-726c-4d66-969e-addf76371ebf/Galen.broker"),
+            Paths.get("/base/path/games/c6547052-3bf1-4d91-8786-9f91230297f1/runs/8e3394ae-726c-4d66-969e-addf76371ebf/Galen"),
             paths.run(run).broker(broker).dir());
     }
 

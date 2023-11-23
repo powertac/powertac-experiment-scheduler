@@ -3,7 +3,7 @@ package org.powertac.rachma.persistence;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 
 @Component
 public class GameSchemaViewSeeder implements SchemaViewSeeder {

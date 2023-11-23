@@ -1,4 +1,0 @@
-{
-  "name":   "TestAgent",
-  "image":  "testagent:latest"
-}

@@ -7,7 +7,7 @@ import org.powertac.rachma.broker.BrokerSet;
 import org.powertac.rachma.file.File;
 import org.powertac.rachma.weather.WeatherConfiguration;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;

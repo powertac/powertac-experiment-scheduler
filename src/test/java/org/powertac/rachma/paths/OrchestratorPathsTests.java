@@ -15,12 +15,4 @@ public class OrchestratorPathsTests {
             paths.games());
     }
 
-    @Test
-    public void brokersDirectoryPathTest() {
-        PathProvider.OrchestratorPaths paths = new OrchestratorPathsImpl("/base/path");
-        Assertions.assertEquals(
-            Paths.get("/base/path/brokers"),
-            paths.brokers());
-    }
-
 }

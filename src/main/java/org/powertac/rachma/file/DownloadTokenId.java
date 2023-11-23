@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.powertac.rachma.user.User;
 
-import javax.persistence.ManyToOne;
+import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 
 @NoArgsConstructor

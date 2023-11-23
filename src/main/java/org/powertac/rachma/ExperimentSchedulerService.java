@@ -1,48 +1,39 @@
 package org.powertac.rachma;
 
+import com.github.dockerjava.api.exception.DockerException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.application.ApplicationSetup;
-import org.powertac.rachma.application.LockException;
-import org.powertac.rachma.exec.PersistentTaskRepository;
+import org.powertac.rachma.docker.DockerImageRepository;
 import org.powertac.rachma.exec.Task;
 import org.powertac.rachma.exec.TaskExecutor;
 import org.powertac.rachma.exec.TaskScheduler;
 import org.powertac.rachma.game.GameScheduler;
+import org.powertac.rachma.paths.PathProvider;
+import org.powertac.rachma.persistence.SchemaViewSeeder;
 import org.powertac.rachma.persistence.SeederException;
 import org.powertac.rachma.persistence.SeederManager;
-import org.powertac.rachma.treatment.SeededGameStateLogFixer;
-import org.powertac.rachma.treatment.TreatmentRepository;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.Banner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-@EnableAutoConfiguration(exclude = {
-    MongoAutoConfiguration.class,
-    MongoDataAutoConfiguration.class
-})
-@ComponentScan
-@EnableAspectJAutoProxy
-@EnableJpaRepositories
+@SpringBootApplication
 public class ExperimentSchedulerService implements ApplicationRunner, ApplicationContextAware {
 
-    private final boolean fixSeededStateLogs = true;
+    @Value("${server.defaultImage}")
+    private String defaultServerImage;
 
     private ApplicationContext context;
 
@@ -65,10 +56,11 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
         runTasks();
     }
 
-    private void runStartupTasks() throws SeederException, LockException, IOException {
-        context.getBean(ApplicationSetup.class).start();
+    private void runStartupTasks() throws SeederException, IOException {
+        createRequiredDirectories();
+        pullRequiredDockerImages();
+        seedRequiredDatabaseViews();
         context.getBean(SeederManager.class).runSeeders();
-        if (fixSeededStateLogs) fixSeededStateLogs();
     }
 
     private void runGames() {
@@ -96,19 +88,32 @@ public class ExperimentSchedulerService implements ApplicationRunner, Applicatio
                     } catch (Exception e) {
                         logger.error("error during task execution", e);
                     }
+                } else {
+                    // TODO : set task status to failed when no executor configured
+                    logger.error("no executor configured for type " + task.getClass());
                 }
-                logger.error("no executor configured for type " + task.getClass());
-                // FIXME : fail task with unconfigured executor
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
 
-    private void fixSeededStateLogs() {
-        final SeededGameStateLogFixer fixer = context.getBean(SeededGameStateLogFixer.class);
-        final TreatmentRepository treatmentRepository =context.getBean(TreatmentRepository.class);
-        treatmentRepository.findAll().forEach(t -> {
-            t.getGames().forEach(fixer::fixGameStateLog);
-        });
+    private void createRequiredDirectories() throws IOException {
+        PathProvider paths = context.getBean(PathProvider.class);
+        Path gamesDirectory = paths.local().games();
+        if (!Files.exists(gamesDirectory)) {
+            Files.createDirectories(gamesDirectory);
+        }
+    }
+
+    private void pullRequiredDockerImages() throws DockerException {
+        DockerImageRepository images = context.getBean(DockerImageRepository.class);
+        if (!images.exists(defaultServerImage)) {
+            images.pull(defaultServerImage);
+        }
+    }
+
+    private void seedRequiredDatabaseViews() {
+        SchemaViewSeeder viewSeeder = context.getBean(SchemaViewSeeder.class);
+        viewSeeder.seedViews();
     }
 
 }

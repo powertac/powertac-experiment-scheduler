@@ -3,13 +3,18 @@ package org.powertac.rachma.docker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.internal.matchers.Any;
 import org.powertac.rachma.docker.exception.ContainerException;
 import org.powertac.rachma.exec.ExecMocks;
+import org.powertac.rachma.exec.PersistentTaskRepository;
+
+import java.time.Instant;
 
 public class ContainerTaskExecutorTests {
 
     @Test
     public void setCreator() {
+        PersistentTaskRepository taskRepository = Mockito.mock(PersistentTaskRepository.class);
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
         ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         Assertions.assertDoesNotThrow(() ->
@@ -20,6 +25,7 @@ public class ContainerTaskExecutorTests {
 
     @Test
     public void acceptsForExistingCreator() {
+        PersistentTaskRepository taskRepository = Mockito.mock(PersistentTaskRepository.class);
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
         ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         ContainerCreator<ContainerTask> creator = Mockito.mock(ContainerCreator.class);
@@ -29,6 +35,7 @@ public class ContainerTaskExecutorTests {
 
     @Test
     public void acceptsFailsForNonExistentCreator() {
+        PersistentTaskRepository taskRepository = Mockito.mock(PersistentTaskRepository.class);
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
         ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         Assertions.assertFalse(executor.accepts(Mockito.mock(ContainerTask.class)));
@@ -36,7 +43,9 @@ public class ContainerTaskExecutorTests {
 
     @Test
     public void execWithMatchingCreator() throws ContainerException {
+        PersistentTaskRepository taskRepository = Mockito.mock(PersistentTaskRepository.class);
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
+        Mockito.doReturn(new DockerContainerExitState(0, Instant.now().toString())).when(controller).run(Mockito.any(DockerContainer.class));
         ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         ContainerCreator<ExecMocks.SampleContainerTask> creator = new ExecMocks.SampleContainerTaskCreator();
         ExecMocks.SampleContainerTask task = new ExecMocks.SampleContainerTask();
@@ -47,6 +56,7 @@ public class ContainerTaskExecutorTests {
 
     @Test
     public void execWithoutMatchingCreatorThrowsRuntimeException() {
+        PersistentTaskRepository taskRepository = Mockito.mock(PersistentTaskRepository.class);
         DockerContainerController controller = Mockito.mock(DockerContainerController.class);
         ContainerTaskExecutor executor = new ContainerTaskExecutor(taskRepository, controller);
         ContainerCreator<ContainerTask> creator = Mockito.mock(ContainerCreator.class);

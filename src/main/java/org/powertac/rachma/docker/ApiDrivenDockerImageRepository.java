@@ -7,6 +7,7 @@ import com.github.dockerjava.api.model.Image;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,10 +23,14 @@ public class ApiDrivenDockerImageRepository implements DockerImageRepository {
     }
 
     @Override
-    public void pull(String tag) throws DockerException, InterruptedException {
-        dockerClient.pullImageCmd(tag)
-            .exec(new PullImageResultCallback())
-            .awaitCompletion();
+    public void pull(String tag) throws DockerException {
+        try {
+            dockerClient.pullImageCmd(tag)
+                .exec(new PullImageResultCallback())
+                .awaitCompletion();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(String.format("unable to pull image '%s'", tag));
+        }
     }
 
     @Override

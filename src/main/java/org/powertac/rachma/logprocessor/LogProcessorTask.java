@@ -6,10 +6,10 @@ import lombok.experimental.SuperBuilder;
 import org.powertac.rachma.docker.ContainerTask;
 import org.powertac.rachma.game.Game;
 
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ManyToOne;
 import java.util.Set;
 
 @Entity

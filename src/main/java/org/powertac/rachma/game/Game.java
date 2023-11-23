@@ -3,6 +3,7 @@ package org.powertac.rachma.game;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import jakarta.persistence.*;
 import lombok.*;
 import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.broker.Broker;
@@ -12,7 +13,6 @@ import org.powertac.rachma.treatment.Treatment;
 import org.powertac.rachma.util.InstantToNumberSerializer;
 import org.powertac.rachma.weather.WeatherConfiguration;
 
-import javax.persistence.*;
 import java.time.Instant;
 import java.util.*;
 

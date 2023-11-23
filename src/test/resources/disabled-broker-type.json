@@ -1,5 +1,0 @@
-{
-  "name":     "TestAgent",
-  "image":    "testagent:latest",
-  "disabled": true
-}

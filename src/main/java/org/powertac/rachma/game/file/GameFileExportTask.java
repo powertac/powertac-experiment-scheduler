@@ -8,9 +8,9 @@ import org.powertac.rachma.exec.PersistentTask;
 import org.powertac.rachma.game.Game;
 import org.powertac.rachma.treatment.Treatment;
 
-import javax.persistence.Entity;
-import javax.persistence.ManyToOne;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Transient;
 import java.util.List;
 
 @Entity

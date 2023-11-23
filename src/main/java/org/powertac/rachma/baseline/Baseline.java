@@ -6,7 +6,7 @@ import org.powertac.rachma.game.Game;
 import org.powertac.rachma.game.generator.GameGeneratorConfig;
 import org.powertac.rachma.weather.WeatherConfiguration;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;

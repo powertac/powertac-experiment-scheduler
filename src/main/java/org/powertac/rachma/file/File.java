@@ -3,7 +3,7 @@ package org.powertac.rachma.file;
 import lombok.*;
 import org.powertac.rachma.game.Game;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 

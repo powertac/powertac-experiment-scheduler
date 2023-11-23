@@ -10,7 +10,7 @@ import org.powertac.rachma.docker.DockerContainer;
 import org.powertac.rachma.docker.DockerNetwork;
 import org.powertac.rachma.util.InstantToNumberSerializer;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.*;
 

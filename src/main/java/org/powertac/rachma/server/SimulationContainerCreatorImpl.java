@@ -28,12 +28,10 @@ import java.util.stream.Collectors;
 public class SimulationContainerCreatorImpl implements SimulationContainerCreator {
 
     private final static String serverAlias = "powertac-server";
+    private final static int defaultMessageBrokerPort = 61616;
 
     @Value("${server.defaultImage}")
     private String defaultImageTag;
-
-    @Value("${simulation.container.defaultMessageBrokerPort}")
-    private int defaultMessageBrokerPort;
 
     private final DockerClient docker;
     private final ServerContainerCommandCreator commandCreator;
