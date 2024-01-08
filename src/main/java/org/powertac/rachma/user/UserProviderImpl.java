@@ -1,12 +1,21 @@
 package org.powertac.rachma.user;
 
+import org.powertac.rachma.user.domain.User;
+import org.powertac.rachma.user.exception.UserNotFoundException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserProviderImpl implements UserProvider {
+
+    private final AuthenticationManager auth;
+
+    public UserProviderImpl(AuthenticationManager auth) {
+        this.auth = auth;
+    }
 
     @Override
     public User getCurrentUser() throws UserNotFoundException { // FIXME: wrong exception type!!!!!!

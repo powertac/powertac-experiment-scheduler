@@ -1,10 +1,10 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.domain;
 
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;
 
-public interface UserCrudRepository extends CrudRepository<User, String> {
+public interface UserRepository extends CrudRepository<User, String> {
 
     Optional<User> findByUsername(String username);
 

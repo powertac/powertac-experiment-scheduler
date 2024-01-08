@@ -1,5 +1,6 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
 import org.powertac.rachma.serialization.InstantToMillisSerializer;
@@ -8,6 +9,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import org.powertac.rachma.user.UserIdSerializer;
+
 import java.time.Instant;
 
 @Entity
@@ -21,10 +24,12 @@ public class RegistrationToken {
     @Getter
     private Long id;
 
+    // FIXME : could this actually be the primary key?
     @Getter
     private String token;
 
     @Getter
+    @JsonProperty("expiresAt")
     @JsonSerialize(using = InstantToMillisSerializer.class)
     private Instant expirationDate;
 

@@ -1,6 +1,8 @@
 package org.powertac.rachma.user;
 
 import org.powertac.rachma.persistence.Seeder;
+import org.powertac.rachma.user.domain.UserRole;
+import org.powertac.rachma.user.domain.UserRoleRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -11,7 +13,8 @@ public class UserRoleSeeder implements Seeder {
     public final static String adminRoleName = "ADMIN";
     private final static Set<String> roleNames = Set.of(
         adminRoleName,
-        "AUTHENTICATED" // TODO : rename to "BASE"
+        "BASE",
+        "AUTHENTICATED" // FIXME : DEPRECATE
     );
 
     private final UserRoleRepository roles;

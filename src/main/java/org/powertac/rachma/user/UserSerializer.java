@@ -3,6 +3,8 @@ package org.powertac.rachma.user;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.powertac.rachma.user.domain.User;
+import org.powertac.rachma.user.domain.UserRole;
 
 import java.io.IOException;
 import java.util.Collection;

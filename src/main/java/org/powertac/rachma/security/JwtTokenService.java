@@ -2,9 +2,9 @@ package org.powertac.rachma.security;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import org.powertac.rachma.file.DownloadToken;
-import org.powertac.rachma.user.InvalidRegistrationTokenException;
-import org.powertac.rachma.user.RegistrationToken;
-import org.powertac.rachma.user.User;
+import org.powertac.rachma.user.exception.InvalidRegistrationTokenException;
+import org.powertac.rachma.user.domain.RegistrationToken;
+import org.powertac.rachma.user.domain.User;
 
 import java.time.Instant;
 

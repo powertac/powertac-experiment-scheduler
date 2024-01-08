@@ -1,8 +1,13 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.security.JwtTokenService;
+import org.powertac.rachma.user.*;
+import org.powertac.rachma.user.domain.*;
+import org.powertac.rachma.user.exception.InvalidRegistrationTokenException;
+import org.powertac.rachma.user.exception.UserNotFoundException;
+import org.powertac.rachma.user.exception.UserRoleNotFoundException;
 import org.powertac.rachma.util.ID;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,14 +24,14 @@ public class UserRestController {
 
     private final UserProvider userProvider;
     private final JwtTokenService tokenService;
-    private final UserCrudRepository users;
-    private final RegistrationTokenCrudRepository registrationTokens;
+    private final UserRepository users;
+    private final RegistrationTokenRepository registrationTokens;
     private final UserRoleRepository userRoles;
     private final PasswordEncoder passwordEncoder;
     private final Logger logger;
 
-    public UserRestController(UserProvider userProvider, JwtTokenService tokenService, UserCrudRepository users,
-                              RegistrationTokenCrudRepository registrationTokens, UserRoleRepository userRoles,
+    public UserRestController(UserProvider userProvider, JwtTokenService tokenService, UserRepository users,
+                              RegistrationTokenRepository registrationTokens, UserRoleRepository userRoles,
                               PasswordEncoder passwordEncoder) {
         this.userProvider = userProvider;
         this.tokenService = tokenService;
@@ -61,15 +66,15 @@ public class UserRestController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<User> createUser(@RequestBody CreateUserDTO userData) {
+    public ResponseEntity<User> createUser(@RequestBody CreateUserData userData) {
         try {
-            RegistrationToken registrationToken = tokenService.getVerifiedRegistrationToken(userData.getRegistrationToken());
-            Set<UserRole> roles = loadRoles(userData.getRoleNames());
-            User user = buildUser(userData.getUsername(), userData.getPassword(), roles);
+            RegistrationToken registrationToken = tokenService.getVerifiedRegistrationToken(userData.token());
+            Set<UserRole> roles = loadRoles(userData.roles());
+            User user = buildUser(userData.username(), userData.password(), roles);
             users.save(user);
             claimRegistrationToken(user, registrationToken);
             return ResponseEntity.ok(user);
-        } catch (InvalidRegistrationTokenException|UserRoleNotFoundException e) {
+        } catch (InvalidRegistrationTokenException | UserRoleNotFoundException e) {
             logger.error("unable to create user", e);
             return ResponseEntity.badRequest().build();
         }

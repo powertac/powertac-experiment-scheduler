@@ -2,6 +2,10 @@ package org.powertac.rachma.user;
 
 import org.powertac.rachma.persistence.Seeder;
 import org.powertac.rachma.persistence.SeederException;
+import org.powertac.rachma.user.domain.User;
+import org.powertac.rachma.user.domain.UserRepository;
+import org.powertac.rachma.user.domain.UserRole;
+import org.powertac.rachma.user.domain.UserRoleRepository;
 import org.powertac.rachma.util.ID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,11 +22,11 @@ public class DefaultUserSeeder implements Seeder {
     @Value("${security.default.admin-password}")
     private String defaultAdminPassword;
 
-    private final UserCrudRepository users;
+    private final UserRepository users;
     private final PasswordEncoder encoder;
     private final UserRoleRepository roles;
 
-    public DefaultUserSeeder(UserCrudRepository userRepo, PasswordEncoder encoder, UserRoleRepository roles) {
+    public DefaultUserSeeder(UserRepository userRepo, PasswordEncoder encoder, UserRoleRepository roles) {
         this.users = userRepo;
         this.encoder = encoder;
         this.roles = roles;

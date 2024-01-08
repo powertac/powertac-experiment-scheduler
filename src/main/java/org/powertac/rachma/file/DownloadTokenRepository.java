@@ -1,6 +1,6 @@
 package org.powertac.rachma.file;
 
-import org.powertac.rachma.user.User;
+import org.powertac.rachma.user.domain.User;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.Optional;

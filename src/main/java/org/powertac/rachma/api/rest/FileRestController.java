@@ -11,7 +11,7 @@ import org.powertac.rachma.game.GameRunRepository;
 import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.paths.PathTranslator;
 import org.powertac.rachma.security.JwtTokenService;
-import org.powertac.rachma.user.User;
+import org.powertac.rachma.user.domain.User;
 import org.powertac.rachma.user.UserProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;

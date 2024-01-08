@@ -2,9 +2,7 @@ package org.powertac.rachma.file;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.powertac.rachma.user.User;
 
-import jakarta.persistence.ManyToOne;
 import java.io.Serializable;
 
 @NoArgsConstructor

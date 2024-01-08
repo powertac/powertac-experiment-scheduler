@@ -1,4 +1,4 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.exception;
 
 public class UserNotFoundException extends Exception {
 

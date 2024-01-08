@@ -13,7 +13,7 @@ import org.powertac.rachma.game.file.GameFileExportTask;
 import org.powertac.rachma.game.file.GameFileExportTaskConfig;
 import org.powertac.rachma.game.file.GameFileExportTaskRepository;
 import org.powertac.rachma.game.file.NewGameFileExportTaskDTO;
-import org.powertac.rachma.user.UserNotFoundException;
+import org.powertac.rachma.user.exception.UserNotFoundException;
 import org.powertac.rachma.user.UserProvider;
 import org.powertac.rachma.util.ID;
 import org.powertac.rachma.validation.exception.ValidationException;
@@ -21,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.List;

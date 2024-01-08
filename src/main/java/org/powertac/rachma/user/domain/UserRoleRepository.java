@@ -1,4 +1,4 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.domain;
 
 import org.springframework.data.repository.CrudRepository;
 

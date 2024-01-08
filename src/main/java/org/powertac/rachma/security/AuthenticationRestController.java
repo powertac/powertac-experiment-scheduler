@@ -2,9 +2,9 @@ package org.powertac.rachma.security;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.powertac.rachma.user.User;
-import org.powertac.rachma.user.UserCrudRepository;
-import org.powertac.rachma.user.UserNotFoundException;
+import org.powertac.rachma.user.domain.User;
+import org.powertac.rachma.user.domain.UserRepository;
+import org.powertac.rachma.user.exception.UserNotFoundException;
 import org.powertac.rachma.user.UserProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,12 +25,12 @@ public class AuthenticationRestController {
 
     private final AuthenticationManager authManager;
     private final JwtTokenService tokenFactory;
-    private final UserCrudRepository users;
+    private final UserRepository users;
     private final UserProvider userProvider;
     private final Logger logger;
 
     public AuthenticationRestController(AuthenticationManager authManager, JwtTokenService tokenFactory,
-                                        UserCrudRepository users, UserProvider userProvider) {
+                                        UserRepository users, UserProvider userProvider) {
         this.authManager = authManager;
         this.tokenFactory = tokenFactory;
         this.users = users;

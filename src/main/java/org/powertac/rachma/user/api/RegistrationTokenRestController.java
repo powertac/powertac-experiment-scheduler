@@ -1,8 +1,13 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.api;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.powertac.rachma.security.JwtTokenService;
+import org.powertac.rachma.user.exception.InvalidRegistrationTokenException;
+import org.powertac.rachma.user.exception.UserNotFoundException;
+import org.powertac.rachma.user.UserProvider;
+import org.powertac.rachma.user.domain.RegistrationToken;
+import org.powertac.rachma.user.domain.RegistrationTokenRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +23,11 @@ public class RegistrationTokenRestController {
 
     private final JwtTokenService tokenService;
     private final UserProvider userProvider;
-    private final RegistrationTokenCrudRepository registrationTokens;
+    private final RegistrationTokenRepository registrationTokens;
     private final Logger logger;
 
     public RegistrationTokenRestController(JwtTokenService tokenService, UserProvider userProvider,
-                                           RegistrationTokenCrudRepository registrationTokens) {
+                                           RegistrationTokenRepository registrationTokens) {
         this.tokenService = tokenService;
         this.userProvider = userProvider;
         this.registrationTokens = registrationTokens;
@@ -30,6 +35,7 @@ public class RegistrationTokenRestController {
     }
 
     @PostMapping("/")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<RegistrationToken> createRegistrationToken() {
         try {
             Instant expiration = Instant.now().plus(expirationPeriod);
@@ -40,7 +46,7 @@ public class RegistrationTokenRestController {
                 .issuedAt(Instant.now())
                 .expirationDate(expiration)
                 .build();
-            registrationTokens.save(token);
+            token = registrationTokens.save(token);
             // FIXME : ID is not automatically updated on this object
             return ResponseEntity.ok(token);
         } catch (UserNotFoundException e) {
@@ -49,7 +55,7 @@ public class RegistrationTokenRestController {
         }
     }
 
-    // FIXME : this should be a POST Request to prevent man-in-the-middle-attacks
+    // FIXME : this should be a POST Request to prevent man-in-the-middle-attacks (?)
     @GetMapping("/{tokenString}")
     public ResponseEntity<?> verifyRegistrationToken(@PathVariable String tokenString) {
         try {

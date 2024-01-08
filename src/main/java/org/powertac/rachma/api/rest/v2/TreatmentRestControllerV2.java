@@ -14,7 +14,7 @@ import org.powertac.rachma.game.file.GameFileExportTaskConfig;
 import org.powertac.rachma.game.file.GameFileExportTaskRepository;
 import org.powertac.rachma.game.file.NewGameFileExportTaskDTO;
 import org.powertac.rachma.treatment.*;
-import org.powertac.rachma.user.UserNotFoundException;
+import org.powertac.rachma.user.exception.UserNotFoundException;
 import org.powertac.rachma.user.UserProvider;
 import org.powertac.rachma.util.ID;
 import org.springframework.http.ResponseEntity;

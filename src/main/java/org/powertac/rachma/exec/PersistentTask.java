@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-import org.powertac.rachma.user.User;
+import org.powertac.rachma.user.domain.User;
 
 import jakarta.persistence.*;
 import java.time.Instant;

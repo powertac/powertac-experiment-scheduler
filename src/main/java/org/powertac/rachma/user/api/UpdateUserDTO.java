@@ -1,13 +1,13 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.api;
 
 import lombok.Getter;
 
 import java.util.Set;
 
-public class CreateUserDTO {
+public class UpdateUserDTO {
 
     @Getter
-    private String username;
+    private String userId;
 
     @Getter
     private String password;
@@ -16,6 +16,6 @@ public class CreateUserDTO {
     private Set<String> roleNames;
 
     @Getter
-    private String registrationToken;
+    private boolean enabled;
 
 }

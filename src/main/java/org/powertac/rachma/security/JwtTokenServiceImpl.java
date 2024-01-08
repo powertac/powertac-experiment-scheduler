@@ -7,7 +7,11 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.auth0.jwt.interfaces.JWTVerifier;
 import org.powertac.rachma.file.DownloadToken;
 import org.powertac.rachma.file.DownloadTokenRepository;
-import org.powertac.rachma.user.*;
+import org.powertac.rachma.user.domain.RegistrationToken;
+import org.powertac.rachma.user.domain.RegistrationTokenRepository;
+import org.powertac.rachma.user.domain.User;
+import org.powertac.rachma.user.domain.UserRepository;
+import org.powertac.rachma.user.exception.InvalidRegistrationTokenException;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
@@ -18,12 +22,12 @@ public class JwtTokenServiceImpl implements JwtTokenService {
 
     private final Algorithm algorithm;
     private final JWTVerifier verifier;
-    private final UserCrudRepository users;
-    private final RegistrationTokenCrudRepository registrationTokens;
+    private final UserRepository users;
+    private final RegistrationTokenRepository registrationTokens;
     private final DownloadTokenRepository downloadTokens;
 
-    public JwtTokenServiceImpl(Algorithm algorithm, JWTVerifier verifier, UserCrudRepository users,
-                               RegistrationTokenCrudRepository registrationTokens,
+    public JwtTokenServiceImpl(Algorithm algorithm, JWTVerifier verifier, UserRepository users,
+                               RegistrationTokenRepository registrationTokens,
                                DownloadTokenRepository downloadTokens) {
         this.algorithm = algorithm;
         this.verifier = verifier;

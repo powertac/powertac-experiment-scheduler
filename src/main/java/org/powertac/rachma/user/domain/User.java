@@ -1,7 +1,8 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.domain;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.*;
+import org.powertac.rachma.user.UserSerializer;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 

@@ -1,4 +1,4 @@
-package org.powertac.rachma.user;
+package org.powertac.rachma.user.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -19,7 +19,7 @@ import org.powertac.rachma.paths.PathProvider;
 import org.powertac.rachma.security.JwtTokenService;
 import org.powertac.rachma.treatment.Treatment;
 import org.powertac.rachma.treatment.TreatmentRepository;
-import org.powertac.rachma.user.User;
+import org.powertac.rachma.user.domain.User;
 import org.powertac.rachma.user.UserProvider;
 import org.powertac.rachma.util.ID;
 import org.springframework.http.ResponseEntity;

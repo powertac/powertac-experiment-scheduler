@@ -2,15 +2,14 @@ package org.powertac.rachma.treatment;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.powertac.rachma.baseline.Baseline;
 import org.powertac.rachma.game.Game;
-import org.powertac.rachma.game.GameConfig;
 
-import jakarta.persistence.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;

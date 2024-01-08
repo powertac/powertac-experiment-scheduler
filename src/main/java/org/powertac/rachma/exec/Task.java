@@ -1,6 +1,6 @@
 package org.powertac.rachma.exec;
 
-import org.powertac.rachma.user.User;
+import org.powertac.rachma.user.domain.User;
 
 import java.time.Instant;
 

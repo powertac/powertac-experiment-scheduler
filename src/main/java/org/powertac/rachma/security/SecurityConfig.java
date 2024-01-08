@@ -2,7 +2,7 @@ package org.powertac.rachma.security;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.powertac.rachma.user.PersistentUserDetailsService;
-import org.powertac.rachma.user.UserCrudRepository;
+import org.powertac.rachma.user.domain.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -34,12 +34,12 @@ public class SecurityConfig  {
     private List<String> allowedOrigins;
 
     @Bean
-    public UserDetailsService userDetailsService(UserCrudRepository users) {
+    public UserDetailsService userDetailsService(UserRepository users) {
         return new PersistentUserDetailsService(users);
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder encoder) throws Exception {
+    public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder encoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(userDetailsService);
         authenticationProvider.setPasswordEncoder(encoder);
@@ -49,6 +49,7 @@ public class SecurityConfig  {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtTokenFilter jwtTokenFilter) throws Exception {
         return http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(exception -> exception.authenticationEntryPoint((request, response, authException) ->
@@ -64,7 +65,6 @@ public class SecurityConfig  {
             .build();
     }
 
-    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOriginPatterns(allowedOrigins);
